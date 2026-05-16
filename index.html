@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>SMARTLESSA AR | PRO GAMER</title>
+    <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        #video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; transform: scaleX(-1); }
+        #canvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+        
+        #progress-container { position: absolute; top: 0; left: 0; width: 100%; height: 8px; background: rgba(0,255,255,0.2); z-index: 150; }
+        #progress-bar { width: 0%; height: 100%; background: #00ffff; box-shadow: 0 0 15px #00ffff; transition: width 0.5s ease; }
+
+        #ui { position: absolute; bottom: 30px; left: 0; right: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        #status {
+            background: rgba(0, 0, 0, 0.85); padding: 18px 25px; border-radius: 20px;
+            color: #00ffff; font-weight: 600; border: 2px solid #00ffff;
+            text-align: center; width: 90%; max-width: 500px;
+            font-size: 1.1rem; backdrop-filter: blur(5px);
+        }
+        #mic-btn {
+            display: none; width: 80px; height: 80px; background: #ff0055; border-radius: 50%;
+            border: 4px solid #fff; cursor: pointer; align-items: center; justify-content: center;
+            animation: pulse 1.5s infinite; box-shadow: 0 0 20px #ff0055;
+        }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+        
+        #start-screen { position: fixed; inset: 0; background: radial-gradient(circle, #1a0033 0%, #000 100%); z-index: 2000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        input { padding: 15px; border-radius: 10px; border: 2px solid #00ffff; background: transparent; color: #00ffff; text-align: center; margin-bottom: 20px; width: 280px; font-size: 1.2rem; }
+        #btn-start { background: #00ffff; color: #000; padding: 18px 50px; border-radius: 10px; font-weight: 900; border: none; cursor: pointer; font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+    <div id="progress-container"><div id="progress-bar"></div></div>
+
+    <div id="start-screen">
+        <h1 style="color:#00ffff; margin-bottom:20px;">SMARTLESSA AR</h1>
+        <input type="text" id="user-name" placeholder="Твій нікнейм...">
+        <button id="btn-start">ЗАПУСТИТИ СИСТЕМУ</button>
+    </div>
+
+    <video id="video" autoplay playsinline muted></video>
+    <canvas id="canvas"></canvas>
+    
+    <div id="ui">
+        <div id="status">Завантаження модулів...</div>
+        <div id="mic-btn">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="white"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        </div>
+    </div>
+
+    <script type="module">
+        import { HandLandmarker, FilesetResolver } from "https://cdn.skypack.dev/@mediapipe/tasks-vision@0.10.3";
+
+        const video = document.getElementById('video');
+        const statusDiv = document.getElementById('status');
+        const micBtn = document.getElementById('mic-btn');
+        const progressBar = document.getElementById('progress-bar');
+
+        let handLandmarker, scene, camera, renderer, ring, masterGroup, holoPlane, holoVideo, particles;
+        let userName = "Гравець";
+        let score = 0, currentIdx = 0;
+        let isWaitingForGesture = true, isSpeaking = false;
+
+        const questions = [
+            { q: "Привіт! Як звати твою улюблену кішку, яка головна в цьому домі?", a: ["жасмінка", "жасмін", "жасміночка"] },
+            { q: "Що дає +100 до настрою: піца, енергетик чи мурчання Жасмінки?", a: ["мурчання", "кішка", "жасмінка"] },
+            { q: "Як називається найсильніший ворог у кінці рівня?", a: ["бос", "boss", "левел бос"] },
+            { q: "Коли гра гальмує через інтернет — це...", a: ["лаг", "лаги", "пінг"] },
+            { q: "Хто тут найкращий геймер?", a: ["я", "мейбі"] }
+        ];
+
+        function speak(text, onEnd = () => {}) {
+            isSpeaking = true;
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'uk-UA';
+            utterance.onend = () => { 
+                isSpeaking = false; 
+                onEnd(); 
+            };
+            window.speechSynthesis.speak(utterance);
+        }
+
+        async function initAI() {
+            const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
+            handLandmarker = await HandLandmarker.createFromOptions(vision, {
+                baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task", delegate: "GPU" },
+                runningMode: "VIDEO", numHands: 1
+            });
+            statusDiv.innerText = "Система готова! Покажи кулак ✊";
+        }
+
+        function setupScene() {
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            masterGroup = new THREE.Group();
+            scene.add(masterGroup);
+            
+            // Кільце
+            ring = new THREE.Mesh(
+                new THREE.TorusGeometry(0.25, 0.015, 16, 100),
+                new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 2 })
+            );
+            masterGroup.add(ring);
+
+            // Голограма (Шейдер)
+            holoVideo = document.createElement('video');
+            holoVideo.src = 'assets/video/guide_hologram.mp4'; // Переконайся, що файл існує!
+            holoVideo.muted = true; holoVideo.loop = true; holoVideo.playsInline = true;
+            
+            const videoTex = new THREE.VideoTexture(holoVideo);
+            const holoMat = new THREE.ShaderMaterial({
+                uniforms: { uVideo: { value: videoTex } },
+                vertexShader: `varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+                fragmentShader: `
+                    uniform sampler2D uVideo;
+                    varying vec2 vUv;
+                    void main() {
+                        vec4 color = texture2D(uVideo, vUv);
+                        float brightness = (color.r + color.g + color.b) / 3.0;
+                        if (color.g > (color.r + color.b) * 0.5 + 0.1) discard; // Green screen removal
+                        gl_FragColor = vec4(0.0, 0.8, 1.0, brightness); 
+                    }`,
+                transparent: true
+            });
+            holoPlane = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 1.2), holoMat);
+            holoPlane.position.set(0, 0.7, 0);
+            holoPlane.visible = false;
+            masterGroup.add(holoPlane);
+
+            // Світло
+            const light = new THREE.PointLight(0x00ffff, 5, 10);
+            scene.add(light);
+
+            camera.position.z = 3;
+            animate();
+        }
+
+        function triggerQuestion() {
+            if (isSpeaking || currentIdx >= questions.length) return;
+            isWaitingForGesture = false;
+            
+            holoPlane.visible = true;
+            try { holoVideo.play(); } catch(e) {}
+            
+            progressBar.style.width = ((currentIdx / questions.length) * 100) + "%";
+            
+            speak(questions[currentIdx].q, () => {
+                micBtn.style.display = "flex";
+                statusDiv.innerText = "🎤 Кажи...";
+            });
+        }
+
+        micBtn.onclick = () => {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const rec = new SpeechRecognition();
+            rec.lang = 'uk-UA';
+            rec.onstart = () => { micBtn.style.background = "#00ff00"; };
+            rec.onresult = (e) => {
+                const res = e.results[0][0].transcript.toLowerCase().trim();
+                const isCorrect = questions[currentIdx].a.some(ans => res.includes(ans));
+                
+                micBtn.style.display = "none";
+                micBtn.style.background = "#ff0055";
+                holoPlane.visible = false;
+                holoVideo.pause();
+
+                if (isCorrect) {
+                    score++;
+                    ring.material.emissive.setHex(0x00ff00);
+                    speak("Круто! Це правильна відповідь.");
+                } else {
+                    ring.material.emissive.setHex(0xffaa00);
+                    speak(`Майже. Це ${questions[currentIdx].a[0]}.`);
+                }
+
+                setTimeout(() => {
+                    ring.material.emissive.setHex(0x00ffff);
+                    currentIdx++;
+                    if (currentIdx < questions.length) {
+                        isWaitingForGesture = true;
+                        statusDiv.innerText = "Покажи кулак ✊ для наступного рівня";
+                    } else {
+                        finishLesson();
+                    }
+                }, 2500);
+            };
+            rec.start();
+        };
+
+        function finishLesson() {
+            progressBar.style.width = "100%";
+            speak(`Місія виконана! ${userName}, твій результат: ${score}/5. Жасмінка задоволена!`, () => {
+                setTimeout(() => location.reload(), 5000);
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            if (handLandmarker && video.readyState >= 2) {
+                const res = handLandmarker.detectForVideo(video, performance.now());
+                if (res.landmarks?.[0]) {
+                    const wrist = res.landmarks[0][0];
+                    masterGroup.position.x = (0.5 - wrist.x) * 3.5;
+                    masterGroup.position.y = (0.5 - wrist.y) * 2.5;
+                    masterGroup.visible = true;
+                    
+                    // Перевірка кулака: кінчик пальця нижче суглоба
+                    if (isWaitingForGesture && res.landmarks[0][8].y > res.landmarks[0][6].y) {
+                        triggerQuestion();
+                    }
+                } else {
+                    masterGroup.visible = false;
+                }
+            }
+            if (ring) ring.rotation.y += 0.05;
+            renderer.render(scene, camera);
+        }
+
+        document.getElementById('btn-start').onclick = async () => {
+            userName = document.getElementById('user-name').value || "Гравець";
+            document.getElementById('start-screen').style.display = 'none';
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+            video.srcObject = stream;
+            setupScene();
+            await initAI();
+            speak(`Систему активовано. Вітаю, ${userName}! Покажи кулак.`);
+        };
+    </script>
+</body>
+</html>
