@@ -1,223 +1,54 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Географія 7 клас: Літосферні плити</title>
-    <style>
-        body { margin: 0; overflow: hidden; background-color: #0d0d11; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
-        #video { position: absolute; bottom: 20px; right: 20px; width: 150px; height: 112px; transform: scaleX(-1); border-radius: 8px; border: 2px solid #ffcc00; z-index: 2; opacity: 0.4; }
-        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffcc00; font-size: 1.5rem; z-index: 3; text-align: center; font-weight: bold; }
-        #lesson-ui { position: absolute; top: 25px; left: 25px; z-index: 4; color: #ffffff; width: 320px; background: rgba(13, 13, 17, 0.85); padding: 15px; border-radius: 10px; border-left: 5px solid #ffcc00; box-shadow: 0 4px 15px rgba(0,0,0,0.5); pointer-events: none;}
-        #lesson-ui h2 { margin: 0 0 8px 0; font-size: 1.1rem; color: #ffcc00; text-transform: uppercase; letter-spacing: 1px;}
-        #lesson-ui p { margin: 5px 0; font-size: 0.85rem; color: #ccc; line-height: 1.4;}
-        .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; margin-top: 5px;}
-        #status { background: #555; color: #fff; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Географія AR: Тектоніка</title>
+  <style>
+    /* Сучасний мінімалістичний UI */
+    body { margin: 0; overflow: hidden; background: #0f172a; color: white; font-family: system-ui, -apple-system, sans-serif; }
+    #app-container { position: relative; width: 100vw; height: 100vh; }
+    #webgl-canvas { display: block; width: 100%; height: 100%; outline: none; }
+    
+    #video-feed { position: absolute; bottom: 24px; right: 24px; width: 180px; border-radius: 16px; transform: scaleX(-1); border: 2px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 10; opacity: 0.8; }
+    
+    .ui-panel { position: absolute; top: 24px; left: 24px; z-index: 10; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(12px); padding: 24px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); max-width: 320px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    h1 { margin: 0 0 8px 0; font-size: 1.25rem; font-weight: 700; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; color: transparent; }
+    p { margin: 0 0 16px 0; font-size: 0.9rem; color: #94a3b8; line-height: 1.5; }
+    ul { margin: 0 0 16px 0; padding-left: 20px; color: #cbd5e1; font-size: 0.85rem; line-height: 1.6; }
+    
+    .status { display: inline-flex; align-items: center; padding: 8px 14px; border-radius: 99px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; transition: all 0.3s ease; }
+    .status.collision { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+    .status.rift { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .status.loading { background: rgba(234, 179, 8, 0.15); color: #facc15; border: 1px solid rgba(234, 179, 8, 0.3); }
+  </style>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+        "@mediapipe/tasks-vision": "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/vision_bundle.js"
+      }
+    }
+  </script>
 </head>
 <body>
-
-    <div id="lesson-ui">
-        <h2>Географія 7 клас</h2>
-        <p><b>Тема:</b> Рух літосферних плит та рельєф</p>
-        <hr style="border-color:#333; margin: 10px 0;">
-        <p>😮 <b>Відкрий рот:</b> Розходження плит ➡️ Рифт / Утворення океану (Магма)</p>
-        <p>😐 <b>Закрий рот:</b> Зіткнення плит ➡️ Складчасті гори (Сейсмічна зона)</p>
-        <div class="status-badge" id="status">Очікування камери...</div>
+  <div id="app-container">
+    <div class="ui-panel">
+      <h1>Тектонічна Лабораторія</h1>
+      <p>Керуй рухом літосферних плит за допомогою власної міміки.</p>
+      <ul>
+        <li><b>Широко відкрий рот:</b><br>Дивергенція (Утворення океану)</li>
+        <li><b>Закрий рот і зціп зуби:</b><br>Конвергенція (Ріст гір)</li>
+      </ul>
+      <div id="status-badge" class="status loading">Ініціалізація AI...</div>
     </div>
+    
+    <video id="video-feed" autoplay playsinline></video>
+    <canvas id="webgl-canvas"></canvas>
+  </div>
 
-    <div id="loading">Запуск тектонічної лабораторії...</div>
-    <video id="video" autoplay playsinline></video>
-    <div id="canvas-container"></div>
-
-    <script>
-        const videoElement = document.getElementById('video');
-        const loadingElement = document.getElementById('loading');
-        const statusBadge = document.getElementById('status');
-        
-        // --- Ініціалізація Three.js ---
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x0d0d11, 0.025);
-
-        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, -3, 32); // Трохи знизу дивимось на площину для 3D ефекту гір
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        container.appendChild(renderer.domElement);
-
-        // --- Створення Тектонічної Моделі (Сітка Кубів-плит) ---
-        const gridWidth = 70;
-        const gridHeight = 40;
-        const count = gridWidth * gridHeight;
-
-        // Кубики щільно прилягають один до одного, створюючи цілісну земну кору
-        const geometry = new THREE.BoxGeometry(0.9, 0.9, 3); 
-        const material = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true });
-        const mesh = new THREE.InstancedMesh(geometry, material, count);
-        scene.add(mesh);
-
-        const dummy = new THREE.Object3D();
-        const initialPositions = [];
-        const colors = new Float32Array(count * 3);
-
-        let index = 0;
-        for (let x = 0; x < gridWidth; x++) {
-            for (let y = 0; y < gridHeight; y++) {
-                const posX = (x - gridWidth / 2) * 0.95;
-                const posY = (y - gridHeight / 2) * 0.95;
-                
-                initialPositions.push({ x: posX, y: posY, z: 0, isLeftPlate: x < gridWidth / 2 });
-                index++;
-            }
-        }
-
-        let faceState = { noseX: 0, noseY: 0, mouthOpenRatio: 0, active: false };
-
-        // --- AI Трекінг обличчя ---
-        function onResults(results) {
-            if (loadingElement) loadingElement.style.display = 'none';
-
-            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                const landmarks = results.multiFaceLandmarks[0];
-                const nose = landmarks[1];       
-                const topLip = landmarks[13];    
-                const bottomLip = landmarks[14]; 
-
-                faceState.noseX = -(nose.x - 0.5) * 75; 
-                faceState.noseY = -(nose.y - 0.5) * 45;
-
-                const mouthDist = Math.sqrt(Math.pow(topLip.x - bottomLip.x, 2) + Math.pow(topLip.y - bottomLip.y, 2));
-                faceState.mouthOpenRatio = Math.min(Math.max((mouthDist - 0.015) / 0.06, 0), 1);
-
-                faceState.active = true;
-                
-                // Оновлення тексту в меню для учнів
-                if(faceState.mouthOpenRatio > 0.4) {
-                    statusBadge.innerHTML = "РИФТОГЕНЕЗ (РОЗХОДЖЕННЯ)";
-                    statusBadge.style.background = "#ff3300";
-                } else {
-                    statusBadge.innerHTML = "КОЛІЗІЯ (ЗБЛИЖЕННЯ)";
-                    statusBadge.style.background = "#00cc66";
-                }
-            } else {
-                faceState.active = false;
-                statusBadge.innerHTML = "Обличчя поза зоною";
-                statusBadge.style.background = "#555";
-            }
-        }
-
-        const faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
-        faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
-        faceMesh.onResults(onResults);
-
-        const cameraUtils = new Camera(videoElement, {
-            onFrame: async () => { await faceMesh.send({ image: videoElement }); },
-            width: 640, height: 480
-        });
-        cameraUtils.start();
-
-        // --- Головний тектонічний рендер ---
-        const clock = new THREE.Clock();
-        const col = new THREE.Color();
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const time = clock.getElapsedTime();
-
-            let idx = 0;
-            for (let x = 0; x < gridWidth; x++) {
-                for (let y = 0; y < gridHeight; y++) {
-                    const block = initialPositions[idx];
-                    
-                    // Невеличкі тектонічні шуми Землі за замовчуванням
-                    let currentZ = Math.sin(block.x * 0.05 + time * 0.5) * 0.2; 
-                    
-                    // Базові кольори плит: Океанічна (Темно-синя) та Материкова (Коричнево-зелена)
-                    if (block.isLeftPlate) {
-                        col.setHex(0x1a2a3a); // Океанічна плита
-                    } else {
-                        col.setHex(0x2d3a1a); // Материкова плита
-                    }
-
-                    if (faceState.active) {
-                        // Рахуємо відстань від блоку до лінії розлому (яка прив'язана до вертикальної осі носа)
-                        const distanceToFault = Math.abs(block.x - faceState.noseX);
-                        const zoneOfInfluence = 12; // Ширина зоні сейсмічної активності навколо носа
-
-                        if (distanceToFault < zoneOfInfluence) {
-                            const factor = 1 - (distanceToFault / zoneOfInfluence); // 1 в центрі розлому, 0 на межі
-
-                            if (faceState.mouthOpenRatio > 0.4) {
-                                // --- РЕЖИМ РОЗХОДЖЕННЯ (РОТ ВІДКРИТИЙ) ---
-                                // Блоки розсуваються вниз (утворюється рифтова долина)
-                                const sink = faceState.mouthOpenRatio * 6 * factor;
-                                currentZ -= sink;
-                                
-                                // Що глибше — то ближче до мантії. Фарбуємо розлом у колір гарячої лави!
-                                if (factor > 0.4) {
-                                    col.lerp(new THREE.Color(0xff2200), factor * faceState.mouthOpenRatio);
-                                }
-                            } else {
-                                // --- РЕЖИМ ЗІТКНЕННЯ (РОТ ЗАКРИТИЙ) ---
-                                // Блоки виштовхуються вгору під шаленим тиском плити на плиту
-                                const mountainHeight = 8 * factor * (1 - faceState.mouthOpenRatio);
-                                // Додаємо гостроти горам через синус
-                                currentZ += Math.abs(Math.sin(block.x * 0.5)) * mountainHeight;
-
-                                // Фарбуємо вершини гір у сніжно-білий колір
-                                if (currentZ > 3) {
-                                    col.lerp(new THREE.Color(0xffffff), (currentZ - 3) / 5);
-                                } else {
-                                    // Передгір'я робимо скелясто-сірим
-                                    col.lerp(new THREE.Color(0x666666), factor);
-                                }
-                            }
-                        }
-                    }
-
-                    // Оновлюємо позицію куба земної кори
-                    dummy.position.set(block.x, block.y, currentZ);
-                    dummy.rotation.set(0, 0, 0); // Плити тримають горизонтальну структуру
-                    dummy.updateMatrix();
-                    mesh.setMatrixAt(idx, dummy.matrix);
-
-                    // Записуємо колір у буфер
-                    colors[idx * 3] = col.r;
-                    colors[idx * 3 + 1] = col.g;
-                    colors[idx * 3 + 2] = col.b;
-
-                    idx++;
-                }
-            }
-
-            mesh.instanceMatrix.needsUpdate = true;
-            mesh.instanceColor.setAttribute('color', new THREE.InstancedBufferAttribute(colors, 3));
-            mesh.instanceColor.needsUpdate = true;
-
-            // Камера м'яко нахиляється слідом за нахилом голови для об'єму
-            if(faceState.active) {
-                camera.position.x = THREE.MathUtils.lerp(camera.position.x, faceState.noseX * 0.2, 0.05);
-            }
-            camera.lookAt(0, 0, 0);
-
-            renderer.render(scene, camera);
-        }
-
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.projectionMatrix.makePerspective(55, camera.aspect, 0.1, 1000);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+  <script type="module" src="./app.js"></script>
 </body>
 </html>
