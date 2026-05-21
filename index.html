@@ -2,381 +2,320 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Цифрова гра «Фабрика повітря» 🌳✨</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Еко-Симулятор: Вплив Лісу 🌍</title>
     <style>
         :root {
-            --bg-color: #eef7f2;
-            --text-color: #2d3748;
-            --card-bg: rgba(255, 255, 255, 0.85);
+            --bg-color: #1e272e;
+            --text-color: #d2dae2;
+            --card-bg: rgba(30, 39, 46, 0.85);
+            --accent-green: #0be881;
+            --accent-red: #ff3f34;
         }
 
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(180deg, #cde8f5 0%, #e6f4ea 100%);
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: linear-gradient(180deg, #4bcffa 0%, #0fbcf9 100%);
             color: var(--text-color);
             overflow: hidden;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
             height: 100vh;
+            transition: background 1s ease;
         }
 
-        /* Екран задимлення (Змінює прозорість від кількості CO2) */
-        #smoke-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(100, 90, 85, 0);
-            pointer-events: none;
-            z-index: 10;
-            transition: background 0.5s ease;
-        }
-
-        /* Головний контейнер */
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: relative;
-            z-index: 20;
-        }
-
-        /* Шапка гри */
+        /* Дашборд з показниками */
         header {
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
+            background: rgba(15, 20, 25, 0.9);
             padding: 15px 20px;
-            margin: 15px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
         }
 
-        h1 {
-            margin: 0;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Статистика */
-        .stats-panel {
-            display: flex;
-            gap: 15px;
-        }
-
-        .stat-box {
-            background: #fff;
-            padding: 8px 15px;
-            border-radius: 12px;
-            font-weight: bold;
-            font-size: 1.1rem;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        /* Контролери для вчителя/дітей */
-        .controls {
-            display: flex;
-            gap: 10px;
-            padding: 0 15px;
-        }
-
-        .btn {
-            border: none;
-            padding: 12px 20px;
-            border-radius: 15px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.1s active;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-danger { background: #ff7675; color: white; }
-        .btn-success { background: #55efc4; color: #2d3748; }
-
-        /* Ігрове поле */
-        .play-field {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 80px; /* Місце для заводів та дерев */
-        }
-
-        /* Заводи та Машини (Джерела CO2) */
-        .sources-bar {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 80px;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-end;
-            padding-bottom: 10px;
-            background: linear-gradient(0deg, rgba(0,0,0,0.05) 0%, transparent 100%);
-        }
-
-        .source-item {
-            font-size: 3.5rem;
-            position: relative;
-            animation: bounce 3s infinite ease-in-out;
-        }
-
-        /* Еко-зона з деревами */
-        .forest-zone {
-            position: absolute;
-            bottom: 90px;
-            left: 50%;
-            transform: translateX(-50%);
+        .metrics-grid {
             display: flex;
             gap: 20px;
         }
 
-        .tree {
-            font-size: 4rem;
-            transition: all 0.3s ease;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
-        }
-
-        /* Молекули CO2 (Хмаринки бруду) */
-        .co2-molecule {
-            position: absolute;
-            font-size: 2.8rem;
-            cursor: pointer;
-            animation: floatUp 6s linear forwards;
-            user-select: none;
-            z-index: 30;
-            /* Збільшена зона для легкого тапу пальцем на дошці */
-            padding: 15px;
-            margin: -15px;
-        }
-
-        /* Ефекти Кисню O2 */
-        .o2-sparkle {
-            position: absolute;
-            font-size: 2rem;
-            animation: burst 1s ease-out forwards;
-            pointer-events: none;
-            z-index: 35;
-        }
-
-        /* Попередження */
-        #alert-msg {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(214, 48, 49, 0.9);
-            color: white;
-            padding: 20px 40px;
-            border-radius: 20px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            display: none;
+        .metric {
+            background: #2d3436;
+            padding: 10px 20px;
+            border-radius: 8px;
             text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            border-left: 4px solid #fff;
+        }
+
+        .metric h3 { margin: 0; font-size: 0.9rem; color: #b2bec3; }
+        .metric span { font-size: 1.5rem; font-weight: bold; }
+        
+        #aqi-card { border-left-color: var(--accent-green); }
+        #temp-card { border-left-color: #ffdd59; }
+        #bio-card { border-left-color: #ef5777; }
+
+        /* Науковий блок (Факти) */
+        .fact-panel {
+            position: absolute;
+            top: 100px;
+            left: 20px;
+            width: 300px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-green);
+            font-size: 0.95rem;
+            line-height: 1.4;
+            display: none;
+            z-index: 50;
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Ігрове поле */
+        .play-field {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 60vh;
+        }
+
+        .ground {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 120px;
+            background: #27ae60;
+            transition: background 1s ease;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            padding-bottom: 20px;
+            gap: 15px;
+        }
+
+        .tree {
+            font-size: 5rem;
+            transform-origin: bottom;
+            animation: grow 0.5s ease-out;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .tree:hover::after {
+            content: '🪓 Зрубати';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff3f34;
+            color: white;
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        /* Кнопки керування */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
             z-index: 100;
         }
 
-        /* Анімації */
-        @keyframes floatUp {
-            0% { transform: translateY(100vh) scale(0.8); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-10vh) scale(1.3); opacity: 0; }
+        .btn-plant {
+            background: var(--accent-green);
+            color: #1e272e;
+            border: none;
+            padding: 15px 25px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(11, 232, 129, 0.4);
+            transition: transform 0.1s;
+        }
+        .btn-plant:active { transform: scale(0.95); }
+
+        /* Забруднення */
+        .pollution-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(45, 52, 54, 0);
+            pointer-events: none;
+            transition: background 1s ease;
+            z-index: 10;
         }
 
-        @keyframes burst {
-            0% { transform: scale(0.5); opacity: 1; }
-            100% { transform: translateY(-80px) scale(1.5); opacity: 0; }
+        @keyframes grow {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
         }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
         }
     </style>
 </head>
 <body>
 
-    <div id="smoke-overlay"></div>
+    <div class="pollution-layer" id="smog"></div>
 
-    <div class="game-container">
-        <header>
-            <h1><div>🌳</div> Фабрика повітря: Вуглецевий цикл</h1>
-            <div class="stats-panel">
-                <div class="stat-box">Зловлено CO₂: <span id="score-co2">0</span> 💨</div>
-                <div class="stat-box">Утворено O₂: <span id="score-o2">0</span> 🫧</div>
+    <header>
+        <h2>🌍 Моніторинг Екосистеми</h2>
+        <div class="metrics-grid">
+            <div class="metric" id="aqi-card">
+                <h3>Індекс якості повітря (AQI)</h3>
+                <span id="val-aqi">20</span> <span id="status-aqi">🟢 (Добре)</span>
             </div>
-        </header>
-
-        <div class="controls">
-            <button class="btn btn-danger" onclick="cutTree()">🪓 Зрубати дерево</button>
-            <button class="btn btn-success" onclick="plantTree()">🌱 Посадити дерево</button>
+            <div class="metric" id="temp-card">
+                <h3>Локальна Температура</h3>
+                <span id="val-temp">22</span>°C 🌡️
+            </div>
+            <div class="metric" id="bio-card">
+                <h3>Тварини в регіоні</h3>
+                <span id="val-bio">15</span> 🦊
+            </div>
         </div>
+    </header>
 
-        <div class="play-field" id="field">
-            <div id="alert-msg">🚨 Усі дерева зрубано!<br>Немає кому очищувати повітря! Посадіть дерева! 🌱</div>
-            
-            <div class="forest-zone" id="forest">
-                </div>
-        </div>
+    <div class="fact-panel" id="fact-box">
+        <strong>📚 Науковий факт:</strong>
+        <p id="fact-text"></p>
+    </div>
 
-        <div class="sources-bar">
-            <div class="source-item">🏭</div>
-            <div class="source-item">🚗</div>
-            <div class="source-item">🏭</div>
-            <div class="source-item">🚙</div>
-        </div>
+    <div class="play-field">
+        <div class="ground" id="forest"></div>
+    </div>
+
+    <div class="controls">
+        <button class="btn-plant" onclick="plantTree()">🌱 Висадити гектар лісу</button>
     </div>
 
     <script>
-        const field = document.getElementById('field');
-        const forest = document.getElementById('forest');
-        const smokeOverlay = document.getElementById('smoke-overlay');
-        const alertMsg = document.getElementById('alert-msg');
-        
-        let co2Count = 0;
-        let o2Count = 0;
-        let treeCount = 4; // Початкова кількість дерев
-        let activeCO2Elements = 0;
-        let spawnInterval;
+        // Базові показники
+        let state = {
+            trees: 3,
+            co2Emissions: 100, // Базові викиди від міст/заводів
+            baseTemp: 26,      // Температура без дерев
+            maxAnimals: 25
+        };
 
-        // Ініціалізація лісу
-        function renderForest() {
+        const facts = [
+            "Одне доросле дерево виділяє достатньо кисню для дихання 3 людей протягом року.",
+            "Дерева працюють як кондиціонери: випаровування вологи з листя може знизити температуру навколо на 2-4°C.",
+            "Коренева система дерев запобігає ерозії ґрунту і затримує воду, рятуючи від посух.",
+            "Ліси є домом для 80% сухопутних видів тварин. Без дерев вони втрачають середовище існування.",
+            "Листя дерев затримує дрібнодисперсний пил (PM2.5), який є критично небезпечним для легень людини."
+        ];
+
+        function updateSystem() {
+            // 1. Розрахунок AQI (чим більше дерев, тим менше забруднення від базового CO2)
+            let absorbedCO2 = state.trees * 20;
+            let currentPollution = Math.max(5, state.co2Emissions - absorbedCO2);
+            let aqiElement = document.getElementById('val-aqi');
+            let aqiStatus = document.getElementById('status-aqi');
+            let aqiCard = document.getElementById('aqi-card');
+            
+            aqiElement.innerText = currentPollution;
+            
+            if(currentPollution < 40) {
+                aqiStatus.innerText = "🟢 (Чисто)";
+                aqiCard.style.borderLeftColor = "#0be881";
+                document.getElementById('smog').style.background = "rgba(45, 52, 54, 0)";
+                document.body.style.background = "linear-gradient(180deg, #4bcffa 0%, #0fbcf9 100%)";
+            } else if(currentPollution < 80) {
+                aqiStatus.innerText = "🟡 (Помірно)";
+                aqiCard.style.borderLeftColor = "#ffdd59";
+                document.getElementById('smog').style.background = "rgba(45, 52, 54, 0.4)";
+                document.body.style.background = "linear-gradient(180deg, #7f8fa6 0%, #718093 100%)";
+            } else {
+                aqiStatus.innerText = "🔴 (Небезпечно!)";
+                aqiCard.style.borderLeftColor = "#ff3f34";
+                document.getElementById('smog').style.background = "rgba(45, 52, 54, 0.85)";
+                document.body.style.background = "linear-gradient(180deg, #2f3640 0%, #353b48 100%)";
+            }
+
+            // 2. Температура (Кожне дерево знижує температуру на 1.5 градуса)
+            let currentTemp = state.baseTemp - (state.trees * 1.5);
+            document.getElementById('val-temp').innerText = currentTemp.toFixed(1);
+
+            // 3. Біорізноманіття (Тваринам потрібен ліс і нормальна температура)
+            let animals = 0;
+            if (state.trees > 0 && currentTemp < 25) {
+                animals = Math.min(state.maxAnimals, state.trees * 5);
+            }
+            document.getElementById('val-bio').innerText = animals;
+            
+            // Смерть екосистеми
+            if(state.trees === 0) {
+                document.getElementById('forest').style.background = "#e1b12c"; // суха земля
+                showFact("🚨 КАТАСТРОФА: Без дерев ґрунт перетворюється на пустелю, температура стрімко зростає, а всі тварини мігрують або гинуть.");
+            } else {
+                document.getElementById('forest').style.background = "#27ae60"; // зелена трава
+            }
+        }
+
+        function renderTrees() {
+            const forest = document.getElementById('forest');
             forest.innerHTML = '';
-            for(let i=0; i<treeCount; i++) {
-                const tree = document.createElement('div');
+            for(let i=0; i<state.trees; i++) {
+                let tree = document.createElement('div');
                 tree.className = 'tree';
-                tree.innerText = '🌳';
+                // Випадковий вид дерева для різноманітності
+                const treeTypes = ['🌳', '🌲', '🌴'];
+                tree.innerText = treeTypes[Math.floor(Math.random() * 2)]; // Тільки листяні і хвойні
+                
+                tree.onclick = () => cutTree();
                 forest.appendChild(tree);
             }
-            
-            if (treeCount === 0) {
-                alertMsg.style.display = 'block';
-            } else {
-                alertMsg.style.display = 'none';
-            }
-            
-            // Перезапускаємо таймер спавну хмаринок, бо швидкість залежить від дерев
-            updateSpawnSpeed();
+            updateSystem();
         }
 
-        // Функція «Зрубати дерево»
-        function cutTree() {
-            if (treeCount > 0) {
-                treeCount--;
-                renderForest();
-                updateSmokeEffect();
-            }
-        }
-
-        // Функція «Посадити дерево»
         function plantTree() {
-            if (treeCount < 7) {
-                treeCount++;
-                renderForest();
-                updateSmokeEffect();
+            if (state.trees < 10) {
+                state.trees++;
+                renderTrees();
+                showFact(facts[Math.floor(Math.random() * facts.length)]);
+            } else {
+                showFact("Максимальна щільність лісу досягнута для цієї ділянки! Екосистема стабільна.");
             }
         }
 
-        // Розрахунок задимлення екрану
-        function updateSmokeEffect() {
-            // Чим менше дерев і чим більше пропущеного CO2, тим брудніший екран
-            let baseSmoke = (7 - treeCount) * 0.12;
-            if(treeCount === 0) baseSmoke = 0.85; // Екологічна катастрофа
-            smokeOverlay.style.background = `rgba(110, 95, 80, ${baseSmoke})`;
+        function cutTree() {
+            if (state.trees > 0) {
+                state.trees--;
+                renderTrees();
+                showFact("Зрубано 1 гектар лісу. Здатність регіону фільтрувати повітря знизилась.");
+            }
         }
 
-        // Створення молекули CO2
-        function spawnCO2() {
-            // Якщо дерев немає, CO2 заповнює все миттєво
-            if (activeCO2Elements > 25) return; 
-
-            const co2 = document.createElement('div');
-            co2.className = 'co2-molecule';
-            co2.innerText = Math.random() > 0.5 ? '💨' : '🛑';
+        function showFact(text) {
+            const box = document.getElementById('fact-box');
+            document.getElementById('fact-text').innerText = text;
+            box.style.display = 'block';
             
-            // Випадкова позиція по ширині екрану
-            co2.style.left = Math.random() * 85 + 5 + '%';
-            co2.style.bottom = '0px';
-            
-            // Швидкість підйому
-            const duration = 4 + Math.random() * 4;
-            co2.style.animationDuration = duration + 's';
-
-            // Обробка ТАПУ / КЛІКУ (Взаємодія дитини з екраном)
-            const cleanUpEvent = (e) => {
-                e.preventDefault();
-                if (treeCount === 0) return; // Якщо дерев немає, зловити не можна!
-
-                co2Count++;
-                o2Count += 2; // Одне дерево дає багато кисню
-                document.getElementById('score-co2').innerText = co2Count;
-                document.getElementById('score-o2').innerText = o2Count;
-
-                // Ефект появи кисню на місці тапу
-                createO2Sparkle(co2.offsetLeft, co2.offsetTop);
-
-                co2.remove();
-                activeCO2Elements--;
-            };
-
-            co2.addEventListener('touchstart', cleanUpEvent);
-            co2.addEventListener('mousedown', cleanUpEvent);
-
-            field.appendChild(co2);
-            activeCO2Elements++;
-
-            // Видалення елементу, якщо дитина не встигла його зловити
+            // Сховати через 8 секунд
             setTimeout(() => {
-                if(co2.parentNode) {
-                    co2.remove();
-                    activeCO2Elements--;
-                    // Пропущений CO2 погіршує стан екрану тимчасово
-                    if(treeCount > 0) {
-                        smokeOverlay.style.background = `rgba(110, 95, 80, 0.4)`;
-                        setTimeout(updateSmokeEffect, 1000);
-                    }
+                box.style.display = 'none';
+            }, 8000);
+        }
+
+        // Постійне збільшення викидів з часом (щоб змушувати гравця діяти)
+        setInterval(() => {
+            if(Math.random() > 0.7) {
+                state.co2Emissions += 5; 
+                updateSystem();
+                if(state.co2Emissions > 150) {
+                    showFact("🏭 Промисловість зростає! Рівень базових викидів збільшився. Потрібно більше дерев!");
                 }
-            }, duration * 1000);
-        }
+            }
+        }, 5000);
 
-        // Анімація виділення кисню (O2)
-        function createO2Sparkle(x, y) {
-            const o2 = document.createElement('div');
-            o2.className = 'o2-sparkle';
-            o2.innerText = Math.random() > 0.5 ? '🫧' : '✨';
-            o2.style.left = x + 'px';
-            o2.style.top = y + 'px';
-            field.appendChild(o2);
-
-            setTimeout(() => o2.remove(), 1000);
-        }
-
-        // Регулювання швидкості появи CO2 залежно від екологічного стану
-        function updateSpawnSpeed() {
-            clearInterval(spawnInterval);
-            
-            let speed = 1500; // Базова швидкість (мілісекунди)
-            if (treeCount === 3 || treeCount === 2) speed = 900;
-            if (treeCount === 1) speed = 500;
-            if (treeCount === 0) speed = 300; // Заводи димлять без упину
-
-            spawnInterval = setInterval(spawnCO2, speed);
-        }
-
-        // Старт гри
-        renderForest();
+        // Ініціалізація
+        renderTrees();
     </script>
 </body>
 </html>
+
