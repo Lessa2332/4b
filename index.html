@@ -3,82 +3,221 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>25 Еко-Місій: Класний проект 🌍</title>
+    <title>Географія 7 клас: Літосферні плити</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0984e3; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 10px; margin: 20px 0; }
-        button { padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .btn-num { background: #55efc4; }
-        .mission-panel { background: white; color: #2d3436; padding: 25px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center; }
-        .choice-btn { background: #fab1a0; margin: 5px; width: 100%; }
-        .success { color: #00b894; font-weight: bold; }
-        .fail { color: #ff7675; font-weight: bold; }
+        body { margin: 0; overflow: hidden; background-color: #0d0d11; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #video { position: absolute; bottom: 20px; right: 20px; width: 150px; height: 112px; transform: scaleX(-1); border-radius: 8px; border: 2px solid #ffcc00; z-index: 2; opacity: 0.4; }
+        #loading { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #ffcc00; font-size: 1.5rem; z-index: 3; text-align: center; font-weight: bold; }
+        #lesson-ui { position: absolute; top: 25px; left: 25px; z-index: 4; color: #ffffff; width: 320px; background: rgba(13, 13, 17, 0.85); padding: 15px; border-radius: 10px; border-left: 5px solid #ffcc00; box-shadow: 0 4px 15px rgba(0,0,0,0.5); pointer-events: none;}
+        #lesson-ui h2 { margin: 0 0 8px 0; font-size: 1.1rem; color: #ffcc00; text-transform: uppercase; letter-spacing: 1px;}
+        #lesson-ui p { margin: 5px 0; font-size: 0.85rem; color: #ccc; line-height: 1.4;}
+        .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; margin-top: 5px;}
+        #status { background: #555; color: #fff; }
     </style>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
 </head>
 <body>
 
-    <h1>🌍 Еко-Експедиція: 25 викликів</h1>
-    <div class="grid" id="grid"></div>
-    <div class="mission-panel" id="panel" style="display:none;">
-        <h2 id="m-title"></h2>
-        <p id="m-desc"></p>
-        <div id="choices"></div>
-        <p id="feedback"></p>
+    <div id="lesson-ui">
+        <h2>Географія 7 клас</h2>
+        <p><b>Тема:</b> Рух літосферних плит та рельєф</p>
+        <hr style="border-color:#333; margin: 10px 0;">
+        <p>😮 <b>Відкрий рот:</b> Розходження плит ➡️ Рифт / Утворення океану (Магма)</p>
+        <p>😐 <b>Закрий рот:</b> Зіткнення плит ➡️ Складчасті гори (Сейсмічна зона)</p>
+        <div class="status-badge" id="status">Очікування камери...</div>
     </div>
 
-<script>
-const missions = [
-    { title: "Місія 1", desc: "Видобуток піску з річки.", good: "Використати еко-технології.", bad: "Знищити русло.", feed: "Річка зберегла екосистему!" },
-    { title: "Місія 2", desc: "Сміття в лісі.", good: "Сортування.", bad: "Спалити.", feed: "Ліс чистий!" },
-    { title: "Місія 3", desc: "Старі батарейки.", good: "Здати на утилізацію.", bad: "Викинути в смітник.", feed: "Ґрунт не отруєно!" },
-    { title: "Місія 4", desc: "Використання пластику.", good: "Еко-торба.", bad: "Пластиковий пакет.", feed: "Океан чистіший!" },
-    { title: "Місія 5", desc: "Будівництво дороги.", good: "Еко-перехід для звірів.", bad: "Знищити тропу.", feed: "Тварини в безпеці!" },
-    { title: "Місія 6", desc: "Відходи заводу.", good: "Система очистки.", bad: "Скид у воду.", feed: "Риба врятована!" },
-    { title: "Місія 7", desc: "Полив полів.", good: "Крапельний полив.", bad: "Залити все водою.", feed: "Воду заощаджено!" },
-    { title: "Місія 8", desc: "Опалення.", good: "Тепловий насос.", bad: "Спалювання шин.", feed: "Повітря свіже!" },
-    { title: "Місія 9", desc: "Міське освітлення.", good: "LED-лампи.", bad: "Залишити старі лампи.", feed: "Енергію збережено!" },
-    { title: "Місія 10", desc: "Дерева в місті.", good: "Зелені дахи.", bad: "Асфальт.", feed: "Місто стало прохолоднішим!" },
-    { title: "Місія 11", desc: "Полювання.", good: "Фотополювання.", bad: "Браконьєрство.", feed: "Вид врятовано!" },
-    { title: "Місія 12", desc: "Вибір авто.", good: "Електрокар.", bad: "Дизель.", feed: "Вихлопів немає!" },
-    { title: "Місія 13", desc: "Папір.", good: "Переробка.", bad: "Вирубка.", feed: "Ліс росте!" },
-    { title: "Місія 14", desc: "Добрива.", good: "Органіка.", bad: "Хімія.", feed: "Земля родюча!" },
-    { title: "Місія 15", desc: "Вода вдома.", good: "Еко-фільтр.", bad: "Пластикові пляшки.", feed: "Менше пластику!" },
-    { title: "Місія 16", desc: "Забруднення моря.", good: "Прибирання пляжу.", bad: "Залишити бруд.", feed: "Пляж чистий!" },
-    { title: "Місія 17", desc: "Освіта.", good: "Урок екології.", bad: "Ігнорувати тему.", feed: "Діти знають як рятувати світ!" },
-    { title: "Місія 18", desc: "Мило/Побутова хімія.", good: "Біорозкладні засоби.", bad: "Фосфати.", feed: "Річка не цвіте!" },
-    { title: "Місія 19", desc: "Одяг.", good: "Секонд-хенд/Вінтаж.", bad: "Купувати одноразовий одяг.", feed: "Мода стала етичною!" },
-    { title: "Місія 20", desc: "Відпочинок в лісі.", good: "Забрати сміття.", bad: "Лишити багаття.", feed: "Ліс не згорів!" },
-    { title: "Місія 21", desc: "Енергія.", good: "Сонячні панелі.", bad: "Спалювати вугілля.", feed: "Чиста енергія!" },
-    { title: "Місія 22", desc: "Міграція птахів.", good: "Годівниці.", bad: "Не чіпати.", feed: "Птахи ситі!" },
-    { title: "Місія 23", desc: "Вибір продуктів.", good: "Місцеве виробництво.", bad: "Імпорт літаком.", feed: "Менше викидів CO2!" },
-    { title: "Місія 24", desc: "Транспорт.", good: "Велосипед.", bad: "Авто в пробці.", feed: "Здоров'я і чистота!" },
-    { title: "Місія 25", desc: "Ставлення до природи.", good: "Любити і берегти.", bad: "Споживати.", feed: "Ти — Еко-Герой!" }
-];
+    <div id="loading">Запуск тектонічної лабораторії...</div>
+    <video id="video" autoplay playsinline></video>
+    <div id="canvas-container"></div>
 
-const grid = document.getElementById('grid');
-missions.forEach((m, i) => {
-    let btn = document.createElement('button');
-    btn.className = 'btn-num'; btn.innerText = i + 1;
-    btn.onclick = () => load(i);
-    grid.appendChild(btn);
-});
+    <script>
+        const videoElement = document.getElementById('video');
+        const loadingElement = document.getElementById('loading');
+        const statusBadge = document.getElementById('status');
+        
+        // --- Ініціалізація Three.js ---
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x0d0d11, 0.025);
 
-function load(i) {
-    document.getElementById('panel').style.display = 'block';
-    document.getElementById('m-title').innerText = missions[i].title;
-    document.getElementById('m-desc').innerText = missions[i].desc;
-    document.getElementById('feedback').innerText = "";
-    document.getElementById('choices').innerHTML = `
-        <button class="choice-btn" onclick="res(true, ${i})">🟢 ${missions[i].good}</button>
-        <button class="choice-btn" onclick="res(false, ${i})">🔴 ${missions[i].bad}</button>
-    `;
-}
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, -3, 32); // Трохи знизу дивимось на площину для 3D ефекту гір
 
-function res(ok, i) {
-    document.getElementById('feedback').innerHTML = ok ? 
-        `<span class="success">✅ ПЕРЕМОГА: ${missions[i].feed}</span>` : 
-        `<span class="fail">❌ ПОМИЛКА: Екосистема постраждала.</span>`;
-}
-</script>
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        container.appendChild(renderer.domElement);
+
+        // --- Створення Тектонічної Моделі (Сітка Кубів-плит) ---
+        const gridWidth = 70;
+        const gridHeight = 40;
+        const count = gridWidth * gridHeight;
+
+        // Кубики щільно прилягають один до одного, створюючи цілісну земну кору
+        const geometry = new THREE.BoxGeometry(0.9, 0.9, 3); 
+        const material = new THREE.MeshBasicMaterial({ color: 0xffffff, vertexColors: true });
+        const mesh = new THREE.InstancedMesh(geometry, material, count);
+        scene.add(mesh);
+
+        const dummy = new THREE.Object3D();
+        const initialPositions = [];
+        const colors = new Float32Array(count * 3);
+
+        let index = 0;
+        for (let x = 0; x < gridWidth; x++) {
+            for (let y = 0; y < gridHeight; y++) {
+                const posX = (x - gridWidth / 2) * 0.95;
+                const posY = (y - gridHeight / 2) * 0.95;
+                
+                initialPositions.push({ x: posX, y: posY, z: 0, isLeftPlate: x < gridWidth / 2 });
+                index++;
+            }
+        }
+
+        let faceState = { noseX: 0, noseY: 0, mouthOpenRatio: 0, active: false };
+
+        // --- AI Трекінг обличчя ---
+        function onResults(results) {
+            if (loadingElement) loadingElement.style.display = 'none';
+
+            if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
+                const landmarks = results.multiFaceLandmarks[0];
+                const nose = landmarks[1];       
+                const topLip = landmarks[13];    
+                const bottomLip = landmarks[14]; 
+
+                faceState.noseX = -(nose.x - 0.5) * 75; 
+                faceState.noseY = -(nose.y - 0.5) * 45;
+
+                const mouthDist = Math.sqrt(Math.pow(topLip.x - bottomLip.x, 2) + Math.pow(topLip.y - bottomLip.y, 2));
+                faceState.mouthOpenRatio = Math.min(Math.max((mouthDist - 0.015) / 0.06, 0), 1);
+
+                faceState.active = true;
+                
+                // Оновлення тексту в меню для учнів
+                if(faceState.mouthOpenRatio > 0.4) {
+                    statusBadge.innerHTML = "РИФТОГЕНЕЗ (РОЗХОДЖЕННЯ)";
+                    statusBadge.style.background = "#ff3300";
+                } else {
+                    statusBadge.innerHTML = "КОЛІЗІЯ (ЗБЛИЖЕННЯ)";
+                    statusBadge.style.background = "#00cc66";
+                }
+            } else {
+                faceState.active = false;
+                statusBadge.innerHTML = "Обличчя поза зоною";
+                statusBadge.style.background = "#555";
+            }
+        }
+
+        const faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}` });
+        faceMesh.setOptions({ maxNumFaces: 1, refineLandmarks: true, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+        faceMesh.onResults(onResults);
+
+        const cameraUtils = new Camera(videoElement, {
+            onFrame: async () => { await faceMesh.send({ image: videoElement }); },
+            width: 640, height: 480
+        });
+        cameraUtils.start();
+
+        // --- Головний тектонічний рендер ---
+        const clock = new THREE.Clock();
+        const col = new THREE.Color();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const time = clock.getElapsedTime();
+
+            let idx = 0;
+            for (let x = 0; x < gridWidth; x++) {
+                for (let y = 0; y < gridHeight; y++) {
+                    const block = initialPositions[idx];
+                    
+                    // Невеличкі тектонічні шуми Землі за замовчуванням
+                    let currentZ = Math.sin(block.x * 0.05 + time * 0.5) * 0.2; 
+                    
+                    // Базові кольори плит: Океанічна (Темно-синя) та Материкова (Коричнево-зелена)
+                    if (block.isLeftPlate) {
+                        col.setHex(0x1a2a3a); // Океанічна плита
+                    } else {
+                        col.setHex(0x2d3a1a); // Материкова плита
+                    }
+
+                    if (faceState.active) {
+                        // Рахуємо відстань від блоку до лінії розлому (яка прив'язана до вертикальної осі носа)
+                        const distanceToFault = Math.abs(block.x - faceState.noseX);
+                        const zoneOfInfluence = 12; // Ширина зоні сейсмічної активності навколо носа
+
+                        if (distanceToFault < zoneOfInfluence) {
+                            const factor = 1 - (distanceToFault / zoneOfInfluence); // 1 в центрі розлому, 0 на межі
+
+                            if (faceState.mouthOpenRatio > 0.4) {
+                                // --- РЕЖИМ РОЗХОДЖЕННЯ (РОТ ВІДКРИТИЙ) ---
+                                // Блоки розсуваються вниз (утворюється рифтова долина)
+                                const sink = faceState.mouthOpenRatio * 6 * factor;
+                                currentZ -= sink;
+                                
+                                // Що глибше — то ближче до мантії. Фарбуємо розлом у колір гарячої лави!
+                                if (factor > 0.4) {
+                                    col.lerp(new THREE.Color(0xff2200), factor * faceState.mouthOpenRatio);
+                                }
+                            } else {
+                                // --- РЕЖИМ ЗІТКНЕННЯ (РОТ ЗАКРИТИЙ) ---
+                                // Блоки виштовхуються вгору під шаленим тиском плити на плиту
+                                const mountainHeight = 8 * factor * (1 - faceState.mouthOpenRatio);
+                                // Додаємо гостроти горам через синус
+                                currentZ += Math.abs(Math.sin(block.x * 0.5)) * mountainHeight;
+
+                                // Фарбуємо вершини гір у сніжно-білий колір
+                                if (currentZ > 3) {
+                                    col.lerp(new THREE.Color(0xffffff), (currentZ - 3) / 5);
+                                } else {
+                                    // Передгір'я робимо скелясто-сірим
+                                    col.lerp(new THREE.Color(0x666666), factor);
+                                }
+                            }
+                        }
+                    }
+
+                    // Оновлюємо позицію куба земної кори
+                    dummy.position.set(block.x, block.y, currentZ);
+                    dummy.rotation.set(0, 0, 0); // Плити тримають горизонтальну структуру
+                    dummy.updateMatrix();
+                    mesh.setMatrixAt(idx, dummy.matrix);
+
+                    // Записуємо колір у буфер
+                    colors[idx * 3] = col.r;
+                    colors[idx * 3 + 1] = col.g;
+                    colors[idx * 3 + 2] = col.b;
+
+                    idx++;
+                }
+            }
+
+            mesh.instanceMatrix.needsUpdate = true;
+            mesh.instanceColor.setAttribute('color', new THREE.InstancedBufferAttribute(colors, 3));
+            mesh.instanceColor.needsUpdate = true;
+
+            // Камера м'яко нахиляється слідом за нахилом голови для об'єму
+            if(faceState.active) {
+                camera.position.x = THREE.MathUtils.lerp(camera.position.x, faceState.noseX * 0.2, 0.05);
+            }
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.projectionMatrix.makePerspective(55, camera.aspect, 0.1, 1000);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+    </script>
 </body>
 </html>
