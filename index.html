@@ -2,433 +2,83 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Еко-Місії: Стратегія виживання 🌍</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>25 Еко-Місій: Класний проект 🌍</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap');
-
-        :root {
-            --glass-bg: rgba(255, 255, 255, 0.15);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --text-main: #ffffff;
-            --accent-green: #00b894;
-            --accent-warn: #fdcb6e;
-            --accent-danger: #ff7675;
-            --sky-top: #0984e3;
-            --sky-bottom: #74b9ff;
-        }
-
-        * {
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Nunito', sans-serif;
-            background: linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
-            color: var(--text-main);
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            transition: background 2s ease;
-        }
-
-        canvas#particles {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1; opacity: 0;
-            transition: opacity 2s ease;
-        }
-
-        /* Дашборд */
-        header {
-            padding: 2vh 4vw;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            max-width: 800px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        .metric-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 10px;
-            text-align: center;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s, border-color 0.5s;
-        }
-
-        .metric-card h3 {
-            margin: 0 0 5px 0;
-            font-size: clamp(0.7rem, 2vw, 0.85rem);
-            text-transform: uppercase;
-        }
-
-        .metric-value {
-            font-size: clamp(1.2rem, 4vw, 2rem);
-            font-weight: 900;
-        }
-
-        /* Ігрове поле - Візуал */
-        .visual-stage {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: clamp(5rem, 15vw, 10rem);
-            z-index: 10;
-        }
-
-        /* Сюжетна панель (Модальне вікно) */
-        .mission-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 95%;
-            max-width: 600px;
-            background: rgba(30, 39, 46, 0.9);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 24px;
-            padding: 25px;
-            z-index: 150;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .mission-title {
-            color: var(--accent-warn);
-            margin: 0;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .mission-desc {
-            font-size: 1.1rem;
-            line-height: 1.5;
-            margin: 0;
-        }
-
-        .choices {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .btn-choice {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: white;
-            padding: 15px;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 1rem;
-            text-align: left;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-choice:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateX(5px);
-        }
-
-        .btn-next {
-            background: var(--accent-green);
-            color: #000;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            display: none;
-            text-align: center;
-            margin-top: 10px;
-        }
-
-        /* Результат місії */
-        .feedback {
-            display: none;
-            padding: 15px;
-            border-radius: 12px;
-            background: rgba(0,0,0,0.3);
-            border-left: 5px solid var(--accent-green);
-            font-size: 1rem;
-            line-height: 1.4;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: #0984e3; color: white; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(5, 60px); gap: 10px; margin: 20px 0; }
+        button { padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-num { background: #55efc4; }
+        .mission-panel { background: white; color: #2d3436; padding: 25px; border-radius: 20px; max-width: 500px; width: 90%; text-align: center; }
+        .choice-btn { background: #fab1a0; margin: 5px; width: 100%; }
+        .success { color: #00b894; font-weight: bold; }
+        .fail { color: #ff7675; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <canvas id="particles"></canvas>
-
-    <header>
-        <div class="metrics-grid">
-            <div class="metric-card" id="card-aqi">
-                <h3>Забруднення (AQI)</h3>
-                <div class="metric-value"><span id="val-aqi">20</span> 🟢</div>
-            </div>
-            <div class="metric-card" id="card-temp">
-                <h3>Температура</h3>
-                <div class="metric-value"><span id="val-temp">22</span>°C</div>
-            </div>
-            <div class="metric-card" id="card-bio">
-                <h3>Тварини</h3>
-                <div class="metric-value"><span id="val-bio">100</span>%</div>
-            </div>
-        </div>
-    </header>
-
-    <div class="visual-stage" id="visual-stage">
-        🌲🦌💧
+    <h1>🌍 Еко-Експедиція: 25 викликів</h1>
+    <div class="grid" id="grid"></div>
+    <div class="mission-panel" id="panel" style="display:none;">
+        <h2 id="m-title"></h2>
+        <p id="m-desc"></p>
+        <div id="choices"></div>
+        <p id="feedback"></p>
     </div>
 
-    <div class="mission-panel">
-        <h2 class="mission-title" id="m-title">Місія 1: Будівництво</h2>
-        <p class="mission-desc" id="m-desc">Завантаження...</p>
-        
-        <div class="choices" id="choices-container">
-            <!-- Кнопки генеруються через JS -->
-        </div>
+<script>
+const missions = [
+    { title: "Місія 1", desc: "Видобуток піску з річки.", good: "Використати еко-технології.", bad: "Знищити русло.", feed: "Річка зберегла екосистему!" },
+    { title: "Місія 2", desc: "Сміття в лісі.", good: "Сортування.", bad: "Спалити.", feed: "Ліс чистий!" },
+    { title: "Місія 3", desc: "Старі батарейки.", good: "Здати на утилізацію.", bad: "Викинути в смітник.", feed: "Ґрунт не отруєно!" },
+    { title: "Місія 4", desc: "Використання пластику.", good: "Еко-торба.", bad: "Пластиковий пакет.", feed: "Океан чистіший!" },
+    { title: "Місія 5", desc: "Будівництво дороги.", good: "Еко-перехід для звірів.", bad: "Знищити тропу.", feed: "Тварини в безпеці!" },
+    { title: "Місія 6", desc: "Відходи заводу.", good: "Система очистки.", bad: "Скид у воду.", feed: "Риба врятована!" },
+    { title: "Місія 7", desc: "Полив полів.", good: "Крапельний полив.", bad: "Залити все водою.", feed: "Воду заощаджено!" },
+    { title: "Місія 8", desc: "Опалення.", good: "Тепловий насос.", bad: "Спалювання шин.", feed: "Повітря свіже!" },
+    { title: "Місія 9", desc: "Міське освітлення.", good: "LED-лампи.", bad: "Залишити старі лампи.", feed: "Енергію збережено!" },
+    { title: "Місія 10", desc: "Дерева в місті.", good: "Зелені дахи.", bad: "Асфальт.", feed: "Місто стало прохолоднішим!" },
+    { title: "Місія 11", desc: "Полювання.", good: "Фотополювання.", bad: "Браконьєрство.", feed: "Вид врятовано!" },
+    { title: "Місія 12", desc: "Вибір авто.", good: "Електрокар.", bad: "Дизель.", feed: "Вихлопів немає!" },
+    { title: "Місія 13", desc: "Папір.", good: "Переробка.", bad: "Вирубка.", feed: "Ліс росте!" },
+    { title: "Місія 14", desc: "Добрива.", good: "Органіка.", bad: "Хімія.", feed: "Земля родюча!" },
+    { title: "Місія 15", desc: "Вода вдома.", good: "Еко-фільтр.", bad: "Пластикові пляшки.", feed: "Менше пластику!" },
+    { title: "Місія 16", desc: "Забруднення моря.", good: "Прибирання пляжу.", bad: "Залишити бруд.", feed: "Пляж чистий!" },
+    { title: "Місія 17", desc: "Освіта.", good: "Урок екології.", bad: "Ігнорувати тему.", feed: "Діти знають як рятувати світ!" },
+    { title: "Місія 18", desc: "Мило/Побутова хімія.", good: "Біорозкладні засоби.", bad: "Фосфати.", feed: "Річка не цвіте!" },
+    { title: "Місія 19", desc: "Одяг.", good: "Секонд-хенд/Вінтаж.", bad: "Купувати одноразовий одяг.", feed: "Мода стала етичною!" },
+    { title: "Місія 20", desc: "Відпочинок в лісі.", good: "Забрати сміття.", bad: "Лишити багаття.", feed: "Ліс не згорів!" },
+    { title: "Місія 21", desc: "Енергія.", good: "Сонячні панелі.", bad: "Спалювати вугілля.", feed: "Чиста енергія!" },
+    { title: "Місія 22", desc: "Міграція птахів.", good: "Годівниці.", bad: "Не чіпати.", feed: "Птахи ситі!" },
+    { title: "Місія 23", desc: "Вибір продуктів.", good: "Місцеве виробництво.", bad: "Імпорт літаком.", feed: "Менше викидів CO2!" },
+    { title: "Місія 24", desc: "Транспорт.", good: "Велосипед.", bad: "Авто в пробці.", feed: "Здоров'я і чистота!" },
+    { title: "Місія 25", desc: "Ставлення до природи.", good: "Любити і берегти.", bad: "Споживати.", feed: "Ти — Еко-Герой!" }
+];
 
-        <div class="feedback" id="feedback-box"></div>
-        <button class="btn-next" id="btn-next" onclick="nextLevel()">Наступний рівень ➔</button>
-    </div>
+const grid = document.getElementById('grid');
+missions.forEach((m, i) => {
+    let btn = document.createElement('button');
+    btn.className = 'btn-num'; btn.innerText = i + 1;
+    btn.onclick = () => load(i);
+    grid.appendChild(btn);
+});
 
-    <script>
-        // Глобальні параметри екосистеми
-        let state = {
-            aqi: 20,
-            temp: 22,
-            bio: 100
-        };
+function load(i) {
+    document.getElementById('panel').style.display = 'block';
+    document.getElementById('m-title').innerText = missions[i].title;
+    document.getElementById('m-desc').innerText = missions[i].desc;
+    document.getElementById('feedback').innerText = "";
+    document.getElementById('choices').innerHTML = `
+        <button class="choice-btn" onclick="res(true, ${i})">🟢 ${missions[i].good}</button>
+        <button class="choice-btn" onclick="res(false, ${i})">🔴 ${missions[i].bad}</button>
+    `;
+}
 
-        let currentLevel = 0;
-
-        // Сценарії місій
-        const scenarios = [
-            {
-                title: "Ситуація 1: Промисловий бум",
-                desc: "Великий інвестор хоче побудувати хімічний завод біля міського лісу. Це дасть нові робочі місця, але ліс доведеться частково вирубати.",
-                visual: "🌲🏭🌲",
-                choices: [
-                    {
-                        text: "🪓 Вирубати частину лісу під звичайний завод (Швидко і дешево)",
-                        effects: { aqi: +60, temp: +2, bio: -40 },
-                        feedback: "Завод працює, але якість повітря різко впала. Температура в місті зросла через брак тіні, а тварини втратили домівки."
-                    },
-                    {
-                        text: "⚙️ Встановити дорогі еко-фільтри і зберегти дерева навколо",
-                        effects: { aqi: +15, temp: 0, bio: -10 },
-                        feedback: "Інвестор витратив більше грошей, але екосистема витримала! Дерева навколо заводу продовжують очищувати повітря."
-                    }
-                ]
-            },
-            {
-                title: "Ситуація 2: Острів тепла",
-                desc: "У місті аномальна літня спека (+35°C). Через величезну кількість асфальту місто не охолоджується навіть вночі.",
-                visual: "🏙️☀️🥵",
-                choices: [
-                    {
-                        text: "❄️ Дозволити масове встановлення потужних кондиціонерів",
-                        effects: { aqi: +30, temp: +1.5, bio: -20 },
-                        feedback: "У приміщеннях стало прохолодно. Але кондиціонери викидають тепло на вулицю! Електростанції спалюють більше вугілля, погіршуючи повітря."
-                    },
-                    {
-                        text: "🌳 Висадити алеї дерев замість парковок та зробити зелені дахи",
-                        effects: { aqi: -20, temp: -3, bio: +20 },
-                        feedback: "Блискуче рішення! Дерева випаровують воду (транспірація), діючи як природні кондиціонери. Температура на вулиці впала, повітря стало чистішим."
-                    }
-                ]
-            },
-            {
-                title: "Ситуація 3: Порятунок річки",
-                desc: "Річка міліє, береги обвалюються через сільське господарство, що підійшло впритул до води. Вода стає каламутною.",
-                visual: "🚜〰️🥀",
-                choices: [
-                    {
-                        text: "🧱 Забетонувати береги річки в канал",
-                        effects: { aqi: 0, temp: +1, bio: -50 },
-                        feedback: "Берег більше не падає, але річка перетворилася на мертвий жолоб. Риба та птахи зникли назавжди, вода нагрівається сильніше."
-                    },
-                    {
-                        text: "🌿 Висадити прибережну захисну смугу (верби та очерет)",
-                        effects: { aqi: -10, temp: -1, bio: +40 },
-                        feedback: "Коріння верб надійно скріпило берег. Рослинність фільтрує хімікати з полів, повертаються птахи. Природа відновила баланс!"
-                    }
-                ]
-            }
-        ];
-
-        // Ініціалізація Particle системи (для фону)
-        const canvas = document.getElementById('particles');
-        const ctx = canvas.getContext('2d');
-        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resize); resize();
-        
-        let particles = [];
-        for(let i=0; i<50; i++) {
-            particles.push({
-                x: Math.random() * canvas.width, y: Math.random() * canvas.height,
-                s: Math.random() * 3 + 1, d: Math.random() * 1
-            });
-        }
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = 'rgba(50, 50, 50, 0.5)';
-            particles.forEach(p => {
-                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
-                p.x += p.d; p.y -= p.d;
-                if(p.y < 0) p.y = canvas.height;
-                if(p.x > canvas.width) p.x = 0;
-            });
-            requestAnimationFrame(draw);
-        }
-        draw();
-
-        // Оновлення інтерфейсу екосистеми
-        function updateUI() {
-            document.getElementById('val-aqi').innerText = state.aqi;
-            document.getElementById('val-temp').innerText = state.temp.toFixed(1);
-            document.getElementById('val-bio').innerText = Math.max(0, state.bio);
-
-            let r = document.querySelector(':root');
-            if(state.aqi > 60) {
-                canvas.style.opacity = '1'; // Дим
-                r.style.setProperty('--sky-top', '#2d3436');
-                r.style.setProperty('--sky-bottom', '#636e72');
-            } else {
-                canvas.style.opacity = '0'; // Чисто
-                r.style.setProperty('--sky-top', '#0984e3');
-                r.style.setProperty('--sky-bottom', '#74b9ff');
-            }
-        }
-
-        // Завантаження рівня
-        function loadLevel() {
-            if (currentLevel >= scenarios.length) {
-                endGame();
-                return;
-            }
-
-            const level = scenarios[currentLevel];
-            document.getElementById('m-title').innerText = level.title;
-            document.getElementById('m-desc').innerText = level.desc;
-            document.getElementById('visual-stage').innerText = level.visual;
-            
-            const choicesDiv = document.getElementById('choices-container');
-            choicesDiv.innerHTML = '';
-            choicesDiv.style.display = 'flex';
-            
-            document.getElementById('feedback-box').style.display = 'none';
-            document.getElementById('btn-next').style.display = 'none';
-
-            level.choices.forEach((choice, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'btn-choice';
-                btn.innerText = choice.text;
-                btn.onclick = () => makeChoice(index);
-                choicesDiv.appendChild(btn);
-            });
-        }
-
-        // Обробка вибору користувача
-        function makeChoice(choiceIndex) {
-            const level = scenarios[currentLevel];
-            const choice = level.choices[choiceIndex];
-
-            // Застосовуємо ефекти до екосистеми
-            state.aqi = Math.max(0, state.aqi + choice.effects.aqi);
-            state.temp += choice.effects.temp;
-            state.bio = Math.max(0, Math.min(100, state.bio + choice.effects.bio));
-            
-            updateUI();
-
-            // Показуємо наслідки
-            document.getElementById('choices-container').style.display = 'none';
-            
-            const feedbackBox = document.getElementById('feedback-box');
-            feedbackBox.innerHTML = `<strong>Наслідок рішення:</strong><br>${choice.feedback}`;
-            
-            if (choice.effects.aqi > 20 || choice.effects.bio < 0) {
-                feedbackBox.style.borderLeftColor = "var(--accent-danger)";
-            } else {
-                feedbackBox.style.borderLeftColor = "var(--accent-green)";
-            }
-            
-            feedbackBox.style.display = 'block';
-            document.getElementById('btn-next').style.display = 'block';
-        }
-
-        function nextLevel() {
-            currentLevel++;
-            loadLevel();
-        }
-
-        function endGame() {
-            document.getElementById('m-title').innerText = "Гру завершено!";
-            let resultText = "";
-            let grade = "";
-
-            if (state.aqi < 50 && state.bio > 70) {
-                grade = "🏆 Видатний еколог!";
-                resultText = "Ви зберегли баланс між розвитком міста та природою. Регіон процвітає!";
-            } else if (state.aqi < 80 && state.bio > 30) {
-                grade = "⚖️ Менеджер-початківець";
-                resultText = "Місто розвивається, але природа зазнала втрат. Є над чим працювати.";
-            } else {
-                grade = "💀 Екологічна катастрофа";
-                resultText = "Ваші рішення призвели до знищення екосистеми. Місто стало непридатним для життя тварин і небезпечним для людей.";
-            }
-
-            document.getElementById('visual-stage').innerText = state.bio > 50 ? "🌍🦅🌿" : "🏭🏜️☠️";
-
-            document.getElementById('m-desc').innerHTML = `
-                <h3 style="color:var(--accent-warn); text-align:center;">${grade}</h3>
-                <p>${resultText}</p>
-                <hr style="border:0; border-top:1px solid rgba(255,255,255,0.2); margin: 15px 0;">
-                <strong>Фінальні показники:</strong><br>
-                💨 AQI: ${state.aqi}<br>
-                🌡️ Температура: ${state.temp.toFixed(1)}°C<br>
-                🦊 Тваринний світ: ${state.bio}%
-            `;
-            
-            document.getElementById('choices-container').style.display = 'none';
-            document.getElementById('feedback-box').style.display = 'none';
-            
-            const btn = document.getElementById('btn-next');
-            btn.innerText = "🔄 Зіграти ще раз";
-            btn.onclick = () => location.reload();
-            btn.style.display = 'block';
-        }
-
-        // Запуск гри
-        loadLevel();
-
-    </script>
+function res(ok, i) {
+    document.getElementById('feedback').innerHTML = ok ? 
+        `<span class="success">✅ ПЕРЕМОГА: ${missions[i].feed}</span>` : 
+        `<span class="fail">❌ ПОМИЛКА: Екосистема постраждала.</span>`;
+}
+</script>
 </body>
 </html>
-
