@@ -44,6 +44,7 @@
     });
   </script>
 
+  <!-- importmap залишаємо для динамічних імпортів -->
   <script type="importmap">
     {
       "imports": {
@@ -76,356 +77,348 @@
   </div>
 
   <script type="module">
-    import * as THREE from 'three';
-    import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
-
-    class TectonicSimulation {
-      constructor() {
-        this.video = document.getElementById('video-feed');
-        this.canvas = document.getElementById('webgl-canvas');
-        this.statusBadge = document.getElementById('status-badge');
-        this.startScreen = document.getElementById('start-screen');
-        this.startBtn = document.getElementById('start-btn');
+    // Динамічний імпорт лише після натискання кнопки
+    document.getElementById('start-btn').addEventListener('click', async () => {
+      const startScreen = document.getElementById('start-screen');
+      const statusBadge = document.getElementById('status-badge');
+      const errorBox = document.getElementById('error-box');
+      
+      // Приховуємо стартовий екран одразу
+      startScreen.style.display = 'none';
+      statusBadge.innerText = 'Завантаження модулів...';
+      statusBadge.className = 'status loading';
+      
+      try {
+        // Динамічний імпорт бібліотек
+        const [THREE_module, mediapipe_module] = await Promise.all([
+          import('three'),
+          import('@mediapipe/tasks-vision')
+        ]);
         
-        this.faceState = { noseX: 0, jawOpenRatio: 0, active: false, lastActive: false };
+        const THREE = THREE_module;
+        const { FaceLandmarker, FilesetResolver } = mediapipe_module;
         
-        // Оптимальний розмір сітки під телефони
-        this.gridWidth = 35;
-        this.gridHeight = 22;
-        
-        // Змінні для стійкості
-        this.smoothedJawOpen = 0;
-        this.faceLostTimeout = null;
-        this.detectionFrameSkip = 0; // обробляти кожен другий кадр
-        
-        this.startBtn.addEventListener('click', () => this.handleStart());
-
-        // Перевірка протоколу (для локальної розробки)
-        if (window.location.protocol === 'file:') {
-          this.logToScreen('⚠️ Відкрийте через localhost або HTTPS для доступу до камери');
-        }
-
-        try {
-          this.init3D();
-        } catch (err) {
-          this.logToScreen("Помилка WebGL/3D: " + err.message);
-        }
-        
-        window.addEventListener('resize', () => this.onResize());
-        window.addEventListener('beforeunload', () => this.dispose());
-      }
-
-      logToScreen(msg) {
-        const box = document.getElementById('error-box');
-        if (box) {
-          box.style.display = 'block';
-          box.innerText += '\n' + msg;
-        }
-      }
-
-      init3D() {
-        this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, alpha: true });
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-
-        this.scene = new THREE.Scene();
-        this.scene.fog = new THREE.FogExp2(0x0f172a, 0.025);
-
-        const aspect = window.innerWidth / window.innerHeight;
-        this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
-        
-        const isMobile = aspect < 1;
-        this.camera.position.set(0, -9, isMobile ? 45 : 28);
-        this.camera.lookAt(0, 0, 0);
-
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-        this.scene.add(ambientLight);
-        
-        const dirLight = new THREE.DirectionalLight(0xffdfb0, 1.3);
-        dirLight.position.set(5, 15, 10);
-        this.scene.add(dirLight);
-
-        const geometry = new THREE.BoxGeometry(0.92, 0.92, 2);
-        const material = new THREE.MeshStandardMaterial({ roughness: 0.8 });
-        
-        this.count = this.gridWidth * this.gridHeight;
-        this.mesh = new THREE.InstancedMesh(geometry, material, this.count);
-        
-        // Зберігаємо для очищення
-        this._geometry = geometry;
-        this._material = material;
-        
-        this.dummy = new THREE.Object3D();
-        this.initialData = [];
-        
-        let i = 0;
-        const defaultColor = new THREE.Color(0x1e293b);
-        for (let x = 0; x < this.gridWidth; x++) {
-          for (let y = 0; y < this.gridHeight; y++) {
-            const posX = (x - this.gridWidth / 2);
-            const posY = (y - this.gridHeight / 2);
-            this.initialData.push({ x: posX, y: posY, isOceanic: x < this.gridWidth / 2 });
+        // Тепер запускаємо основний клас
+        class TectonicSimulation {
+          constructor() {
+            this.video = document.getElementById('video-feed');
+            this.canvas = document.getElementById('webgl-canvas');
+            this.statusBadge = document.getElementById('status-badge');
             
-            this.mesh.setColorAt(i, defaultColor);
-            i++;
-          }
-        }
-        
-        this.scene.add(this.mesh);
-        this.clock = new THREE.Clock();
-        
-        this.animate = this.animate.bind(this);
-        requestAnimationFrame(this.animate);
-      }
-
-      dispose() {
-        // Зупинка камери
-        if (this.video && this.video.srcObject) {
-          const tracks = this.video.srcObject.getTracks();
-          tracks.forEach(track => track.stop());
-        }
-        // Очистка FaceLandmarker (якщо потрібно)
-        if (this.faceLandmarker) {
-          this.faceLandmarker.close();
-          this.faceLandmarker = null;
-        }
-        // Очищення Three.js ресурсів
-        if (this.renderer) {
-          this.renderer.dispose();
-        }
-        if (this.mesh) {
-          this.mesh.geometry.dispose();
-          if (Array.isArray(this.mesh.material)) {
-            this.mesh.material.forEach(m => m.dispose());
-          } else {
-            this.mesh.material.dispose();
-          }
-        }
-        if (this._geometry) this._geometry.dispose();
-        if (this._material) this._material.dispose();
-        this.scene.clear();
-      }
-
-      async handleStart() {
-        this.startScreen.style.display = 'none';
-        this.updateUI('Доступ до камери...', 'loading');
-        
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({ 
-            video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' } 
-          });
-          
-          this.video.srcObject = stream;
-          await this.video.play();
-          
-          this.updateUI('Запуск ШІ...', 'loading');
-          await this.loadVisionModel();
-          
-        } catch (error) {
-          this.updateUI('Помилка камери', 'rift');
-          this.logToScreen("Камера недоступна: " + error.name + " - " + error.message);
-        }
-      }
-
-      async loadVisionModel() {
-        try {
-          const vision = await FilesetResolver.forVisionTasks(
-            "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm"
-          );
-          
-          // Спроба з GPU, fallback на CPU
-          const createLandmarker = async (delegate) => {
-            return FaceLandmarker.createFromOptions(vision, {
-              baseOptions: {
-                modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-                delegate: delegate
-              },
-              outputFaceBlendshapes: true,
-              runningMode: "VIDEO",
-              numFaces: 1
-            });
-          };
-
-          try {
-            this.faceLandmarker = await createLandmarker("GPU");
-            this.logToScreen("Використовується GPU-делегат");
-          } catch (gpuError) {
-            this.logToScreen("GPU недоступний, перемикання на CPU...");
-            this.faceLandmarker = await createLandmarker("CPU");
-            this.logToScreen("Використовується CPU-делегат");
+            this.faceState = { noseX: 0, jawOpenRatio: 0, active: false, lastActive: false };
+            
+            this.gridWidth = 35;
+            this.gridHeight = 22;
+            
+            this.smoothedJawOpen = 0;
+            this.faceLostTimeout = null;
+            this.detectionFrameSkip = 0;
+            
+            this.init3D(THREE);
+            window.addEventListener('resize', () => this.onResize(THREE));
+            window.addEventListener('beforeunload', () => this.dispose());
           }
 
-          this.updateUI('КОЛІЗІЯ (ГОРИ)', 'collision');
-          this.detectFace();
-        } catch(error) {
-           this.updateUI('Збій модуля ШІ', 'rift');
-           this.logToScreen("MediaPipe Crash: " + error.message);
-        }
-      }
+          logToScreen(msg) {
+            const box = document.getElementById('error-box');
+            if (box) {
+              box.style.display = 'block';
+              box.innerText += '\n' + msg;
+            }
+          }
 
-      detectFace() {
-        const tick = () => {
-          if (!this.video || this.video.readyState < 2 || !this.faceLandmarker) {
+          init3D(THREE) {
+            this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, alpha: true });
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
+            this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+
+            this.scene = new THREE.Scene();
+            this.scene.fog = new THREE.FogExp2(0x0f172a, 0.025);
+
+            const aspect = window.innerWidth / window.innerHeight;
+            this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
+            
+            const isMobile = aspect < 1;
+            this.camera.position.set(0, -9, isMobile ? 45 : 28);
+            this.camera.lookAt(0, 0, 0);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            this.scene.add(ambientLight);
+            
+            const dirLight = new THREE.DirectionalLight(0xffdfb0, 1.3);
+            dirLight.position.set(5, 15, 10);
+            this.scene.add(dirLight);
+
+            const geometry = new THREE.BoxGeometry(0.92, 0.92, 2);
+            const material = new THREE.MeshStandardMaterial({ roughness: 0.8 });
+            
+            this.count = this.gridWidth * this.gridHeight;
+            this.mesh = new THREE.InstancedMesh(geometry, material, this.count);
+            
+            this._geometry = geometry;
+            this._material = material;
+            
+            this.dummy = new THREE.Object3D();
+            this.initialData = [];
+            
+            let i = 0;
+            const defaultColor = new THREE.Color(0x1e293b);
+            for (let x = 0; x < this.gridWidth; x++) {
+              for (let y = 0; y < this.gridHeight; y++) {
+                const posX = (x - this.gridWidth / 2);
+                const posY = (y - this.gridHeight / 2);
+                this.initialData.push({ x: posX, y: posY, isOceanic: x < this.gridWidth / 2 });
+                
+                this.mesh.setColorAt(i, defaultColor);
+                i++;
+              }
+            }
+            
+            this.scene.add(this.mesh);
+            this.clock = new THREE.Clock();
+            
+            this.THREE = THREE; // зберігаємо посилання
+            this.animate = this.animate.bind(this);
+            requestAnimationFrame(this.animate);
+          }
+
+          dispose() {
+            if (this.video && this.video.srcObject) {
+              const tracks = this.video.srcObject.getTracks();
+              tracks.forEach(track => track.stop());
+            }
+            if (this.faceLandmarker) {
+              this.faceLandmarker.close();
+              this.faceLandmarker = null;
+            }
+            if (this.renderer) {
+              this.renderer.dispose();
+            }
+            if (this.mesh) {
+              this.mesh.geometry.dispose();
+              if (Array.isArray(this.mesh.material)) {
+                this.mesh.material.forEach(m => m.dispose());
+              } else {
+                this.mesh.material.dispose();
+              }
+            }
+            if (this._geometry) this._geometry.dispose();
+            if (this._material) this._material.dispose();
+            this.scene.clear();
+          }
+
+          async startCameraAndAI(FaceLandmarker, FilesetResolver) {
+            this.updateUI('Доступ до камери...', 'loading');
+            try {
+              const stream = await navigator.mediaDevices.getUserMedia({ 
+                video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' } 
+              });
+              this.video.srcObject = stream;
+              await this.video.play();
+              
+              this.updateUI('Запуск ШІ...', 'loading');
+              
+              const vision = await FilesetResolver.forVisionTasks(
+                "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.9/wasm"
+              );
+              
+              const createLandmarker = async (delegate) => {
+                return FaceLandmarker.createFromOptions(vision, {
+                  baseOptions: {
+                    modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+                    delegate: delegate
+                  },
+                  outputFaceBlendshapes: true,
+                  runningMode: "VIDEO",
+                  numFaces: 1
+                });
+              };
+
+              try {
+                this.faceLandmarker = await createLandmarker("GPU");
+                this.logToScreen("Використовується GPU-делегат");
+              } catch (gpuError) {
+                this.logToScreen("GPU недоступний, перемикання на CPU...");
+                this.faceLandmarker = await createLandmarker("CPU");
+                this.logToScreen("Використовується CPU-делегат");
+              }
+
+              this.updateUI('КОЛІЗІЯ (ГОРИ)', 'collision');
+              this.detectFace();
+            } catch (error) {
+              this.updateUI('Помилка камери', 'rift');
+              this.logToScreen("Камера недоступна: " + error.name + " - " + error.message);
+            }
+          }
+
+          detectFace() {
+            const tick = () => {
+              if (!this.video || this.video.readyState < 2 || !this.faceLandmarker) {
+                requestAnimationFrame(tick);
+                return;
+              }
+              
+              this.detectionFrameSkip++;
+              if (this.detectionFrameSkip % 2 !== 0) {
+                requestAnimationFrame(tick);
+                return;
+              }
+              
+              try {
+                const results = this.faceLandmarker.detectForVideo(this.video, performance.now());
+                this.processFaceData(results);
+              } catch(e) {
+                this.logToScreen("Помилка детекції: " + e.message);
+              }
+              requestAnimationFrame(tick);
+            };
             requestAnimationFrame(tick);
-            return;
           }
-          
-          this.detectionFrameSkip++;
-          if (this.detectionFrameSkip % 2 !== 0) {
-            requestAnimationFrame(tick);
-            return;
-          }
-          
-          try {
-            const results = this.faceLandmarker.detectForVideo(this.video, performance.now());
-            this.processFaceData(results);
-          } catch(e) {
-            this.logToScreen("Помилка детекції: " + e.message);
-          }
-          requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
-      }
 
-      processFaceData(results) {
-        // Перевірка наявності даних
-        if (!results.faceLandmarks || results.faceLandmarks.length === 0) {
-          this.faceState.active = false;
-          this.handleFaceLost();
-          return;
-        }
-        
-        const landmarks = results.faceLandmarks[0];
-        
-        // Перевіряємо blendshapes
-        let jawOpen = 0;
-        if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
-          const blendshapes = results.faceBlendshapes[0].categories;
-          const jawCategory = blendshapes.find(b => b.categoryName === 'jawOpen');
-          if (jawCategory) {
-            jawOpen = jawCategory.score;
-          }
-        }
-        
-        // Оновлюємо згладжені значення
-        const noseX = -(landmarks[1].x - 0.5) * 35;
-        this.faceState.noseX = THREE.MathUtils.lerp(this.faceState.noseX || noseX, noseX, 0.5); // згладжування
-        this.smoothedJawOpen = THREE.MathUtils.lerp(this.smoothedJawOpen, jawOpen, 0.3);
-        this.faceState.jawOpenRatio = this.smoothedJawOpen;
-        this.faceState.active = true;
-        this.faceState.lastActive = true;
-
-        // Очищення таймера втрати обличчя
-        if (this.faceLostTimeout) {
-          clearTimeout(this.faceLostTimeout);
-          this.faceLostTimeout = null;
-        }
-
-        // Статус тектоніки
-        if (this.smoothedJawOpen > 0.22) {
-          this.updateUI('РИФТОГЕНЕЗ', 'rift');
-        } else {
-          this.updateUI('КОЛІЗІЯ (ГОРИ)', 'collision');
-        }
-      }
-
-      handleFaceLost() {
-        // Плавне повернення до центру при втраті обличчя
-        if (this.faceState.lastActive) {
-          if (!this.faceLostTimeout) {
-            this.faceLostTimeout = setTimeout(() => {
+          processFaceData(results) {
+            if (!results.faceLandmarks || results.faceLandmarks.length === 0) {
               this.faceState.active = false;
-              this.faceState.lastActive = false;
-              this.updateUI('Обличчя не знайдено', 'off');
-            }, 500); // затримка перед скиданням
+              this.handleFaceLost();
+              return;
+            }
+            
+            const landmarks = results.faceLandmarks[0];
+            
+            let jawOpen = 0;
+            if (results.faceBlendshapes && results.faceBlendshapes.length > 0) {
+              const blendshapes = results.faceBlendshapes[0].categories;
+              const jawCategory = blendshapes.find(b => b.categoryName === 'jawOpen');
+              if (jawCategory) {
+                jawOpen = jawCategory.score;
+              }
+            }
+            
+            const noseX = -(landmarks[1].x - 0.5) * 35;
+            this.faceState.noseX = this.THREE.MathUtils.lerp(this.faceState.noseX || noseX, noseX, 0.5);
+            this.smoothedJawOpen = this.THREE.MathUtils.lerp(this.smoothedJawOpen, jawOpen, 0.3);
+            this.faceState.jawOpenRatio = this.smoothedJawOpen;
+            this.faceState.active = true;
+            this.faceState.lastActive = true;
+
+            if (this.faceLostTimeout) {
+              clearTimeout(this.faceLostTimeout);
+              this.faceLostTimeout = null;
+            }
+
+            if (this.smoothedJawOpen > 0.22) {
+              this.updateUI('РИФТОГЕНЕЗ', 'rift');
+            } else {
+              this.updateUI('КОЛІЗІЯ (ГОРИ)', 'collision');
+            }
           }
-        } else {
-          this.faceState.active = false;
-        }
-      }
 
-      updateUI(text, state) {
-        if (this.statusBadge.innerText !== text) {
-          this.statusBadge.innerText = text;
-          this.statusBadge.className = `status ${state}`;
-        }
-      }
+          handleFaceLost() {
+            if (this.faceState.lastActive) {
+              if (!this.faceLostTimeout) {
+                this.faceLostTimeout = setTimeout(() => {
+                  this.faceState.active = false;
+                  this.faceState.lastActive = false;
+                  this.updateUI('Обличчя не знайдено', 'off');
+                }, 500);
+              }
+            } else {
+              this.faceState.active = false;
+            }
+          }
 
-      animate() {
-        requestAnimationFrame(this.animate);
-        const time = this.clock.getElapsedTime();
-        const col = new THREE.Color();
-        
-        // Якщо обличчя неактивне, плавно повертаємо камеру та зменшуємо вплив
-        if (!this.faceState.active) {
-          this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, 0, 0.05);
-          this.smoothedJawOpen *= 0.9; // затухання jawOpen
-          this.faceState.jawOpenRatio = this.smoothedJawOpen;
-        }
-        
-        let idx = 0;
-        for (let x = 0; x < this.gridWidth; x++) {
-          for (let y = 0; y < this.gridHeight; y++) {
-            const block = this.initialData[idx];
-            let targetZ = Math.sin(block.x * 0.12 + time * 0.6) * 0.12;
+          updateUI(text, state) {
+            if (this.statusBadge.innerText !== text) {
+              this.statusBadge.innerText = text;
+              this.statusBadge.className = `status ${state}`;
+            }
+          }
+
+          animate() {
+            requestAnimationFrame(this.animate);
+            const THREE = this.THREE;
+            const time = this.clock.getElapsedTime();
+            const col = new THREE.Color();
             
-            if (block.isOceanic) col.setHex(0x1e293b); 
-            else col.setHex(0x3f6212);
-
-            // Застосовуємо ефект лише якщо обличчя активно (або плавно затухає)
-            const effectiveJaw = this.faceState.jawOpenRatio;
-            const effectiveNose = this.faceState.active ? this.faceState.noseX : 0;
+            if (!this.faceState.active) {
+              this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, 0, 0.05);
+              this.smoothedJawOpen *= 0.9;
+              this.faceState.jawOpenRatio = this.smoothedJawOpen;
+            }
             
-            if (this.faceState.active || this.smoothedJawOpen > 0.01) {
-              const distToFault = Math.abs(block.x - effectiveNose);
-              const influenceZone = 9;
+            let idx = 0;
+            for (let x = 0; x < this.gridWidth; x++) {
+              for (let y = 0; y < this.gridHeight; y++) {
+                const block = this.initialData[idx];
+                let targetZ = Math.sin(block.x * 0.12 + time * 0.6) * 0.12;
+                
+                if (block.isOceanic) col.setHex(0x1e293b); 
+                else col.setHex(0x3f6212);
 
-              if (distToFault < influenceZone) {
-                const power = 1 - (distToFault / influenceZone);
+                const effectiveJaw = this.faceState.jawOpenRatio;
+                const effectiveNose = this.faceState.active ? this.faceState.noseX : 0;
+                
+                if (this.faceState.active || this.smoothedJawOpen > 0.01) {
+                  const distToFault = Math.abs(block.x - effectiveNose);
+                  const influenceZone = 9;
 
-                if (effectiveJaw > 0.22) {
-                  const depth = effectiveJaw * 7 * power;
-                  targetZ -= depth;
-                  if (power > 0.3) col.lerp(new THREE.Color(0xf97316), power * effectiveJaw * 1.3); 
-                } else {
-                  const height = 6 * power * (1 - effectiveJaw);
-                  targetZ += Math.abs(Math.sin(block.x * 0.4)) * height;
-                  if (targetZ > 2.5) col.lerp(new THREE.Color(0xf8fafc), (targetZ - 2.5) / 2.5); 
-                  else col.lerp(new THREE.Color(0x64748b), power); 
+                  if (distToFault < influenceZone) {
+                    const power = 1 - (distToFault / influenceZone);
+
+                    if (effectiveJaw > 0.22) {
+                      const depth = effectiveJaw * 7 * power;
+                      targetZ -= depth;
+                      if (power > 0.3) col.lerp(new THREE.Color(0xf97316), power * effectiveJaw * 1.3); 
+                    } else {
+                      const height = 6 * power * (1 - effectiveJaw);
+                      targetZ += Math.abs(Math.sin(block.x * 0.4)) * height;
+                      if (targetZ > 2.5) col.lerp(new THREE.Color(0xf8fafc), (targetZ - 2.5) / 2.5); 
+                      else col.lerp(new THREE.Color(0x64748b), power); 
+                    }
+                  }
                 }
+
+                this.dummy.position.set(block.x, block.y, targetZ);
+                this.dummy.updateMatrix();
+                this.mesh.setMatrixAt(idx, this.dummy.matrix);
+                this.mesh.setColorAt(idx, col);
+
+                idx++;
               }
             }
 
-            this.dummy.position.set(block.x, block.y, targetZ);
-            this.dummy.updateMatrix();
-            this.mesh.setMatrixAt(idx, this.dummy.matrix);
-            this.mesh.setColorAt(idx, col);
+            this.mesh.instanceMatrix.needsUpdate = true;
+            if (this.mesh.instanceColor) this.mesh.instanceColor.needsUpdate = true;
+            
+            if (this.faceState.active) {
+                this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this.faceState.noseX * 0.25, 0.05);
+            }
+            
+            this.renderer.render(this.scene, this.camera);
+          }
 
-            idx++;
+          onResize(THREE) {
+            const aspect = window.innerWidth / window.innerHeight;
+            this.camera.aspect = aspect;
+            this.camera.position.z = (aspect < 1) ? 45 : 28;
+            this.camera.updateProjectionMatrix();
+            this.renderer.setSize(window.innerWidth, window.innerHeight);
           }
         }
 
-        this.mesh.instanceMatrix.needsUpdate = true;
-        if (this.mesh.instanceColor) this.mesh.instanceColor.needsUpdate = true;
+        // Запуск симуляції
+        const sim = new TectonicSimulation();
+        await sim.startCameraAndAI(FaceLandmarker, FilesetResolver);
         
-        if (this.faceState.active) {
-            this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this.faceState.noseX * 0.25, 0.05);
+      } catch (error) {
+        statusBadge.innerText = 'Помилка завантаження';
+        statusBadge.className = 'status rift';
+        if (errorBox) {
+          errorBox.style.display = 'block';
+          errorBox.innerText += '\n[Помилка імпорту]: ' + error.message;
         }
-        
-        this.renderer.render(this.scene, this.camera);
+        console.error(error);
       }
-
-      onResize() {
-        const aspect = window.innerWidth / window.innerHeight;
-        this.camera.aspect = aspect;
-        this.camera.position.z = (aspect < 1) ? 45 : 28;
-        this.camera.updateProjectionMatrix();
-        this.renderer.setSize(window.innerWidth, window.innerHeight);
-      }
-    }
-
-    // Старт
-    new TectonicSimulation();
+    });
   </script>
 </body>
 </html>
