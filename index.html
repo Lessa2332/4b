@@ -3,100 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Географія AR: Горсти та Грабени | Розривні рухи</title>
+    <title>Географія 3D: Горсти та Грабени | Розривні рухи</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { margin: 0; overflow: hidden; font-family: 'Segoe UI', 'Roboto', sans-serif; }
         #ui {
             position: absolute;
             bottom: 20px;
             left: 20px;
             right: 20px;
             background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            border-radius: 20px;
-            padding: 12px 20px;
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 16px 24px;
             color: white;
             text-align: center;
             z-index: 20;
-            border-left: 6px solid #ff5555;
+            border-left: 6px solid #ff6666;
             pointer-events: none;
-            font-weight: 500;
-            transition: border-left-color 0.2s;
+            transition: all 0.2s;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-        #process-name { font-size: 1.8rem; font-weight: bold; letter-spacing: 1px; }
-        #process-desc { font-size: 0.9rem; opacity: 0.9; margin-top: 5px; }
+        #process-name {
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+        #process-desc {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
         #instruction {
             position: absolute;
             top: 20px;
             left: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.65);
-            border-radius: 30px;
-            padding: 10px 18px;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 40px;
+            padding: 12px 20px;
             color: #ffdd99;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
             text-align: center;
             z-index: 20;
+            font-weight: 500;
             font-family: monospace;
             pointer-events: none;
-            border: 1px solid #ffaa5544;
+            border: 1px solid #ffaa55;
         }
-        #status {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            background: #000000aa;
-            border-radius: 12px;
-            padding: 6px 14px;
-            font-size: 0.7rem;
-            color: #0f0;
-            font-family: monospace;
-            z-index: 20;
-            pointer-events: none;
-            max-width: 55%;
-            text-align: right;
-        }
-        #start-btn {
+        #controls-hint {
             position: absolute;
             bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            color: #ccccaa;
+            pointer-events: none;
+            z-index: 20;
+            font-weight: bold;
+        }
+        @media (max-width: 600px) {
+            #process-name { font-size: 1.3rem; }
+            #instruction { font-size: 0.7rem; top: 10px; }
+            #ui { padding: 10px 16px; }
+            #controls-hint { bottom: 80px; font-size: 0.7rem; }
+        }
+        button {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
             background: #2c5f8a;
             color: white;
             border: none;
-            border-radius: 40px;
-            padding: 12px 28px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.7rem;
             cursor: pointer;
-            z-index: 30;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5);
-            transition: 0.2s;
-            font-family: inherit;
+            z-index: 25;
+            font-family: monospace;
+            opacity: 0.7;
         }
-        #start-btn:hover { background: #1e3e5a; transform: translateX(-50%) scale(1.02); }
-        @media (max-width: 600px) {
-            #process-name { font-size: 1.2rem; }
-            #instruction { font-size: 0.65rem; top: 10px; }
-            #ui { padding: 8px 16px; }
-            #start-btn { padding: 8px 20px; font-size: 1rem; bottom: 80px; }
+        button:hover { opacity: 1; }
+        .status-sim {
+            position: absolute;
+            top: 90px;
+            right: 20px;
+            background: #00000099;
+            border-radius: 12px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            color: #aaffaa;
+            font-family: monospace;
+            z-index: 20;
+            pointer-events: none;
         }
-        .error-txt { color: #ff8888; }
     </style>
 </head>
 <body>
     <div id="instruction">
-        🧪 <strong>Географія AR: Розривні рухи (горсти та грабени)</strong><br>
-        😠 <strong>НАХМУРТЕ БРОВИ</strong> → <span style="color:#ffaa66">ГОРСТ (підняття)</span> &nbsp;|&nbsp;
-        😲 <strong>ВІДКРИЙТЕ РОТА</strong> → <span style="color:#88aaff">ГРАБЕН (опускання)</span><br>
-        🧭 Повертайте голову вліво/вправо – зміщуйте зону розлому
+        🏔️ <strong>ГЕОГРАФІЯ 3D: Розривні рухи земної кори</strong> — Горсти та Грабени<br>
+        🖱️ <strong>Миша:</strong> рух <span style="color:#ffaa66">ВГОРУ</span> → <span style="color:#ffaa66">ГОРСТ (підняття)</span>&nbsp;&nbsp;|&nbsp;
+        рух <span style="color:#88aaff">ВНИЗ</span> → <span style="color:#88aaff">ГРАБЕН (опускання)</span><br>
+        🧭 <strong>Рух миші вліво/вправо</strong> — зміщує зону розлому (горизонтальне переміщення)
     </div>
     <div id="ui">
         <div id="process-name">⚙️ НЕЙТРАЛЬНО</div>
-        <div id="process-desc">Блоки на одному рівні. Увімкніть камеру та керуйте мімікою</div>
+        <div id="process-desc">Блоки на одному рівні. Рухайте мишу вертикально для створення горсту або грабену.</div>
     </div>
-    <div id="status">📷 Натисніть «Увімкнути AR»</div>
-    <button id="start-btn">🎥 Увімкнути AR та камеру</button>
+    <div id="controls-hint">
+        🖱️ МИША: ↑ Горст &nbsp;&nbsp;|&nbsp;&nbsp; ↓ Грабен &nbsp;&nbsp;|&nbsp;&nbsp; ← → зміщення
+    </div>
+    <div class="status-sim" id="sim-status">🐭 Симуляція миші активна</div>
+    <button id="reset-btn">⟳ Скинути положення</button>
 
     <!-- Підключення Three.js -->
     <script type="importmap">
@@ -110,62 +130,50 @@
     <script type="module">
         import * as THREE from 'three';
 
-        // ---------- Глобальні змінні Three.js ----------
+        // --- 3D сцена ---
         let scene, camera, renderer;
         let blocksGroup;
         let centerBlock, leftBlock, rightBlock;
         let arrowUp, arrowDown;
-        const centerBlockBaseY = -0.2;
-        let currentVerticalOffset = 0;
-        let targetVerticalOffset = 0;
+        let faultLinesGroup;
         
-        let browIntensity = 0;
-        let mouthIntensity = 0;
-        let noseXNormalized = 0;
-        let currentGroupX = 0;
+        const CENTER_BASE_Y = -0.2;
+        let targetVertical = 0;        // -0.8 .. 0.72
+        let currentVertical = 0;
+        let targetHorizontal = 0;       // зсув групи
+        let currentHorizontal = 0;
         
-        // Стан MediaPipe
-        let faceMesh = null;
-        let videoElem = null;
-        let isFaceMeshReady = false;
+        // --- Елементи UI ---
+        const processNameElem = document.getElementById('process-name');
+        const processDescElem = document.getElementById('process-desc');
+        const uiPanel = document.getElementById('ui');
         
-        // Калібрування
-        let neutralBrowDist = 0.045;
-        let neutralMouthDist = 0.02;
-        let calibrated = false;
-        
-        const statusDiv = document.getElementById('status');
-        function setStatus(msg, isError = false) {
-            statusDiv.innerHTML = msg;
-            statusDiv.style.color = isError ? "#ff8888" : "#aaffaa";
-            console.log(msg);
-        }
-        
-        // --- Функції створення 3D об'єктів ---
-        function createTexturedBlock(w, h, d, baseColor, posX, posY, posZ) {
+        // --- Функції створення об'єктів (текстурні блоки) ---
+        function createSedimentaryBlock(w, h, d, baseColor, posX, posY, posZ) {
             const canvas = document.createElement('canvas');
             canvas.width = 512;
             canvas.height = 512;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = baseColor;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#dba959';
-            ctx.lineWidth = 18;
-            for (let i = 1; i <= 10; i++) {
-                const y = (i / 10) * canvas.height;
+            // Горизонтальні геологічні шари
+            ctx.strokeStyle = '#e2b570';
+            ctx.lineWidth = 20;
+            for (let i = 1; i <= 12; i++) {
+                const y = (i / 12) * canvas.height;
                 ctx.beginPath();
                 ctx.moveTo(0, y);
                 ctx.lineTo(canvas.width, y);
                 ctx.stroke();
-                ctx.fillStyle = '#b87c3a';
-                ctx.fillRect(0, y-4, canvas.width, 4);
+                ctx.fillStyle = '#bb8a4a';
+                ctx.fillRect(0, y-5, canvas.width, 5);
             }
-            ctx.fillStyle = '#6a4a2a';
-            for (let i = 0; i < 400; i++) ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
+            ctx.fillStyle = '#8a6232';
+            for (let i = 0; i < 500; i++) ctx.fillRect(Math.random()*canvas.width, Math.random()*canvas.height, 2, 2);
             const texture = new THREE.CanvasTexture(canvas);
             texture.wrapS = THREE.RepeatWrapping;
             texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set(1.5, 2);
+            texture.repeat.set(1.2, 2.5);
             const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.7, metalness: 0.1 });
             const geom = new THREE.BoxGeometry(w, h, d);
             const mesh = new THREE.Mesh(geom, material);
@@ -177,14 +185,14 @@
         
         function createArrow(direction, color) {
             const group = new THREE.Group();
-            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.8, 6), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.4 }));
-            const head = new THREE.Mesh(new THREE.ConeGeometry(0.22, 0.3, 16), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.6 }));
+            const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 0.85, 8), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.4 }));
+            const head = new THREE.Mesh(new THREE.ConeGeometry(0.24, 0.35, 16), new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.6 }));
             if (direction === 'up') {
-                shaft.position.y = -0.4;
-                head.position.y = 0.5;
+                shaft.position.y = -0.45;
+                head.position.y = 0.55;
             } else {
-                shaft.position.y = 0.4;
-                head.position.y = -0.5;
+                shaft.position.y = 0.45;
+                head.position.y = -0.55;
                 head.rotation.x = Math.PI;
             }
             group.add(shaft, head);
@@ -193,251 +201,219 @@
         
         function init3D() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x071a3b);
-            scene.fog = new THREE.FogExp2(0x071a3b, 0.01);
-            camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 20);
-            camera.position.set(0, 1.2, 6);
+            scene.background = new THREE.Color(0x081c3b);
+            scene.fog = new THREE.FogExp2(0x081c3b, 0.012);
+            
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20);
+            camera.position.set(0, 1.2, 6.2);
             camera.lookAt(0, 0, 0);
+            
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
             document.body.appendChild(renderer.domElement);
             
-            const ambient = new THREE.AmbientLight(0x404060);
+            // Освітлення
+            const ambient = new THREE.AmbientLight(0x404066);
             scene.add(ambient);
-            const main = new THREE.DirectionalLight(0xfff0cc, 1.2);
-            main.position.set(3, 5, 2);
-            main.castShadow = true;
-            scene.add(main);
-            const fill = new THREE.PointLight(0x5577aa, 0.4);
-            fill.position.set(-2, 1, 3);
-            scene.add(fill);
+            const mainLight = new THREE.DirectionalLight(0xfff5dd, 1.3);
+            mainLight.position.set(3, 5, 2);
+            mainLight.castShadow = true;
+            scene.add(mainLight);
+            const fillLight = new THREE.PointLight(0x5577aa, 0.5);
+            fillLight.position.set(-2, 1.5, 3);
+            scene.add(fillLight);
+            const backLight = new THREE.PointLight(0xffaa66, 0.3);
+            backLight.position.set(0, 1.5, -3);
+            scene.add(backLight);
             
-            const grid = new THREE.GridHelper(10, 20, 0x88aacc, 0x335577);
-            grid.position.y = -1.1;
+            // Допоміжна сітка
+            const grid = new THREE.GridHelper(12, 20, 0x88aacc, 0x335588);
+            grid.position.y = -1.2;
             grid.material.transparent = true;
-            grid.material.opacity = 0.3;
+            grid.material.opacity = 0.35;
             scene.add(grid);
             
             blocksGroup = new THREE.Group();
             scene.add(blocksGroup);
             
+            // Параметри блоків
             const leftW = 1.7, rightW = 1.7, centerW = 1.5;
-            const h = 1.2, d = 2.2;
-            const leftX = -(leftW/2 + centerW/2 + 0.08);
-            const rightX = (rightW/2 + centerW/2 + 0.08);
-            leftBlock = createTexturedBlock(leftW, h, d, '#7a6a58', leftX, centerBlockBaseY, 0);
-            rightBlock = createTexturedBlock(rightW, h, d, '#7a6a58', rightX, centerBlockBaseY, 0);
-            centerBlock = createTexturedBlock(centerW, h, d, '#bd9468', 0, centerBlockBaseY, 0);
+            const h = 1.25, d = 2.3;
+            const leftX = -(leftW/2 + centerW/2 + 0.1);
+            const rightX = (rightW/2 + centerW/2 + 0.1);
+            
+            leftBlock = createSedimentaryBlock(leftW, h, d, '#7c6a56', leftX, CENTER_BASE_Y, 0);
+            rightBlock = createSedimentaryBlock(rightW, h, d, '#7c6a56', rightX, CENTER_BASE_Y, 0);
+            centerBlock = createSedimentaryBlock(centerW, h, d, '#c9a06c', 0, CENTER_BASE_Y, 0);
             blocksGroup.add(leftBlock, rightBlock, centerBlock);
             
-            const faultMat = new THREE.LineBasicMaterial({ color: 0xff4444 });
-            const lPoints = [new THREE.Vector3(-1.55, -0.8, -1.2), new THREE.Vector3(-1.55, 0.8, -1.2),
-                             new THREE.Vector3(-1.55, 0.8, 1.2), new THREE.Vector3(-1.55, -0.8, 1.2), new THREE.Vector3(-1.55, -0.8, -1.2)];
-            const rPoints = [new THREE.Vector3(1.55, -0.8, -1.2), new THREE.Vector3(1.55, 0.8, -1.2),
-                             new THREE.Vector3(1.55, 0.8, 1.2), new THREE.Vector3(1.55, -0.8, 1.2), new THREE.Vector3(1.55, -0.8, -1.2)];
-            const leftFault = new THREE.Line(new THREE.BufferGeometry().setFromPoints(lPoints), faultMat);
-            const rightFault = new THREE.Line(new THREE.BufferGeometry().setFromPoints(rPoints), faultMat);
+            // Червоні лінії розломів (вертикальні)
+            const faultMat = new THREE.LineBasicMaterial({ color: 0xff4444, linewidth: 2 });
+            const leftPoints = [
+                new THREE.Vector3(-1.58, -0.85, -1.3), new THREE.Vector3(-1.58, 0.85, -1.3),
+                new THREE.Vector3(-1.58, 0.85, 1.3), new THREE.Vector3(-1.58, -0.85, 1.3),
+                new THREE.Vector3(-1.58, -0.85, -1.3)
+            ];
+            const rightPoints = [
+                new THREE.Vector3(1.58, -0.85, -1.3), new THREE.Vector3(1.58, 0.85, -1.3),
+                new THREE.Vector3(1.58, 0.85, 1.3), new THREE.Vector3(1.58, -0.85, 1.3),
+                new THREE.Vector3(1.58, -0.85, -1.3)
+            ];
+            const leftFault = new THREE.Line(new THREE.BufferGeometry().setFromPoints(leftPoints), faultMat);
+            const rightFault = new THREE.Line(new THREE.BufferGeometry().setFromPoints(rightPoints), faultMat);
             blocksGroup.add(leftFault, rightFault);
             
+            // Стрілки напрямку
             arrowUp = createArrow('up', 0xffaa66);
             arrowDown = createArrow('down', 0x88aaff);
-            arrowUp.position.set(0, 0.5, 1.2);
-            arrowDown.position.set(0, 0.5, 1.2);
+            arrowUp.position.set(0, 0.55, 1.3);
+            arrowDown.position.set(0, 0.55, 1.3);
             blocksGroup.add(arrowUp, arrowDown);
             arrowUp.visible = false;
             arrowDown.visible = false;
             
-            const particleCount = 600;
-            const geomPart = new THREE.BufferGeometry();
+            // Ефект частинок (для атмосфери)
+            const particleCount = 800;
+            const particleGeo = new THREE.BufferGeometry();
             const positions = new Float32Array(particleCount * 3);
             for (let i = 0; i < particleCount; i++) {
-                positions[i*3] = (Math.random() - 0.5) * 6;
-                positions[i*3+1] = (Math.random() - 0.5) * 1.5 - 0.3;
-                positions[i*3+2] = (Math.random() - 0.5) * 4;
+                positions[i*3] = (Math.random() - 0.5) * 7;
+                positions[i*3+1] = (Math.random() - 0.5) * 1.6 - 0.3;
+                positions[i*3+2] = (Math.random() - 0.5) * 4.5;
             }
-            geomPart.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            const particles = new THREE.Points(geomPart, new THREE.PointsMaterial({ color: 0xccaa88, size: 0.04, transparent: true, opacity: 0.4 }));
+            particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ color: 0xccaa77, size: 0.035, transparent: true, opacity: 0.5 }));
             blocksGroup.add(particles);
         }
         
-        function updateVertical() {
-            const HORST_THR = 0.28;
-            const GRABEN_THR = 0.35;
-            let newTarget = 0;
-            let procName = "⚙️ НЕЙТРАЛЬНО";
-            let procDesc = "Блоки врівень. Змініть міміку для горсту або грабену.";
-            let upVis = false, downVis = false;
+        // --- Оновлення вертикального зсуву та UI ---
+        function updateVerticalUI() {
+            // Плавне згладжування
+            currentVertical += (targetVertical - currentVertical) * 0.2;
+            if (Math.abs(currentVertical) < 0.003 && targetVertical === 0) currentVertical = 0;
+            centerBlock.position.y = CENTER_BASE_Y + currentVertical;
             
-            if (browIntensity > HORST_THR && mouthIntensity < 0.2) {
-                const intens = Math.min(1, (browIntensity - HORST_THR) / 0.5);
-                newTarget = 0.72 * intens;
-                procName = "🏔️ ГОРСТ";
-                procDesc = "Центральний блок піднявся → горст (скид)";
+            let processName = "⚙️ НЕЙТРАЛЬНО";
+            let processDesc = "Блоки на одному рівні. Рухайте мишу вертикально вгору/вниз.";
+            let upVis = false, downVis = false;
+            let borderColor = "#ff6666";
+            
+            if (targetVertical > 0.05) {
+                const intensity = Math.min(1, targetVertical / 0.72);
+                processName = "🏔️ ГОРСТ";
+                processDesc = `Центральний блок ПІДНЯВСЯ на ${Math.round(intensity*100)}% → горст (скид)`;
                 upVis = true;
-            } else if (mouthIntensity > GRABEN_THR && browIntensity < 0.2) {
-                const intens = Math.min(1, (mouthIntensity - GRABEN_THR) / 0.5);
-                newTarget = -0.8 * intens;
-                procName = "🌊 ГРАБЕН";
-                procDesc = "Центральний блок опустився → грабен";
+                borderColor = "#ffaa66";
+            } else if (targetVertical < -0.05) {
+                const intensity = Math.min(1, Math.abs(targetVertical) / 0.8);
+                processName = "🌊 ГРАБЕН";
+                processDesc = `Центральний блок ОПУСТИВСЯ на ${Math.round(intensity*100)}% → грабен`;
                 downVis = true;
+                borderColor = "#88aaff";
             }
             
-            targetVerticalOffset = newTarget;
-            currentVerticalOffset += (targetVerticalOffset - currentVerticalOffset) * 0.22;
-            if (Math.abs(currentVerticalOffset) < 0.005 && targetVerticalOffset === 0) currentVerticalOffset = 0;
-            centerBlock.position.y = centerBlockBaseY + currentVerticalOffset;
-            
-            document.getElementById('process-name').innerHTML = procName;
-            document.getElementById('process-desc').innerHTML = procDesc;
-            const uiDiv = document.getElementById('ui');
-            if (procName.includes("ГОРСТ")) uiDiv.style.borderLeftColor = "#ffaa66";
-            else if (procName.includes("ГРАБЕН")) uiDiv.style.borderLeftColor = "#88aaff";
-            else uiDiv.style.borderLeftColor = "#ff5555";
+            processNameElem.innerHTML = processName;
+            processDescElem.innerHTML = processDesc;
+            uiPanel.style.borderLeftColor = borderColor;
             
             arrowUp.visible = upVis;
             arrowDown.visible = downVis;
-            if (upVis) arrowUp.scale.setScalar(1 + Math.sin(Date.now() * 0.012) * 0.12);
-            if (downVis) arrowDown.scale.setScalar(1 + Math.sin(Date.now() * 0.012) * 0.12);
+            if (upVis) arrowUp.scale.setScalar(1 + Math.sin(Date.now() * 0.01) * 0.12);
+            if (downVis) arrowDown.scale.setScalar(1 + Math.sin(Date.now() * 0.01) * 0.12);
         }
         
         function updateHorizontal() {
-            let targetX = noseXNormalized * 1.5;
-            targetX = Math.min(1.2, Math.max(-1.2, targetX));
-            currentGroupX += (targetX - currentGroupX) * 0.1;
-            blocksGroup.position.x = currentGroupX;
-            camera.position.x += ((currentGroupX * 0.25) - camera.position.x) * 0.06;
-            camera.lookAt(currentGroupX, 0.2, 0);
+            // плавне зміщення групи (симуляція повороту голови)
+            currentHorizontal += (targetHorizontal - currentHorizontal) * 0.12;
+            blocksGroup.position.x = currentHorizontal;
+            // невеликий зсув камери для кращого огляду
+            camera.position.x += ((currentHorizontal * 0.25) - camera.position.x) * 0.08;
+            camera.lookAt(currentHorizontal, 0.2, 0);
         }
         
-        // --- Ініціалізація MediaPipe з надійним завантаженням ---
-        async function initMediaPipe() {
-            try {
-                setStatus("⏳ Завантаження MediaPipe FaceMesh...");
-                // Динамічне імпортування через стабільний CDN
-                const module = await import('https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js');
-                const { FaceMesh } = module;
-                const { Camera } = await import('https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js');
-                
-                faceMesh = new FaceMesh({
-                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`
-                });
-                
-                faceMesh.setOptions({
-                    maxNumFaces: 1,
-                    refineLandmarks: true,
-                    minDetectionConfidence: 0.5,
-                    minTrackingConfidence: 0.5
-                });
-                
-                faceMesh.onResults((results) => {
-                    if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
-                        const lm = results.multiFaceLandmarks[0];
-                        const leftBrow = lm[70], leftEye = lm[159];
-                        const rightBrow = lm[300], rightEye = lm[386];
-                        const browDist = (Math.abs(leftBrow.y - leftEye.y) + Math.abs(rightBrow.y - rightEye.y)) / 2;
-                        const upperLip = lm[13], lowerLip = lm[14];
-                        const mouthDist = Math.abs(upperLip.y - lowerLip.y);
-                        const nose = lm[1];
-                        const leftCheek = lm[356], rightCheek = lm[127];
-                        const faceW = Math.abs(rightCheek.x - leftCheek.x);
-                        let noseRel = (nose.x - leftCheek.x) / faceW;
-                        noseRel = (noseRel - 0.5) * 2;
-                        
-                        if (!calibrated && browDist > 0.012 && mouthDist > 0.008) {
-                            neutralBrowDist = browDist;
-                            neutralMouthDist = mouthDist;
-                            calibrated = true;
-                            setStatus("✅ Калібрування успішне! Керуйте мімікою.");
-                        }
-                        
-                        if (calibrated) {
-                            browIntensity = Math.min(1, Math.max(0, (neutralBrowDist - browDist) / neutralBrowDist));
-                            mouthIntensity = Math.min(1, Math.max(0, (mouthDist - neutralMouthDist) / 0.055));
-                            if (mouthDist < neutralMouthDist * 0.9) mouthIntensity = 0;
-                            noseXNormalized = noseRel;
-                            setStatus(`😠 ${Math.round(browIntensity*100)}%  |  😲 ${Math.round(mouthIntensity*100)}%  |  🧭 ${Math.round(noseRel*100)}%`);
-                        } else {
-                            setStatus("🎭 Калібрування... трохи порухайте бровами та ротом");
-                        }
-                    } else {
-                        browIntensity = 0; mouthIntensity = 0; noseXNormalized = 0;
-                        setStatus("😞 Обличчя не виявлено. Станьте перед камерою.");
-                    }
-                    updateVertical();
-                    updateHorizontal();
-                });
-                
-                // Запит камери
-                setStatus("📷 Запит доступу до камери...");
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-                if (videoElem && videoElem.srcObject) {
-                    videoElem.srcObject.getTracks().forEach(t => t.stop());
-                }
-                videoElem = document.createElement('video');
-                videoElem.srcObject = stream;
-                videoElem.autoplay = true;
-                videoElem.playsInline = true;
-                await videoElem.play();
-                
-                const cameraUtils = new Camera(videoElem, {
-                    onFrame: async () => {
-                        if (faceMesh) await faceMesh.send({ image: videoElem });
-                    },
-                    width: 640,
-                    height: 480
-                });
-                cameraUtils.start();
-                isFaceMeshReady = true;
-                setStatus("🎥 Камера працює, AR активний");
-                document.getElementById('start-btn').style.display = 'none';
-                
-            } catch (err) {
-                console.error("MediaPipe помилка:", err);
-                setStatus(`❌ Помилка: ${err.message || "FaceMesh не завантажився"}`, true);
-                document.getElementById('start-btn').disabled = false;
-                document.getElementById('start-btn').textContent = "🔄 Повторити спробу";
+        // --- Обробка руху миші по всьому екрану (симуляція міміки) ---
+        let mouseYnorm = 0.5;    // 0..1 (0=верх, 1=низ)
+        let mouseXnorm = 0.5;    // 0..1 (0=ліво, 1=право)
+        
+        function onMouseMove(event) {
+            // Нормалізація координат відносно вікна
+            mouseYnorm = event.clientY / window.innerHeight;   // 0 (верх) – 1 (низ)
+            mouseXnorm = event.clientX / window.innerWidth;    // 0 (ліво) – 1 (право)
+            
+            // Вертикаль: якщо миша у верхній половині -> горст (підняття), у нижній -> грабен
+            // нейтральна зона посередині (0.35..0.65)
+            let vertTarget = 0;
+            if (mouseYnorm < 0.35) {
+                // горст: інтенсивність від 0 до 0.72
+                const intensity = 1 - (mouseYnorm / 0.35);
+                vertTarget = 0.72 * Math.min(1, intensity);
+            } else if (mouseYnorm > 0.65) {
+                // грабен: інтенсивність від 0 до -0.8
+                const intensity = (mouseYnorm - 0.65) / 0.35;
+                vertTarget = -0.8 * Math.min(1, intensity);
+            } else {
+                vertTarget = 0;
             }
+            targetVertical = vertTarget;
+            
+            // Горизонталь: від -1.3 до +1.3 (зсув розлому)
+            let horizTarget = (mouseXnorm - 0.5) * 2.2;
+            horizTarget = Math.min(1.3, Math.max(-1.3, horizTarget));
+            targetHorizontal = horizTarget;
+            
+            // Оновлюємо статус симуляції для наочності
+            const simDiv = document.getElementById('sim-status');
+            simDiv.innerHTML = `🖱️ Y:${Math.round(mouseYnorm*100)}% | X:${Math.round(mouseXnorm*100)}%`;
         }
         
-        // --- Анімація Three.js ---
+        // Скидання положення
+        function reset() {
+            targetVertical = 0;
+            targetHorizontal = 0;
+            // також скидаємо позицію миші умовно до центру
+            mouseYnorm = 0.5;
+            mouseXnorm = 0.5;
+            // оновлюємо індикатор
+            document.getElementById('sim-status').innerHTML = `🖱️ Скинуто | центр`;
+        }
+        
+        // --- Анімаційний цикл ---
         function animate() {
             requestAnimationFrame(animate);
+            updateVerticalUI();
+            updateHorizontal();
             if (renderer && scene && camera) {
                 renderer.render(scene, camera);
             }
         }
         
-        // --- Обробка помилок глобально ---
-        window.addEventListener('error', (e) => {
-            console.error("Global error:", e.error);
-            if (e.message && e.message.includes("FaceMesh")) {
-                setStatus("⚠️ Помилка MediaPipe. Спробуйте інший браузер (Chrome/Edge)", true);
-            }
-        });
-        
-        // --- Запуск ---
-        function start() {
-            const btn = document.getElementById('start-btn');
-            btn.disabled = true;
-            btn.textContent = "⏳ Запуск AR...";
-            initMediaPipe().catch(e => {
-                setStatus(`Критична помилка: ${e.message}`, true);
-                btn.disabled = false;
-                btn.textContent = "⚠️ Повторити спробу";
+        // --- Ініціалізація та обробники подій ---
+        function init() {
+            init3D();
+            animate();
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
             });
+            // Слідкуємо за рухом миші по всьому документу
+            window.addEventListener('mousemove', onMouseMove);
+            document.getElementById('reset-btn').addEventListener('click', reset);
+            // Для дотику на мобільних (опційно) – простий варіант: touchmove
+            window.addEventListener('touchmove', (e) => {
+                if (e.touches.length) {
+                    const touch = e.touches[0];
+                    const fakeEvent = { clientY: touch.clientY, clientX: touch.clientX };
+                    onMouseMove(fakeEvent);
+                }
+            });
+            // Невелика підказка на початку
+            console.log("Географія 3D: Горсти та грабени – керування мишею");
         }
         
-        // Ініціалізація 3D та обробник кнопки
-        init3D();
-        animate();
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-        document.getElementById('start-btn').addEventListener('click', start);
-        setStatus("📌 Натисніть кнопку для запуску AR (потрібен дозвіл камери)");
+        init();
     </script>
 </body>
 </html>
