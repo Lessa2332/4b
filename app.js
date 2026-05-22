@@ -11,60 +11,71 @@ class TectonicSimulation {
     
     this.faceState = { noseX: 0, jawOpenRatio: 0, active: false };
     
-    // Трохи зменшив сітку для кращої продуктивності на мобільному
-    this.gridWidth = 40;
-    this.gridHeight = 25;
+    // Стабільна невелика сітка під мобільні процесори
+    this.gridWidth = 35;
+    this.gridHeight = 22;
     
-    this.init3D();
-    
-    // Чекаємо кліку користувача!
-    this.startBtn.addEventListener('click', () => {
-      this.startScreen.style.display = 'none';
-      this.initAI();
-    });
+    // Прив'язуємо клік НАЙПЕРШИМ ділом, до будь-яких важких ініціалізацій
+    this.startBtn.addEventListener('click', () => this.handleStart());
 
+    try {
+      this.init3D();
+    } catch (err) {
+      this.logToScreen("Помилка WebGL/3D: " + err.message);
+    }
+    
     window.addEventListener('resize', () => this.onResize());
   }
 
+  logToScreen(msg) {
+    const box = document.getElementById('error-box');
+    if (box) {
+      box.style.display = 'block';
+      box.innerText += '\n' + msg;
+    }
+  }
+
   init3D() {
-    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true, alpha: true });
+    this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: false, alpha: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); // Обмежуємо для економії батареї
 
     this.scene = new THREE.Scene();
-    this.scene.fog = new THREE.FogExp2(0x0f172a, 0.02);
+    this.scene.fog = new THREE.FogExp2(0x0f172a, 0.025);
 
     const aspect = window.innerWidth / window.innerHeight;
-    this.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
+    this.camera = new THREE.PerspectiveCamera(45, aspect, 0.1, 1000);
     
     const isMobile = aspect < 1;
-    this.camera.position.set(0, -10, isMobile ? 45 : 30);
+    this.camera.position.set(0, -9, isMobile ? 45 : 28);
     this.camera.lookAt(0, 0, 0);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
     this.scene.add(ambientLight);
-    const dirLight = new THREE.DirectionalLight(0xffdfb0, 1.5);
-    dirLight.position.set(10, 20, 15);
+    
+    const dirLight = new THREE.DirectionalLight(0xffdfb0, 1.3);
+    dirLight.position.set(5, 15, 10);
     this.scene.add(dirLight);
 
-    const geometry = new THREE.BoxGeometry(0.95, 0.95, 2);
-    const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.8 });
+    const geometry = new THREE.BoxGeometry(0.92, 0.92, 2);
+    const material = new THREE.MeshStandardMaterial({ roughness: 0.8 });
     
     this.count = this.gridWidth * this.gridHeight;
     this.mesh = new THREE.InstancedMesh(geometry, material, this.count);
-    
-    const colorArray = new Float32Array(this.count * 3);
-    this.mesh.instanceColor = new THREE.InstancedBufferAttribute(colorArray, 3);
     
     this.dummy = new THREE.Object3D();
     this.initialData = [];
     
     let i = 0;
+    const defaultColor = new THREE.Color(0x1e293b);
     for (let x = 0; x < this.gridWidth; x++) {
       for (let y = 0; y < this.gridHeight; y++) {
         const posX = (x - this.gridWidth / 2);
         const posY = (y - this.gridHeight / 2);
         this.initialData.push({ x: posX, y: posY, isOceanic: x < this.gridWidth / 2 });
+        
+        // Одразу ініціалізуємо базові кольори через API Three.js, уникаючи прямих мутацій буферів
+        this.mesh.setColorAt(i, defaultColor);
         i++;
       }
     }
@@ -76,25 +87,26 @@ class TectonicSimulation {
     requestAnimationFrame(this.animate);
   }
 
-  async initAI() {
-    this.updateUI('Підключення камери...', 'loading');
+  async handleStart() {
+    this.startScreen.style.display = 'none';
+    this.updateUI('Доступ до камери...', 'loading');
+    
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 640, height: 480, facingMode: 'user' } 
+        video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' } 
       });
-      this.video.srcObject = stream;
-      this.video.style.display = 'block';
       
+      this.video.srcObject = stream;
+      // Важливо для iOS: запускаємо ручками після того як згоду отримано
       await this.video.play();
       
-      this.video.addEventListener('loadeddata', () => {
-        this.updateUI('Завантаження ШІ...', 'loading');
-        this.loadVisionModel();
-      });
+      // Не чекаємо капризних івентів браузера, йдемо прямо на завантаження ШІ
+      this.updateUI('Запуск інтелекту...', 'loading');
+      this.loadVisionModel();
+      
     } catch (error) {
-      // Якщо камера заблокована, виводимо це на екран
-      this.updateUI(`Помилка камери: ${error.name}`, 'rift');
-      console.error(error);
+      this.updateUI('Помилка камери', 'rift');
+      this.logToScreen("Камера заблокована чи відсутня: " + error.name + " - " + error.message);
     }
   }
 
@@ -117,23 +129,24 @@ class TectonicSimulation {
       this.updateUI('КОЛІЗІЯ (ГОРИ)', 'collision');
       this.detectFace();
     } catch(error) {
-       this.updateUI(`Помилка ШІ: ${error.message.substring(0, 20)}`, 'rift');
+       this.updateUI('Збій модуля ШІ', 'rift');
+       this.logToScreen("MediaPipe Crash: " + error.message);
     }
   }
 
   detectFace() {
-    let lastVideoTime = -1;
     const tick = () => {
-      if (this.video.currentTime !== lastVideoTime && this.faceLandmarker) {
+      if (this.video.readyState >= 2 && this.faceLandmarker) {
         try {
           const results = this.faceLandmarker.detectForVideo(this.video, performance.now());
           this.processFaceData(results);
-          lastVideoTime = this.video.currentTime;
-        } catch(e) {} // Ігноруємо дрібні помилки рендеру кадру
+        } catch(e) {
+          // Придушуємо циклічні мікро-збої кадру, щоб не вішати потік
+        }
       }
       requestAnimationFrame(tick);
     };
-    tick();
+    requestAnimationFrame(tick);
   }
 
   processFaceData(results) {
@@ -141,13 +154,12 @@ class TectonicSimulation {
       const landmarks = results.faceLandmarks[0];
       const blendshapes = results.faceBlendshapes[0].categories;
       
-      this.faceState.noseX = -(landmarks[1].x - 0.5) * 40; 
-      
+      this.faceState.noseX = -(landmarks[1].x - 0.5) * 35; 
       const jawOpen = blendshapes.find(b => b.categoryName === 'jawOpen').score;
       this.faceState.jawOpenRatio = jawOpen;
       this.faceState.active = true;
 
-      if (jawOpen > 0.25) {
+      if (jawOpen > 0.22) {
         this.updateUI('РИФТОГЕНЕЗ', 'rift');
       } else {
         this.updateUI('КОЛІЗІЯ (ГОРИ)', 'collision');
@@ -173,34 +185,27 @@ class TectonicSimulation {
     for (let x = 0; x < this.gridWidth; x++) {
       for (let y = 0; y < this.gridHeight; y++) {
         const block = this.initialData[idx];
-        let targetZ = Math.sin(block.x * 0.1 + time * 0.5) * 0.15;
+        let targetZ = Math.sin(block.x * 0.12 + time * 0.6) * 0.12;
         
         if (block.isOceanic) col.setHex(0x1e293b); 
         else col.setHex(0x3f6212);
 
         if (this.faceState.active) {
           const distToFault = Math.abs(block.x - this.faceState.noseX);
-          const influenceZone = 10;
+          const influenceZone = 9;
 
           if (distToFault < influenceZone) {
             const power = 1 - (distToFault / influenceZone);
 
-            if (this.faceState.jawOpenRatio > 0.25) {
-              const depth = this.faceState.jawOpenRatio * 8 * power;
+            if (this.faceState.jawOpenRatio > 0.22) {
+              const depth = this.faceState.jawOpenRatio * 7 * power;
               targetZ -= depth;
-              
-              if (power > 0.3) {
-                col.lerp(new THREE.Color(0xf97316), power * this.faceState.jawOpenRatio * 1.5); 
-              }
+              if (power > 0.3) col.lerp(new THREE.Color(0xf97316), power * this.faceState.jawOpenRatio * 1.3); 
             } else {
-              const height = 7 * power * (1 - this.faceState.jawOpenRatio);
-              targetZ += Math.abs(Math.sin(block.x * 0.5)) * height;
-              
-              if (targetZ > 3.0) {
-                col.lerp(new THREE.Color(0xf8fafc), (targetZ - 3.0) / 3); 
-              } else {
-                col.lerp(new THREE.Color(0x64748b), power); 
-              }
+              const height = 6 * power * (1 - this.faceState.jawOpenRatio);
+              targetZ += Math.abs(Math.sin(block.x * 0.4)) * height;
+              if (targetZ > 2.5) col.lerp(new THREE.Color(0xf8fafc), (targetZ - 2.5) / 2.5); 
+              else col.lerp(new THREE.Color(0x64748b), power); 
             }
           }
         }
@@ -218,7 +223,7 @@ class TectonicSimulation {
     if (this.mesh.instanceColor) this.mesh.instanceColor.needsUpdate = true;
     
     if (this.faceState.active) {
-        this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this.faceState.noseX * 0.3, 0.05);
+        this.camera.position.x = THREE.MathUtils.lerp(this.camera.position.x, this.faceState.noseX * 0.25, 0.05);
     }
     
     this.renderer.render(this.scene, this.camera);
@@ -227,11 +232,11 @@ class TectonicSimulation {
   onResize() {
     const aspect = window.innerWidth / window.innerHeight;
     this.camera.aspect = aspect;
-    const isMobile = aspect < 1;
-    this.camera.position.z = isMobile ? 45 : 30;
+    this.camera.position.z = (aspect < 1) ? 45 : 28;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 }
 
-window.onload = () => new TectonicSimulation();
+// Запускаємо додаток нативно без посередників
+new TectonicSimulation();
