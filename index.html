@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Літосфера: Горсти та Грабени 🪨</title>
+    <title>Літосфера: Горсти та Грабени | Нахили голову</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body { overflow: hidden; font-family: 'Segoe UI', 'Comic Neue', 'Nunito', sans-serif; background: #0a2f2f; }
+        body { overflow: hidden; font-family: 'Segoe UI', 'Comic Neue', system-ui; background: #0a2f2f; }
 
         #video {
             position: absolute; inset: 0; width: 100%; height: 100%;
@@ -17,44 +17,33 @@
             z-index: 1; pointer-events: none;
         }
 
-        /* Панель прогресу (зірочки) */
         #stars {
             position: absolute; top: 16px; right: 16px;
             display: flex; gap: 12px; z-index: 20;
             background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
             padding: 8px 20px; border-radius: 40px;
         }
-        .star {
-            font-size: 2rem; opacity: 0.3; transition: 0.2s;
-        }
+        .star { font-size: 2rem; opacity: 0.3; transition: 0.2s; }
         .star.active { opacity: 1; filter: drop-shadow(0 0 6px gold); transform: scale(1.1); }
 
-        /* Головна інформаційна панель */
         #info-panel {
             position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 550px;
-            background: rgba(0,0,0,0.8); backdrop-filter: blur(12px);
+            background: rgba(0,0,0,0.85); backdrop-filter: blur(12px);
             border-radius: 60px; padding: 16px 24px;
             text-align: center; z-index: 15;
             border: 2px solid #ffbc6e;
             color: white;
         }
-        #gesture-name {
-            font-size: 2rem; font-weight: bold; letter-spacing: 1px;
-        }
-        #instruction {
-            font-size: 1rem; margin-top: 8px; opacity: 0.9;
-        }
-        #hint {
-            font-size: 0.85rem; margin-top: 6px; color: #ffdd99;
-        }
+        #gesture-name { font-size: 2rem; font-weight: bold; letter-spacing: 1px; }
+        #instruction { font-size: 1rem; margin-top: 8px; opacity: 0.9; }
+        #hint { font-size: 0.85rem; margin-top: 6px; color: #ffdd99; }
 
-        /* Плаваюча бульбашка з мімікою */
         #face-feedback {
             position: absolute; z-index: 100;
             background: #ff884d; color: white;
             border-radius: 50px; padding: 8px 18px;
-            font-size: 1.4rem; font-weight: bold;
+            font-size: 1.3rem; font-weight: bold;
             display: none; align-items: center; gap: 10px;
             transform: translate(-50%, -50%);
             white-space: nowrap;
@@ -64,7 +53,6 @@
         }
         #face-feedback.correct { background: #2ecc71; }
 
-        /* Стартовий екран */
         #start-screen {
             position: fixed; inset: 0; z-index: 200;
             background: radial-gradient(circle at 30% 20%, #1e6b5e, #0a2f2f);
@@ -80,18 +68,15 @@
         }
         button:active { transform: translateY(5px); box-shadow: 0 3px 0 #a05e15; }
 
-        /* Екран перемоги */
         #win-screen {
             position: fixed; inset: 0; z-index: 200;
             background: radial-gradient(circle, #f9d976, #f39f86);
             display: none; flex-direction: column; align-items: center; justify-content: center;
             gap: 20px; text-align: center; color: #2c3e2b;
         }
-        #win-screen h1 { font-size: 3rem; }
     </style>
 </head>
 <body>
-
     <div id="stars">
         <span class="star" id="star0">⭐</span>
         <span class="star" id="star1">⭐</span>
@@ -102,8 +87,8 @@
 
     <div id="info-panel">
         <div id="gesture-name">🧘 Нейтрально</div>
-        <div id="instruction">😠 Нахмур брови → <span style="color:#ffaa66">ГОРСТ</span> (підняття) &nbsp;|&nbsp; 😲 Відкрий рот → <span style="color:#88aaff">ГРАБЕН</span> (опускання)</div>
-        <div id="hint">🎯 Покажи міміку – центральний блок рухається, летять частинки породи</div>
+        <div id="instruction">🙂 Нахили голову ВНИЗ → <span style="color:#ffaa66">ГОРСТ</span> (підняття) &nbsp;|&nbsp; 🙃 Нахили ВГОРУ → <span style="color:#88aaff">ГРАБЕН</span> (опускання)</div>
+        <div id="hint">🎯 Рухай головою вниз/вгору – центральний блок рухається, летять частинки</div>
     </div>
 
     <div id="face-feedback">😐</div>
@@ -113,8 +98,8 @@
 
     <div id="start-screen">
         <div style="font-size: 6rem;">🗻🌋</div>
-        <h1>Досліджуй літосферу!</h1>
-        <p style="font-size:1.3rem;">Керуй мімікою – створюй <b>горсти</b> та <b>грабени</b></p>
+        <h1>Досліджуй літосферу</h1>
+        <p style="font-size:1.3rem;">Керуй <b>нахилом голови</b> – створюй горсти та грабени</p>
         <button id="startBtn">🚀 Почати</button>
     </div>
 
@@ -138,7 +123,6 @@
         import * as THREE from 'three';
         import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-        // ---------- Отримуємо DOM елементи ----------
         const video = document.getElementById('video');
         const gestureNameDiv = document.getElementById('gesture-name');
         const instructionDiv = document.getElementById('instruction');
@@ -146,37 +130,30 @@
         const faceFeedback = document.getElementById('face-feedback');
         const stars = document.querySelectorAll('.star');
         
-        let faceLandmarker = null;
+        let faceLandmarker;
         let scene, camera, renderer;
-        let blocksGroup, centerBlock, leftBlock, rightBlock;
+        let blocksGroup, centerBlock;
         let arrowUp, arrowDown;
-        let particleSystem;   // система частинок
+        let particleSystem;
         
-        // Змінні анімації блоку
         let currentVertical = 0;
         let targetVertical = 0;
         
-        // Параметри міміки
-        let browIntensity = 0;
-        let mouthIntensity = 0;
-        let calibrated = false;
-        let neutralBrowDist = 0.045;
-        let neutralMouthDist = 0.02;
+        let headPitch = 0;
+        let calibratedPitch = null;
         
-        // Прогрес (5 простих кроків: горст, грабен, горст, грабен, горст)
         let step = 0;
         let waitingForSuccess = false;
         let confirmCounter = 0;
         
         const steps = [
-            { name: "ГОРСТ", target: "brow", desc: "Нахмур брови — підніми центральний блок!" },
-            { name: "ГРАБЕН", target: "mouth", desc: "Відкрий рот — опусти блок!" },
-            { name: "ГОРСТ", target: "brow", desc: "Знову горст! Покажи нахмурені брови." },
-            { name: "ГРАБЕН", target: "mouth", desc: "Фінальний грабен — відкрий рот широко." },
-            { name: "⭐ СУПЕР", target: "brow", desc: "Останнє завдання: створи горст!" }
+            { name: "ГОРСТ", target: "down", desc: "Нахили голову ВНИЗ (підборіддя до грудей) – підніми блок!" },
+            { name: "ГРАБЕН", target: "up", desc: "Нахили голову ВГОРУ (дивись вгору) – опусти блок!" },
+            { name: "ГОРСТ", target: "down", desc: "Знову горст! Нахили голову вниз." },
+            { name: "ГРАБЕН", target: "up", desc: "Фінальний грабен – нахили голову вгору." },
+            { name: "⭐ СУПЕР", target: "down", desc: "Останнє завдання: нахили голову вниз!" }
         ];
         
-        // Оновлення зірок
         function updateStars() {
             stars.forEach((s, idx) => {
                 if (idx < step) s.classList.add('active');
@@ -184,21 +161,17 @@
             });
         }
         
-        // Успішне виконання кроку
         function completeStep() {
             if (waitingForSuccess) return;
             waitingForSuccess = true;
-            // Візуальний фідбек
             faceFeedback.classList.add('correct');
             setTimeout(() => faceFeedback.classList.remove('correct'), 500);
             
-            // Текстова підказка про успіх
             gestureNameDiv.style.background = "#2ecc71";
             gestureNameDiv.style.padding = "0 10px";
             gestureNameDiv.style.borderRadius = "40px";
             setTimeout(() => gestureNameDiv.style.background = "", 800);
             
-            // Збільшуємо крок
             step++;
             updateStars();
             
@@ -207,16 +180,12 @@
                 waitingForSuccess = false;
                 return;
             }
-            // Оновлюємо інструкцію наступного кроку
             instructionDiv.innerHTML = `🎯 ${steps[step].desc}`;
-            hintDiv.innerHTML = steps[step].target === "brow" ? "😠 Нахмур брови для ГОРСТУ" : "😲 Відкрий рот для ГРАБЕНУ";
-            setTimeout(() => {
-                waitingForSuccess = false;
-                confirmCounter = 0;
-            }, 1000);
+            hintDiv.innerHTML = steps[step].target === "down" ? "🙂 Нахили голову ВНИЗ для ГОРСТУ" : "🙃 Нахили голову ВГОРУ для ГРАБЕНУ";
+            setTimeout(() => { waitingForSuccess = false; confirmCounter = 0; }, 800);
         }
         
-        // ---------- 3D сцена з частинками ----------
+        // --- 3D з частинками ---
         function createTexturedBlock(w, h, d, color, posX, posY, posZ) {
             const canvas = document.createElement('canvas');
             canvas.width = 512; canvas.height = 512;
@@ -242,15 +211,15 @@
         }
         
         function createParticleSystem() {
-            const count = 800;
+            const count = 700;
             const geometry = new THREE.BufferGeometry();
             const positions = new Float32Array(count * 3);
-            const velocities = []; // для анімації
+            const velocities = [];
             for (let i = 0; i < count; i++) {
                 positions[i*3] = (Math.random() - 0.5) * 5;
                 positions[i*3+1] = (Math.random() - 0.5) * 1.5 - 0.2;
                 positions[i*3+2] = (Math.random() - 0.5) * 3.5;
-                velocities.push({ y: (Math.random() - 0.5) * 0.02, x: (Math.random() - 0.5)*0.01 });
+                velocities.push({ y: (Math.random() - 0.5) * 0.02 });
             }
             geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
             const material = new THREE.PointsMaterial({ color: 0xddaa66, size: 0.045, transparent: true, opacity: 0.7 });
@@ -259,21 +228,18 @@
         }
         
         function updateParticles(intensity, direction) {
-            // intensity: 0..1, direction: +1 (горст, частинки вгору) або -1 (грабен, вниз)
             if (!particleSystem) return;
             const positions = particleSystem.positionsAttr.array;
             const vel = particleSystem.velocities;
-            const force = direction * intensity * 0.025;
+            const force = direction * intensity * 0.03;
             for (let i = 0; i < particleSystem.count; i++) {
-                // оновлюємо Y координату частинок як ефект "викиду"
                 let y = positions[i*3+1];
                 y += vel[i].y + force * (Math.random() - 0.5);
                 if (y > 0.8) y = -0.5;
                 if (y < -0.8) y = 0.6;
                 positions[i*3+1] = y;
-                // невеликий дрейф по X
-                positions[i*3] += vel[i].x * 0.5;
-                if (Math.abs(positions[i*3]) > 2.5) positions[i*3] *= -0.9;
+                positions[i*3] += (Math.random() - 0.5) * 0.008;
+                if (Math.abs(positions[i*3]) > 2.8) positions[i*3] *= -0.9;
             }
             particleSystem.positionsAttr.needsUpdate = true;
         }
@@ -306,12 +272,11 @@
             const leftX = -(leftW/2 + centerW/2 + 0.08);
             const rightX = (rightW/2 + centerW/2 + 0.08);
             const baseY = -0.2;
-            leftBlock = createTexturedBlock(leftW, h, d, '#7c6a58', leftX, baseY, 0);
-            rightBlock = createTexturedBlock(rightW, h, d, '#7c6a58', rightX, baseY, 0);
+            const leftBlock = createTexturedBlock(leftW, h, d, '#7c6a58', leftX, baseY, 0);
+            const rightBlock = createTexturedBlock(rightW, h, d, '#7c6a58', rightX, baseY, 0);
             centerBlock = createTexturedBlock(centerW, h, d, '#c69454', 0, baseY, 0);
             blocksGroup.add(leftBlock, rightBlock, centerBlock);
             
-            // Лінії розломів
             const faultMat = new THREE.LineBasicMaterial({ color: 0xff5555 });
             const leftLineGeo = new THREE.BufferGeometry().setFromPoints([
                 new THREE.Vector3(-1.48, -0.8, -1.3), new THREE.Vector3(-1.48, 0.9, -1.3),
@@ -324,7 +289,6 @@
             blocksGroup.add(new THREE.Line(leftLineGeo, faultMat));
             blocksGroup.add(new THREE.Line(rightLineGeo, faultMat));
             
-            // Стрілки
             const arrowUpGeo = new THREE.ConeGeometry(0.2, 0.55, 8);
             arrowUp = new THREE.Mesh(arrowUpGeo, new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0xff6600 }));
             arrowUp.position.set(0, 0.65, 1.25);
@@ -335,7 +299,6 @@
             blocksGroup.add(arrowUp, arrowDown);
             arrowUp.visible = false; arrowDown.visible = false;
             
-            // Частинки
             const part = createParticleSystem();
             particleSystem = part;
             blocksGroup.add(part.points);
@@ -345,49 +308,25 @@
             currentVertical += (targetVertical - currentVertical) * 0.22;
             centerBlock.position.y = -0.2 + currentVertical;
             
-            const isMovingUp = targetVertical > 0.05;
-            const isMovingDown = targetVertical < -0.05;
-            arrowUp.visible = isMovingUp;
-            arrowDown.visible = isMovingDown;
+            arrowUp.visible = targetVertical > 0.05;
+            arrowDown.visible = targetVertical < -0.05;
             
-            // Анімація частинок: інтенсивність залежить від швидкості зсуву
             const intensity = Math.min(1, Math.abs(targetVertical) * 1.5);
             const direction = targetVertical > 0 ? 1 : (targetVertical < 0 ? -1 : 0);
             if (intensity > 0.05) updateParticles(intensity, direction);
         }
         
-        // ---------- Аналіз міміки через FaceLandmarker ----------
-        function computeMimic(landmarks) {
-            const leftBrow = landmarks[70];
-            const leftEyeTop = landmarks[159];
-            const rightBrow = landmarks[300];
-            const rightEyeTop = landmarks[386];
-            const browDist = (Math.abs(leftBrow.y - leftEyeTop.y) + Math.abs(rightBrow.y - rightEyeTop.y)) / 2;
-            const upperLip = landmarks[13];
-            const lowerLip = landmarks[14];
-            const mouthDist = Math.abs(upperLip.y - lowerLip.y);
-            
-            if (!calibrated && browDist > 0.012 && mouthDist > 0.006) {
-                neutralBrowDist = browDist;
-                neutralMouthDist = mouthDist;
-                calibrated = true;
-                hintDiv.innerHTML = "✅ Калібрування завершено! Тепер міміка працює.";
-                setTimeout(() => {
-                    if (step < steps.length) hintDiv.innerHTML = steps[step].desc;
-                    else hintDiv.innerHTML = "Чудова робота!";
-                }, 2000);
-            }
-            
-            let browIntens = 0, mouthIntens = 0;
-            if (calibrated) {
-                browIntens = Math.min(1, Math.max(0, (neutralBrowDist - browDist) / neutralBrowDist));
-                mouthIntens = Math.min(1, Math.max(0, (mouthDist - neutralMouthDist) / 0.05));
-                if (mouthDist < neutralMouthDist * 0.9) mouthIntens = 0;
-            }
-            return { brow: browIntens, mouth: mouthIntens };
+        // Обчислення нахилу голови
+        function computeHeadPitch(landmarks) {
+            const nose = landmarks[1];
+            const chin = landmarks[152];
+            const forehead = landmarks[10];
+            const faceHeight = Math.abs(forehead.y - chin.y);
+            if (faceHeight < 0.01) return 0;
+            let pitch = (nose.y - (forehead.y + chin.y)/2) / (faceHeight/2);
+            return Math.min(0.8, Math.max(-0.8, pitch));
         }
         
-        // Основний цикл детекції обличчя
         async function initFaceAI() {
             const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
             faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
@@ -408,46 +347,49 @@
                 const result = faceLandmarker.detectForVideo(video, startTime);
                 if (result.faceLandmarks && result.faceLandmarks.length > 0) {
                     const lm = result.faceLandmarks[0];
-                    const mimic = computeMimic(lm);
-                    browIntensity = mimic.brow;
-                    mouthIntensity = mimic.mouth;
+                    const pitch = computeHeadPitch(lm);
+                    headPitch = pitch;
                     
-                    // Позиція бульбашки за носом
+                    if (calibratedPitch === null) {
+                        calibratedPitch = pitch;
+                        setTimeout(() => hintDiv.innerHTML = "✅ Калібрування готове! Нахиляй голову.", 1000);
+                    }
+                    
+                    let relative = pitch - (calibratedPitch || 0);
+                    let gesture = "none";
+                    let newTarget = 0;
+                    let gestureText = "😐 нейтрально";
+                    let name = "🧘 Нейтрально";
+                    
+                    if (relative > 0.12) {
+                        gesture = "down";
+                        newTarget = 0.72;
+                        gestureText = "🙂 ГОРСТ (нахил вниз) ⬆️";
+                        name = "🏔️ ГОРСТ (підняття)";
+                    } else if (relative < -0.12) {
+                        gesture = "up";
+                        newTarget = -0.82;
+                        gestureText = "🙃 ГРАБЕН (нахил вгору) ⬇️";
+                        name = "🌊 ГРАБЕН (опускання)";
+                    }
+                    
+                    targetVertical = newTarget;
+                    update3DAnimation();
+                    
                     const nose = lm[1];
                     const x = (1 - nose.x) * 100;
                     const y = nose.y * 100;
                     faceFeedback.style.left = `${x}%`;
                     faceFeedback.style.top = `${y}%`;
                     faceFeedback.style.display = 'flex';
+                    faceFeedback.innerHTML = gestureText;
+                    gestureNameDiv.innerHTML = name;
                     
-                    // Визначення жесту та вертикальної цілі
-                    let gesture = "none";
-                    let newTarget = 0;
-                    if (browIntensity > 0.3 && mouthIntensity < 0.2) {
-                        gesture = "brow";
-                        newTarget = 0.72;
-                        faceFeedback.innerHTML = "😠 ГОРСТ ⬆️";
-                        gestureNameDiv.innerHTML = "🏔️ ГОРСТ (підняття)";
-                    } else if (mouthIntensity > 0.4 && browIntensity < 0.2) {
-                        gesture = "mouth";
-                        newTarget = -0.82;
-                        faceFeedback.innerHTML = "😲 ГРАБЕН ⬇️";
-                        gestureNameDiv.innerHTML = "🌊 ГРАБЕН (опускання)";
-                    } else {
-                        gesture = "none";
-                        newTarget = 0;
-                        faceFeedback.innerHTML = "😐 нейтрально";
-                        gestureNameDiv.innerHTML = "🧘 Нейтрально";
-                    }
-                    targetVertical = newTarget;
-                    update3DAnimation();
-                    
-                    // Логіка проходження рівнів (без голосу, тільки текст)
                     if (!waitingForSuccess && step < steps.length) {
                         const required = steps[step].target;
-                        if ((required === "brow" && gesture === "brow") || (required === "mouth" && gesture === "mouth")) {
+                        if ((required === "down" && gesture === "down") || (required === "up" && gesture === "up")) {
                             confirmCounter++;
-                            if (confirmCounter > 18) {  // приблизно 0.6 секунди стабільного жесту
+                            if (confirmCounter > 18) {
                                 completeStep();
                                 confirmCounter = 0;
                             }
@@ -465,7 +407,6 @@
             detect();
         }
         
-        // Запуск камери та ініціалізація
         async function startApp() {
             document.getElementById('start-screen').style.display = 'none';
             try {
@@ -474,18 +415,15 @@
                 await video.play();
                 init3D();
                 await initFaceAI();
-                
                 function animate3D() {
                     requestAnimationFrame(animate3D);
                     if (renderer && scene && camera) renderer.render(scene, camera);
                 }
                 animate3D();
-                
                 instructionDiv.innerHTML = `🎯 ${steps[0].desc}`;
-                hintDiv.innerHTML = "😠 Нахмур брови для ГОРСТУ";
+                hintDiv.innerHTML = "🙂 Нахили голову ВНИЗ для ГОРСТУ";
             } catch(err) {
-                alert("Потрібен дозвіл на використання камери!");
-                console.error(err);
+                alert("Потрібен дозвіл на камеру");
             }
         }
         
