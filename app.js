@@ -6,16 +6,23 @@ class TectonicSimulation {
     this.video = document.getElementById('video-feed');
     this.canvas = document.getElementById('webgl-canvas');
     this.statusBadge = document.getElementById('status-badge');
+    this.startScreen = document.getElementById('start-screen');
+    this.startBtn = document.getElementById('start-btn');
     
     this.faceState = { noseX: 0, jawOpenRatio: 0, active: false };
     
-    // Трохи зменшили сітку, щоб легше рендерилась на мобільних
-    this.gridWidth = 55;
-    this.gridHeight = 35;
+    // Трохи зменшив сітку для кращої продуктивності на мобільному
+    this.gridWidth = 40;
+    this.gridHeight = 25;
     
     this.init3D();
-    this.initAI();
     
+    // Чекаємо кліку користувача!
+    this.startBtn.addEventListener('click', () => {
+      this.startScreen.style.display = 'none';
+      this.initAI();
+    });
+
     window.addEventListener('resize', () => this.onResize());
   }
 
@@ -30,9 +37,8 @@ class TectonicSimulation {
     const aspect = window.innerWidth / window.innerHeight;
     this.camera = new THREE.PerspectiveCamera(50, aspect, 0.1, 1000);
     
-    // АДАПТИВНІСТЬ: Якщо це телефон (вертикальний екран), віддаляємо камеру на Z=55
     const isMobile = aspect < 1;
-    this.camera.position.set(0, -10, isMobile ? 55 : 35);
+    this.camera.position.set(0, -10, isMobile ? 45 : 30);
     this.camera.lookAt(0, 0, 0);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
@@ -47,7 +53,6 @@ class TectonicSimulation {
     this.count = this.gridWidth * this.gridHeight;
     this.mesh = new THREE.InstancedMesh(geometry, material, this.count);
     
-    // БЕЗПЕКА ДЛЯ THREE.JS: Ініціалізуємо буфер кольорів одразу, щоб уникнути крашів
     const colorArray = new Float32Array(this.count * 3);
     this.mesh.instanceColor = new THREE.InstancedBufferAttribute(colorArray, 3);
     
@@ -72,23 +77,24 @@ class TectonicSimulation {
   }
 
   async initAI() {
+    this.updateUI('Підключення камери...', 'loading');
     try {
-      // Запитуємо доступ до камери
       const stream = await navigator.mediaDevices.getUserMedia({ 
         video: { width: 640, height: 480, facingMode: 'user' } 
       });
       this.video.srcObject = stream;
+      this.video.style.display = 'block';
       
-      // На iOS треба явно викликати play()
-      this.video.play().catch(e => console.error("Помилка автоплею:", e));
+      await this.video.play();
       
       this.video.addEventListener('loadeddata', () => {
-        this.updateUI('Завантаження нейромережі...', 'loading');
+        this.updateUI('Завантаження ШІ...', 'loading');
         this.loadVisionModel();
       });
     } catch (error) {
-      this.updateUI('Дайте доступ до камери', 'rift');
-      console.error("Помилка доступу до камери:", error);
+      // Якщо камера заблокована, виводимо це на екран
+      this.updateUI(`Помилка камери: ${error.name}`, 'rift');
+      console.error(error);
     }
   }
 
@@ -110,8 +116,8 @@ class TectonicSimulation {
 
       this.updateUI('КОЛІЗІЯ (ГОРИ)', 'collision');
       this.detectFace();
-    } catch(err) {
-       this.updateUI('Помилка завантаження ШІ', 'rift');
+    } catch(error) {
+       this.updateUI(`Помилка ШІ: ${error.message.substring(0, 20)}`, 'rift');
     }
   }
 
@@ -119,9 +125,11 @@ class TectonicSimulation {
     let lastVideoTime = -1;
     const tick = () => {
       if (this.video.currentTime !== lastVideoTime && this.faceLandmarker) {
-        const results = this.faceLandmarker.detectForVideo(this.video, performance.now());
-        this.processFaceData(results);
-        lastVideoTime = this.video.currentTime;
+        try {
+          const results = this.faceLandmarker.detectForVideo(this.video, performance.now());
+          this.processFaceData(results);
+          lastVideoTime = this.video.currentTime;
+        } catch(e) {} // Ігноруємо дрібні помилки рендеру кадру
       }
       requestAnimationFrame(tick);
     };
@@ -133,7 +141,7 @@ class TectonicSimulation {
       const landmarks = results.faceLandmarks[0];
       const blendshapes = results.faceBlendshapes[0].categories;
       
-      this.faceState.noseX = -(landmarks[1].x - 0.5) * 50; 
+      this.faceState.noseX = -(landmarks[1].x - 0.5) * 40; 
       
       const jawOpen = blendshapes.find(b => b.categoryName === 'jawOpen').score;
       this.faceState.jawOpenRatio = jawOpen;
@@ -172,7 +180,7 @@ class TectonicSimulation {
 
         if (this.faceState.active) {
           const distToFault = Math.abs(block.x - this.faceState.noseX);
-          const influenceZone = 12;
+          const influenceZone = 10;
 
           if (distToFault < influenceZone) {
             const power = 1 - (distToFault / influenceZone);
@@ -219,9 +227,8 @@ class TectonicSimulation {
   onResize() {
     const aspect = window.innerWidth / window.innerHeight;
     this.camera.aspect = aspect;
-    // При перевороті екрана на ходу перераховуємо дистанцію
     const isMobile = aspect < 1;
-    this.camera.position.z = isMobile ? 55 : 35;
+    this.camera.position.z = isMobile ? 45 : 30;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
