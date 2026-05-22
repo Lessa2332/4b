@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Літосфера AR: Горсти та Грабени 🏔️</title>
+    <title>Літосфера: Горсти та Грабени 🪨</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@600;800&display=swap');
-
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
-        body { overflow: hidden; font-family: 'Quicksand', sans-serif; background: #0a1f2e; }
+        body { overflow: hidden; font-family: 'Segoe UI', 'Comic Neue', 'Nunito', sans-serif; background: #0a2f2f; }
 
         #video {
             position: absolute; inset: 0; width: 100%; height: 100%;
@@ -19,125 +17,112 @@
             z-index: 1; pointer-events: none;
         }
 
-        /* зірки прогресу */
-        #stars-bar {
+        /* Панель прогресу (зірочки) */
+        #stars {
             position: absolute; top: 16px; right: 16px;
-            z-index: 150; display: flex; gap: 12px;
+            display: flex; gap: 12px; z-index: 20;
             background: rgba(0,0,0,0.5); backdrop-filter: blur(8px);
-            padding: 8px 18px; border-radius: 50px;
+            padding: 8px 20px; border-radius: 40px;
         }
-        .star-icon {
-            font-size: 2.5rem; opacity: 0.3;
-            transition: all 0.3s ease;
+        .star {
+            font-size: 2rem; opacity: 0.3; transition: 0.2s;
         }
-        .star-icon.earned { opacity: 1; filter: drop-shadow(0 0 10px gold); transform: scale(1.2); }
+        .star.active { opacity: 1; filter: drop-shadow(0 0 6px gold); transform: scale(1.1); }
 
-        /* картка знання */
-        #info-card {
-            position: absolute; inset: 0; z-index: 2000;
-            display: none; align-items: center; justify-content: center;
-            background: rgba(0,0,0,0.85);
-            pointer-events: none;
-        }
-        .card {
-            background: linear-gradient(135deg, #fff9e8, #ffefc0);
-            border-radius: 60px; padding: 30px 40px;
-            text-align: center; max-width: 85%;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            animation: bounceIn 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        .card h2 { font-size: 2.5rem; color: #2d4c1e; margin: 15px 0; }
-        .card p { font-size: 1.3rem; color: #2c3e2b; }
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            80% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        #status-bar {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 500px;
+        /* Головна інформаційна панель */
+        #info-panel {
+            position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 550px;
             background: rgba(0,0,0,0.8); backdrop-filter: blur(12px);
             border-radius: 60px; padding: 16px 24px;
-            text-align: center; z-index: 100;
-            border: 1px solid #ffd966;
+            text-align: center; z-index: 15;
+            border: 2px solid #ffbc6e;
+            color: white;
         }
-        #instruction-text {
-            font-size: 1.4rem; font-weight: bold; color: #ffecb3;
+        #gesture-name {
+            font-size: 2rem; font-weight: bold; letter-spacing: 1px;
         }
-        #mimic-hint {
-            font-size: 1rem; color: #ddd; margin-top: 6px;
+        #instruction {
+            font-size: 1rem; margin-top: 8px; opacity: 0.9;
+        }
+        #hint {
+            font-size: 0.85rem; margin-top: 6px; color: #ffdd99;
         }
 
-        #face-bubble {
-            position: absolute; z-index: 1000;
-            background: #ff7b2c; color: white;
-            border-radius: 60px; padding: 8px 18px;
-            font-size: 1.6rem; font-weight: bold;
-            display: none; align-items: center; gap: 12px;
+        /* Плаваюча бульбашка з мімікою */
+        #face-feedback {
+            position: absolute; z-index: 100;
+            background: #ff884d; color: white;
+            border-radius: 50px; padding: 8px 18px;
+            font-size: 1.4rem; font-weight: bold;
+            display: none; align-items: center; gap: 10px;
             transform: translate(-50%, -50%);
             white-space: nowrap;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             border: 3px solid #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            pointer-events: none;
         }
-        #face-bubble.correct { background: #2ecc71; }
+        #face-feedback.correct { background: #2ecc71; }
 
-        #start-screen, #win-screen {
-            position: fixed; inset: 0; z-index: 3000;
-            background: radial-gradient(circle at 20% 30%, #1e4b2e, #0a2f1a);
+        /* Стартовий екран */
+        #start-screen {
+            position: fixed; inset: 0; z-index: 200;
+            background: radial-gradient(circle at 30% 20%, #1e6b5e, #0a2f2f);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; color: white; gap: 20px;
+            text-align: center; gap: 20px; color: white;
         }
         button {
-            background: #f7b32b; border: none; padding: 16px 40px;
-            font-size: 1.8rem; font-weight: bold; border-radius: 50px;
-            color: #2c3e2b; cursor: pointer; box-shadow: 0 8px 0 #a55d00;
-            font-family: inherit;
+            background: #ffb347; border: none; padding: 16px 40px;
+            font-size: 1.8rem; font-weight: bold; border-radius: 60px;
+            cursor: pointer; color: #2d2b1f; font-family: inherit;
+            box-shadow: 0 8px 0 #a05e15;
+            transition: 0.05s linear;
         }
-        button:active { transform: translateY(5px); box-shadow: 0 3px 0 #a55d00; }
-        h1 { font-size: 2.5rem; text-shadow: 2px 2px 0 #1f3b1a; }
+        button:active { transform: translateY(5px); box-shadow: 0 3px 0 #a05e15; }
+
+        /* Екран перемоги */
+        #win-screen {
+            position: fixed; inset: 0; z-index: 200;
+            background: radial-gradient(circle, #f9d976, #f39f86);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            gap: 20px; text-align: center; color: #2c3e2b;
+        }
+        #win-screen h1 { font-size: 3rem; }
     </style>
 </head>
 <body>
 
-    <div id="stars-bar">
-        <span class="star-icon" id="star0">🌟</span>
-        <span class="star-icon" id="star1">🌟</span>
-        <span class="star-icon" id="star2">🌟</span>
-        <span class="star-icon" id="star3">🌟</span>
-        <span class="star-icon" id="star4">🌟</span>
+    <div id="stars">
+        <span class="star" id="star0">⭐</span>
+        <span class="star" id="star1">⭐</span>
+        <span class="star" id="star2">⭐</span>
+        <span class="star" id="star3">⭐</span>
+        <span class="star" id="star4">⭐</span>
     </div>
 
-    <div id="info-card">
-        <div class="card">
-            <div style="font-size: 4rem;" id="card-icon">🏔️</div>
-            <h2 id="card-title">Горст</h2>
-            <p id="card-desc">Центральний блок піднявся вгору — утворився горст</p>
-        </div>
+    <div id="info-panel">
+        <div id="gesture-name">🧘 Нейтрально</div>
+        <div id="instruction">😠 Нахмур брови → <span style="color:#ffaa66">ГОРСТ</span> (підняття) &nbsp;|&nbsp; 😲 Відкрий рот → <span style="color:#88aaff">ГРАБЕН</span> (опускання)</div>
+        <div id="hint">🎯 Покажи міміку – центральний блок рухається, летять частинки породи</div>
     </div>
 
-    <div id="status-bar">
-        <div id="instruction-text">😠 Нахмур брови → ГОРСТ &nbsp;|&nbsp; 😲 Відкрий рот → ГРАБЕН</div>
-        <div id="mimic-hint">🎯 Спробуй!</div>
-    </div>
-
-    <div id="face-bubble">😐</div>
+    <div id="face-feedback">😐</div>
 
     <video id="video" autoplay playsinline muted></video>
     <canvas id="canvas"></canvas>
 
     <div id="start-screen">
-        <div style="font-size: 5rem;">🌋🏞️</div>
+        <div style="font-size: 6rem;">🗻🌋</div>
         <h1>Досліджуй літосферу!</h1>
-        <p style="font-size:1.3rem;">Керуй мімікою — створюй <b>горсти</b> та <b>грабени</b></p>
-        <button id="start-btn">Розпочати</button>
+        <p style="font-size:1.3rem;">Керуй мімікою – створюй <b>горсти</b> та <b>грабени</b></p>
+        <button id="startBtn">🚀 Почати</button>
     </div>
 
-    <div id="win-screen" style="display:none;">
+    <div id="win-screen">
         <div style="font-size:5rem;">🏆🎉</div>
-        <h1>Ти справжній геолог!</h1>
+        <h1>Ти геолог-чемпіон!</h1>
         <p>Ти опанував розривні рухи земної кори</p>
-        <button onclick="location.reload()">Грати знову</button>
+        <button onclick="location.reload()">Зіграти ще</button>
     </div>
 
     <script type="importmap">
@@ -153,135 +138,99 @@
         import * as THREE from 'three';
         import { FaceLandmarker, FilesetResolver } from '@mediapipe/tasks-vision';
 
-        // ---------- Елементи UI ----------
+        // ---------- Отримуємо DOM елементи ----------
         const video = document.getElementById('video');
-        const instructionEl = document.getElementById('instruction-text');
-        const mimicHint = document.getElementById('mimic-hint');
-        const faceBubble = document.getElementById('face-bubble');
-        const infoCard = document.getElementById('info-card');
-        const cardTitle = document.getElementById('card-title');
-        const cardDesc = document.getElementById('card-desc');
-        const cardIcon = document.getElementById('card-icon');
-
-        let faceLandmarker;
-        let scene, camera, renderer, blocksGroup, centerBlock, leftBlock, rightBlock;
+        const gestureNameDiv = document.getElementById('gesture-name');
+        const instructionDiv = document.getElementById('instruction');
+        const hintDiv = document.getElementById('hint');
+        const faceFeedback = document.getElementById('face-feedback');
+        const stars = document.querySelectorAll('.star');
+        
+        let faceLandmarker = null;
+        let scene, camera, renderer;
+        let blocksGroup, centerBlock, leftBlock, rightBlock;
         let arrowUp, arrowDown;
+        let particleSystem;   // система частинок
+        
+        // Змінні анімації блоку
         let currentVertical = 0;
         let targetVertical = 0;
         
-        // Прогрес гравця
-        let level = 0;          // 0..4 (5 рівнів)
-        let isWaiting = false;
-        let confirmFrames = 0;
-        let lastGesture = "none";
-        
-        // Параметри міміки (оновлюються з landmarks)
-        let browFurrow = 0;      // нахмурення (0..1)
-        let mouthOpen = 0;       // відкриття рота (0..1)
-        
-        // Калібрування нейтрального стану
-        let neutralBrowDist = 0.06;
-        let neutralMouthDist = 0.02;
+        // Параметри міміки
+        let browIntensity = 0;
+        let mouthIntensity = 0;
         let calibrated = false;
+        let neutralBrowDist = 0.045;
+        let neutralMouthDist = 0.02;
         
-        // Рівні навчання
-        const lessons = [
-            { name: "ГОРСТ", desc: "Центральний блок піднявся – це горст. Виникає при стисненні.", icon: "🏔️", target: "brow" },
-            { name: "ГРАБЕН", desc: "Центральний блок опустився – це грабен. Виникає при розтягуванні.", icon: "🌊", target: "mouth" },
-            { name: "ГОРСТ (повторення)", desc: "Знову горст – блок угору!", icon: "⛰️", target: "brow" },
-            { name: "ГРАБЕН (повторення)", desc: "Ще раз грабен – блок униз", icon: "🏞️", target: "mouth" },
-            { name: "Супер-тест", desc: "Чергуй горст і грабен! Але зараз покажи ГОРСТ", icon: "🎓", target: "brow" }
+        // Прогрес (5 простих кроків: горст, грабен, горст, грабен, горст)
+        let step = 0;
+        let waitingForSuccess = false;
+        let confirmCounter = 0;
+        
+        const steps = [
+            { name: "ГОРСТ", target: "brow", desc: "Нахмур брови — підніми центральний блок!" },
+            { name: "ГРАБЕН", target: "mouth", desc: "Відкрий рот — опусти блок!" },
+            { name: "ГОРСТ", target: "brow", desc: "Знову горст! Покажи нахмурені брови." },
+            { name: "ГРАБЕН", target: "mouth", desc: "Фінальний грабен — відкрий рот широко." },
+            { name: "⭐ СУПЕР", target: "brow", desc: "Останнє завдання: створи горст!" }
         ];
-        
-        // Функція для голосового супроводу
-        function speak(text, onEnd) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'uk-UA';
-            utterance.rate = 0.9;
-            if (onEnd) utterance.onend = onEnd;
-            window.speechSynthesis.speak(utterance);
-        }
         
         // Оновлення зірок
         function updateStars() {
-            for (let i = 0; i < 5; i++) {
-                const star = document.getElementById(`star${i}`);
-                if (i < level) star.classList.add('earned');
-                else star.classList.remove('earned');
-            }
-        }
-        
-        // Показати картку знання
-        function showLessonCard(lessonIndex) {
-            const l = lessons[lessonIndex];
-            cardIcon.textContent = l.icon;
-            cardTitle.textContent = l.name;
-            cardDesc.textContent = l.desc;
-            infoCard.style.display = 'flex';
-            speak(l.name + ". " + l.desc, () => {
-                setTimeout(() => {
-                    infoCard.style.display = 'none';
-                }, 2000);
+            stars.forEach((s, idx) => {
+                if (idx < step) s.classList.add('active');
+                else s.classList.remove('active');
             });
         }
         
-        // Успішне виконання рівня
-        function advanceLevel() {
-            if (isWaiting) return;
-            isWaiting = true;
-            
+        // Успішне виконання кроку
+        function completeStep() {
+            if (waitingForSuccess) return;
+            waitingForSuccess = true;
             // Візуальний фідбек
-            faceBubble.classList.add('correct');
-            setTimeout(() => faceBubble.classList.remove('correct'), 400);
+            faceFeedback.classList.add('correct');
+            setTimeout(() => faceFeedback.classList.remove('correct'), 500);
             
-            // Запам'ятати поточний рівень, щоб показати картку
-            const currentLevel = level;
-            showLessonCard(currentLevel);
+            // Текстова підказка про успіх
+            gestureNameDiv.style.background = "#2ecc71";
+            gestureNameDiv.style.padding = "0 10px";
+            gestureNameDiv.style.borderRadius = "40px";
+            setTimeout(() => gestureNameDiv.style.background = "", 800);
             
-            // Через 3 секунди переходимо до наступного рівня
+            // Збільшуємо крок
+            step++;
+            updateStars();
+            
+            if (step >= steps.length) {
+                document.getElementById('win-screen').style.display = 'flex';
+                waitingForSuccess = false;
+                return;
+            }
+            // Оновлюємо інструкцію наступного кроку
+            instructionDiv.innerHTML = `🎯 ${steps[step].desc}`;
+            hintDiv.innerHTML = steps[step].target === "brow" ? "😠 Нахмур брови для ГОРСТУ" : "😲 Відкрий рот для ГРАБЕНУ";
             setTimeout(() => {
-                level++;
-                updateStars();
-                if (level >= lessons.length) {
-                    // Перемога!
-                    document.getElementById('win-screen').style.display = 'flex';
-                    isWaiting = false;
-                    return;
-                }
-                // Оновити підказку
-                const nextLesson = lessons[level];
-                if (nextLesson.target === "brow") {
-                    instructionEl.innerHTML = "😠 НАХМУР БРОВИ, щоб підняти блок → ГОРСТ";
-                } else {
-                    instructionEl.innerHTML = "😲 ВІДКРИЙ РОТА, щоб опустити блок → ГРАБЕН";
-                }
-                mimicHint.textContent = nextLesson.desc;
-                speak(`Рівень ${level+1}. ${nextLesson.name}`);
-                isWaiting = false;
-                // Скидаємо підтвердження
-                confirmFrames = 0;
-                lastGesture = "none";
-                targetVertical = 0;
-            }, 2800);
+                waitingForSuccess = false;
+                confirmCounter = 0;
+            }, 1000);
         }
         
-        // ---------- 3D сцена: горст / грабен ----------
+        // ---------- 3D сцена з частинками ----------
         function createTexturedBlock(w, h, d, color, posX, posY, posZ) {
             const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
+            canvas.width = 512; canvas.height = 512;
             const ctx = canvas.getContext('2d');
             ctx.fillStyle = color;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.strokeStyle = '#daa06a';
-            ctx.lineWidth = 20;
-            for (let i = 1; i <= 10; i++) {
-                const y = (i / 10) * canvas.height;
+            ctx.strokeStyle = '#e5bc8c';
+            ctx.lineWidth = 18;
+            for (let i = 1; i <= 8; i++) {
+                const y = (i / 8) * canvas.height;
                 ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y);
                 ctx.stroke();
-                ctx.fillStyle = '#b97f44';
-                ctx.fillRect(0, y-5, canvas.width, 5);
+                ctx.fillStyle = '#b5813a';
+                ctx.fillRect(0, y-4, canvas.width, 5);
             }
             const texture = new THREE.CanvasTexture(canvas);
             const material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.6 });
@@ -292,122 +241,153 @@
             return mesh;
         }
         
+        function createParticleSystem() {
+            const count = 800;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(count * 3);
+            const velocities = []; // для анімації
+            for (let i = 0; i < count; i++) {
+                positions[i*3] = (Math.random() - 0.5) * 5;
+                positions[i*3+1] = (Math.random() - 0.5) * 1.5 - 0.2;
+                positions[i*3+2] = (Math.random() - 0.5) * 3.5;
+                velocities.push({ y: (Math.random() - 0.5) * 0.02, x: (Math.random() - 0.5)*0.01 });
+            }
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            const material = new THREE.PointsMaterial({ color: 0xddaa66, size: 0.045, transparent: true, opacity: 0.7 });
+            const points = new THREE.Points(geometry, material);
+            return { points, velocities, count, positionsAttr: geometry.attributes.position };
+        }
+        
+        function updateParticles(intensity, direction) {
+            // intensity: 0..1, direction: +1 (горст, частинки вгору) або -1 (грабен, вниз)
+            if (!particleSystem) return;
+            const positions = particleSystem.positionsAttr.array;
+            const vel = particleSystem.velocities;
+            const force = direction * intensity * 0.025;
+            for (let i = 0; i < particleSystem.count; i++) {
+                // оновлюємо Y координату частинок як ефект "викиду"
+                let y = positions[i*3+1];
+                y += vel[i].y + force * (Math.random() - 0.5);
+                if (y > 0.8) y = -0.5;
+                if (y < -0.8) y = 0.6;
+                positions[i*3+1] = y;
+                // невеликий дрейф по X
+                positions[i*3] += vel[i].x * 0.5;
+                if (Math.abs(positions[i*3]) > 2.5) positions[i*3] *= -0.9;
+            }
+            particleSystem.positionsAttr.needsUpdate = true;
+        }
+        
         function init3D() {
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a1f2e);
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 20);
-            camera.position.set(0, 1.2, 5.5);
+            scene.background = new THREE.Color(0x0a2f2f);
+            camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 20);
+            camera.position.set(0, 1.2, 5.8);
             camera.lookAt(0, 0, 0);
             renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('canvas'), alpha: false, antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.shadowMap.enabled = true;
             
-            // освітлення
             const ambient = new THREE.AmbientLight(0x404060);
             scene.add(ambient);
-            const mainLight = new THREE.DirectionalLight(0xfff5cc, 1);
-            mainLight.position.set(2, 3, 2);
+            const mainLight = new THREE.DirectionalLight(0xfff2cc, 1.2);
+            mainLight.position.set(2, 4, 2);
             mainLight.castShadow = true;
             scene.add(mainLight);
-            const fillLight = new THREE.PointLight(0x88aaff, 0.5);
-            fillLight.position.set(-1, 1, 2);
+            const fillLight = new THREE.PointLight(0x88aaff, 0.4);
+            fillLight.position.set(-1, 1.5, 2);
             scene.add(fillLight);
             
-            // група блоків
             blocksGroup = new THREE.Group();
             scene.add(blocksGroup);
             
             const leftW = 1.6, rightW = 1.6, centerW = 1.4;
             const h = 1.2, d = 2.2;
-            const leftX = -(leftW/2 + centerW/2 + 0.1);
-            const rightX = (rightW/2 + centerW/2 + 0.1);
+            const leftX = -(leftW/2 + centerW/2 + 0.08);
+            const rightX = (rightW/2 + centerW/2 + 0.08);
             const baseY = -0.2;
-            
             leftBlock = createTexturedBlock(leftW, h, d, '#7c6a58', leftX, baseY, 0);
             rightBlock = createTexturedBlock(rightW, h, d, '#7c6a58', rightX, baseY, 0);
             centerBlock = createTexturedBlock(centerW, h, d, '#c69454', 0, baseY, 0);
             blocksGroup.add(leftBlock, rightBlock, centerBlock);
             
-            // червоні лінії розломів
-            const faultMat = new THREE.LineBasicMaterial({ color: 0xff4444 });
-            const leftLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(-1.45, -0.8, -1.3), new THREE.Vector3(-1.45, 0.9, -1.3),
-                new THREE.Vector3(-1.45, 0.9, 1.3), new THREE.Vector3(-1.45, -0.8, 1.3)
-            ]), faultMat);
-            const rightLine = new THREE.Line(new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(1.45, -0.8, -1.3), new THREE.Vector3(1.45, 0.9, -1.3),
-                new THREE.Vector3(1.45, 0.9, 1.3), new THREE.Vector3(1.45, -0.8, 1.3)
-            ]), faultMat);
-            blocksGroup.add(leftLine, rightLine);
+            // Лінії розломів
+            const faultMat = new THREE.LineBasicMaterial({ color: 0xff5555 });
+            const leftLineGeo = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-1.48, -0.8, -1.3), new THREE.Vector3(-1.48, 0.9, -1.3),
+                new THREE.Vector3(-1.48, 0.9, 1.3), new THREE.Vector3(-1.48, -0.8, 1.3)
+            ]);
+            const rightLineGeo = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(1.48, -0.8, -1.3), new THREE.Vector3(1.48, 0.9, -1.3),
+                new THREE.Vector3(1.48, 0.9, 1.3), new THREE.Vector3(1.48, -0.8, 1.3)
+            ]);
+            blocksGroup.add(new THREE.Line(leftLineGeo, faultMat));
+            blocksGroup.add(new THREE.Line(rightLineGeo, faultMat));
             
-            // стрілочки
-            const arrowUpGeo = new THREE.ConeGeometry(0.2, 0.5, 8);
-            const arrowUpMat = new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0xff5500 });
-            arrowUp = new THREE.Mesh(arrowUpGeo, arrowUpMat);
-            arrowUp.position.set(0, 0.7, 1.2);
-            arrowUp.rotation.x = 0;
-            
-            const arrowDownGeo = new THREE.ConeGeometry(0.2, 0.5, 8);
-            const arrowDownMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x3377ff });
-            arrowDown = new THREE.Mesh(arrowDownGeo, arrowDownMat);
-            arrowDown.position.set(0, 0.7, 1.2);
+            // Стрілки
+            const arrowUpGeo = new THREE.ConeGeometry(0.2, 0.55, 8);
+            arrowUp = new THREE.Mesh(arrowUpGeo, new THREE.MeshStandardMaterial({ color: 0xffaa66, emissive: 0xff6600 }));
+            arrowUp.position.set(0, 0.65, 1.25);
+            const arrowDownGeo = new THREE.ConeGeometry(0.2, 0.55, 8);
+            arrowDown = new THREE.Mesh(arrowDownGeo, new THREE.MeshStandardMaterial({ color: 0x88aaff, emissive: 0x2288ff }));
+            arrowDown.position.set(0, 0.65, 1.25);
             arrowDown.rotation.x = Math.PI;
             blocksGroup.add(arrowUp, arrowDown);
             arrowUp.visible = false; arrowDown.visible = false;
             
-            // декоративні частки
-            const particles = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ color: 0xccaa77, size: 0.04 }));
-            blocksGroup.add(particles);
+            // Частинки
+            const part = createParticleSystem();
+            particleSystem = part;
+            blocksGroup.add(part.points);
         }
         
-        function update3D() {
-            // плавне переміщення центрального блоку
-            currentVertical += (targetVertical - currentVertical) * 0.2;
+        function update3DAnimation() {
+            currentVertical += (targetVertical - currentVertical) * 0.22;
             centerBlock.position.y = -0.2 + currentVertical;
             
-            // показуємо відповідну стрілку
-            if (targetVertical > 0.05) {
-                arrowUp.visible = true; arrowDown.visible = false;
-            } else if (targetVertical < -0.05) {
-                arrowUp.visible = false; arrowDown.visible = true;
-            } else {
-                arrowUp.visible = false; arrowDown.visible = false;
-            }
+            const isMovingUp = targetVertical > 0.05;
+            const isMovingDown = targetVertical < -0.05;
+            arrowUp.visible = isMovingUp;
+            arrowDown.visible = isMovingDown;
+            
+            // Анімація частинок: інтенсивність залежить від швидкості зсуву
+            const intensity = Math.min(1, Math.abs(targetVertical) * 1.5);
+            const direction = targetVertical > 0 ? 1 : (targetVertical < 0 ? -1 : 0);
+            if (intensity > 0.05) updateParticles(intensity, direction);
         }
         
-        // ---------- Аналіз міміки за допомогою FaceLandmarker ----------
+        // ---------- Аналіз міміки через FaceLandmarker ----------
         function computeMimic(landmarks) {
-            // ключові точки: брови (70, 300) та верхні повіки (159, 386)
             const leftBrow = landmarks[70];
             const leftEyeTop = landmarks[159];
             const rightBrow = landmarks[300];
             const rightEyeTop = landmarks[386];
             const browDist = (Math.abs(leftBrow.y - leftEyeTop.y) + Math.abs(rightBrow.y - rightEyeTop.y)) / 2;
-            
-            // рот: 13 (верхня губа), 14 (нижня)
             const upperLip = landmarks[13];
             const lowerLip = landmarks[14];
             const mouthDist = Math.abs(upperLip.y - lowerLip.y);
             
-            if (!calibrated && browDist > 0.01 && mouthDist > 0.005) {
+            if (!calibrated && browDist > 0.012 && mouthDist > 0.006) {
                 neutralBrowDist = browDist;
                 neutralMouthDist = mouthDist;
                 calibrated = true;
-                mimicHint.textContent = "Калібрування завершено! Тепер міміка працює";
-                setTimeout(() => mimicHint.textContent = lessons[level].desc, 1500);
+                hintDiv.innerHTML = "✅ Калібрування завершено! Тепер міміка працює.";
+                setTimeout(() => {
+                    if (step < steps.length) hintDiv.innerHTML = steps[step].desc;
+                    else hintDiv.innerHTML = "Чудова робота!";
+                }, 2000);
             }
             
-            let browIntensity = 0;
-            let mouthIntensity = 0;
+            let browIntens = 0, mouthIntens = 0;
             if (calibrated) {
-                browIntensity = Math.min(1, Math.max(0, (neutralBrowDist - browDist) / neutralBrowDist));
-                mouthIntensity = Math.min(1, Math.max(0, (mouthDist - neutralMouthDist) / 0.05));
-                if (mouthDist < neutralMouthDist * 0.9) mouthIntensity = 0;
+                browIntens = Math.min(1, Math.max(0, (neutralBrowDist - browDist) / neutralBrowDist));
+                mouthIntens = Math.min(1, Math.max(0, (mouthDist - neutralMouthDist) / 0.05));
+                if (mouthDist < neutralMouthDist * 0.9) mouthIntens = 0;
             }
-            return { brow: browIntensity, mouth: mouthIntensity };
+            return { brow: browIntens, mouth: mouthIntens };
         }
         
-        // ---------- Основний цикл FaceLandmarker ----------
+        // Основний цикл детекції обличчя
         async function initFaceAI() {
             const vision = await FilesetResolver.forVisionTasks("https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.3/wasm");
             faceLandmarker = await FaceLandmarker.createFromOptions(vision, {
@@ -416,12 +396,9 @@
                     delegate: "GPU"
                 },
                 runningMode: "VIDEO",
-                numFaces: 1,
-                outputFaceBlendshapes: false,
-                outputFacialTransformationMatrixes: false
+                numFaces: 1
             });
             
-            // Запуск детекції в реальному часі
             function detect() {
                 if (!faceLandmarker || !video.videoWidth) {
                     requestAnimationFrame(detect);
@@ -432,64 +409,63 @@
                 if (result.faceLandmarks && result.faceLandmarks.length > 0) {
                     const lm = result.faceLandmarks[0];
                     const mimic = computeMimic(lm);
+                    browIntensity = mimic.brow;
+                    mouthIntensity = mimic.mouth;
                     
-                    // Оновлення бульбашки та горизонтального положення (для веселощів)
+                    // Позиція бульбашки за носом
                     const nose = lm[1];
-                    const xPos = (1 - nose.x) * 100;
-                    const yPos = nose.y * 100;
-                    faceBubble.style.left = `${xPos}%`;
-                    faceBubble.style.top = `${yPos}%`;
-                    faceBubble.style.display = 'flex';
+                    const x = (1 - nose.x) * 100;
+                    const y = nose.y * 100;
+                    faceFeedback.style.left = `${x}%`;
+                    faceFeedback.style.top = `${y}%`;
+                    faceFeedback.style.display = 'flex';
                     
-                    // Визначаємо жест
+                    // Визначення жесту та вертикальної цілі
                     let gesture = "none";
                     let newTarget = 0;
-                    if (mimic.brow > 0.35 && mimic.mouth < 0.2) {
+                    if (browIntensity > 0.3 && mouthIntensity < 0.2) {
                         gesture = "brow";
-                        newTarget = 0.7;
-                        faceBubble.innerHTML = "😠 ГОРСТ ↑";
-                    } else if (mimic.mouth > 0.4 && mimic.brow < 0.2) {
+                        newTarget = 0.72;
+                        faceFeedback.innerHTML = "😠 ГОРСТ ⬆️";
+                        gestureNameDiv.innerHTML = "🏔️ ГОРСТ (підняття)";
+                    } else if (mouthIntensity > 0.4 && browIntensity < 0.2) {
                         gesture = "mouth";
-                        newTarget = -0.8;
-                        faceBubble.innerHTML = "😲 ГРАБЕН ↓";
+                        newTarget = -0.82;
+                        faceFeedback.innerHTML = "😲 ГРАБЕН ⬇️";
+                        gestureNameDiv.innerHTML = "🌊 ГРАБЕН (опускання)";
                     } else {
                         gesture = "none";
                         newTarget = 0;
-                        faceBubble.innerHTML = "😐";
+                        faceFeedback.innerHTML = "😐 нейтрально";
+                        gestureNameDiv.innerHTML = "🧘 Нейтрально";
                     }
-                    
                     targetVertical = newTarget;
-                    update3D();
+                    update3DAnimation();
                     
-                    // Логіка перевірки рівня (якщо не в режимі очікування)
-                    if (!isWaiting && level < lessons.length) {
-                        const required = lessons[level].target;
-                        if (required === "brow" && gesture === "brow") {
-                            confirmFrames++;
-                            if (confirmFrames > 18) {  // ~0.6 секунди стабільного жесту
-                                advanceLevel();
-                                confirmFrames = 0;
-                            }
-                        } else if (required === "mouth" && gesture === "mouth") {
-                            confirmFrames++;
-                            if (confirmFrames > 18) {
-                                advanceLevel();
-                                confirmFrames = 0;
+                    // Логіка проходження рівнів (без голосу, тільки текст)
+                    if (!waitingForSuccess && step < steps.length) {
+                        const required = steps[step].target;
+                        if ((required === "brow" && gesture === "brow") || (required === "mouth" && gesture === "mouth")) {
+                            confirmCounter++;
+                            if (confirmCounter > 18) {  // приблизно 0.6 секунди стабільного жесту
+                                completeStep();
+                                confirmCounter = 0;
                             }
                         } else {
-                            confirmFrames = Math.max(0, confirmFrames - 2);
+                            confirmCounter = Math.max(0, confirmCounter - 2);
                         }
                     }
                 } else {
-                    faceBubble.style.display = 'none';
-                    if (!isWaiting) targetVertical = 0;
+                    faceFeedback.style.display = 'none';
+                    if (!waitingForSuccess) targetVertical = 0;
+                    gestureNameDiv.innerHTML = "🧘 Обличчя не знайдено";
                 }
                 requestAnimationFrame(detect);
             }
             detect();
         }
         
-        // ---------- Запуск камери та 3D ----------
+        // Запуск камери та ініціалізація
         async function startApp() {
             document.getElementById('start-screen').style.display = 'none';
             try {
@@ -499,28 +475,21 @@
                 init3D();
                 await initFaceAI();
                 
-                // Анімаційний цикл Three.js
                 function animate3D() {
                     requestAnimationFrame(animate3D);
-                    if (renderer && scene && camera) {
-                        renderer.render(scene, camera);
-                    }
+                    if (renderer && scene && camera) renderer.render(scene, camera);
                 }
                 animate3D();
                 
-                // Початковий голос
-                speak("Привіт! Покажи нахмурені брови, щоб зробити горст. Відкрий рот для грабена.");
-                instructionEl.innerHTML = "😠 НАХМУР БРОВИ → ГОРСТ &nbsp;|&nbsp; 😲 ВІДКРИЙ РОТА → ГРАБЕН";
-                mimicHint.textContent = lessons[0].desc;
-            } catch (err) {
-                alert("Потрібен дозвіл на камеру!");
+                instructionDiv.innerHTML = `🎯 ${steps[0].desc}`;
+                hintDiv.innerHTML = "😠 Нахмур брови для ГОРСТУ";
+            } catch(err) {
+                alert("Потрібен дозвіл на використання камери!");
                 console.error(err);
             }
         }
         
-        document.getElementById('start-btn').onclick = startApp;
-        
-        // Підлаштування розміру
+        document.getElementById('startBtn').onclick = startApp;
         window.addEventListener('resize', () => {
             if (renderer) {
                 renderer.setSize(window.innerWidth, window.innerHeight);
