@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Географія 7 клас: Живий рух плит</title>
+    <title>Географія 7 клас: Живий розріз літосфери</title>
     <style>
         body { margin: 0; overflow: hidden; background-color: #0d0d11; font-family: 'Segoe UI', sans-serif; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
@@ -24,10 +24,10 @@
 
     <div id="lesson-ui">
         <h2>Географія 7 клас</h2>
-        <p><b>Тема:</b> Рух літосферних плит та рельєф</p>
+        <p><b>Тема:</b> Рух літосферних плит (розріз)</p>
         <hr style="border-color:#333; margin: 10px 0;">
-        <p>😮 <b>Відкрий рот</b> ➡️ Плити розходяться (рифт, магма)</p>
-        <p>😐 <b>Закрий рот</b> ➡️ Плити стикаються (гори, землетрус)</p>
+        <p>😠 <b>Нахмур брови</b> → Плити стикаються (гори)</p>
+        <p>😮 <b>Відкрий рот</b> → Плити розходяться (рифт, магма)</p>
         <div class="status-badge" id="status">Очікування камери...</div>
     </div>
 
@@ -43,7 +43,7 @@
         // --- Ініціалізація Three.js ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
-        scene.fog = new THREE.FogExp2(0x0d0d11, 0.025);
+        scene.fog = new THREE.FogExp2(0x0d0d11, 0.02);
 
         const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.set(0, -4, 32);
@@ -59,13 +59,12 @@
         const count = gridWidth * gridHeight;
 
         const geometry = new THREE.BoxGeometry(0.9, 0.9, 3);
-        const material = new THREE.MeshBasicMaterial({ vertexColors: false }); // колір задаємо через instanceColor
+        const material = new THREE.MeshBasicMaterial({ vertexColors: false });
         const mesh = new THREE.InstancedMesh(geometry, material, count);
         scene.add(mesh);
 
         const dummy = new THREE.Object3D();
         const initialPositions = [];
-        // Збережемо, до якої плити належить кожен блок
         const plateAssignment = new Int8Array(count); // 0 = ліва, 1 = права
 
         let idx = 0;
@@ -79,27 +78,39 @@
             }
         }
 
-        // --- Система частинок для магми (розходження) ---
+        // --- Магматичний шар під корою (розріз) ---
+        const magmaPlaneGeometry = new THREE.PlaneGeometry(80, 40);
+        const magmaPlaneMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff3300,
+            side: THREE.DoubleSide,
+            transparent: true,
+            opacity: 0.7
+        });
+        const magmaPlane = new THREE.Mesh(magmaPlaneGeometry, magmaPlaneMaterial);
+        magmaPlane.rotation.x = -Math.PI / 2; // горизонтально
+        magmaPlane.position.z = -4.5; // під плитами
+        scene.add(magmaPlane);
+
+        // --- Частинки магми (розходження) ---
         const magmaParticleCount = 400;
         const magmaGeometry = new THREE.BufferGeometry();
         const magmaPositions = new Float32Array(magmaParticleCount * 3);
         const magmaColors = new Float32Array(magmaParticleCount * 3);
         const magmaSizes = new Float32Array(magmaParticleCount);
-        const magmaVelocity = new Float32Array(magmaParticleCount * 3); // швидкість кожної частинки
-        const magmaLife = new Float32Array(magmaParticleCount); // час життя
+        const magmaVelocity = new Float32Array(magmaParticleCount * 3);
+        const magmaLife = new Float32Array(magmaParticleCount);
         
-        // Ініціалізуємо частинки випадково
         for (let i = 0; i < magmaParticleCount; i++) {
             magmaPositions[i * 3] = (Math.random() - 0.5) * 20;
             magmaPositions[i * 3 + 1] = (Math.random() - 0.5) * 30;
-            magmaPositions[i * 3 + 2] = Math.random() * -5; // глибина
-            magmaColors[i * 3] = 1.0;   // червоний
+            magmaPositions[i * 3 + 2] = Math.random() * -5;
+            magmaColors[i * 3] = 1.0;
             magmaColors[i * 3 + 1] = 0.3 + Math.random() * 0.4;
             magmaColors[i * 3 + 2] = 0.0;
             magmaSizes[i] = 1.5 + Math.random() * 3;
             magmaVelocity[i * 3] = (Math.random() - 0.5) * 0.02;
             magmaVelocity[i * 3 + 1] = (Math.random() - 0.5) * 0.02;
-            magmaVelocity[i * 3 + 2] = 0.05 + Math.random() * 0.1; // піднімаються
+            magmaVelocity[i * 3 + 2] = 0.05 + Math.random() * 0.1;
             magmaLife[i] = 0;
         }
         
@@ -107,7 +118,6 @@
         magmaGeometry.setAttribute('color', new THREE.BufferAttribute(magmaColors, 3));
         magmaGeometry.setAttribute('size', new THREE.BufferAttribute(magmaSizes, 1));
         
-        // Створюємо спрайтову текстуру (коло)
         const canvas = document.createElement('canvas');
         canvas.width = 32;
         canvas.height = 32;
@@ -132,7 +142,7 @@
         const magmaPoints = new THREE.Points(magmaGeometry, magmaMaterial);
         scene.add(magmaPoints);
 
-        // --- Система частинок для уламків (зіткнення) ---
+        // --- Частинки уламків (зіткнення) ---
         const debrisParticleCount = 300;
         const debrisGeometry = new THREE.BufferGeometry();
         const debrisPositions = new Float32Array(debrisParticleCount * 3);
@@ -144,7 +154,7 @@
         for (let i = 0; i < debrisParticleCount; i++) {
             debrisPositions[i * 3] = (Math.random() - 0.5) * 20;
             debrisPositions[i * 3 + 1] = (Math.random() - 0.5) * 30;
-            debrisPositions[i * 3 + 2] = Math.random() * 5; // над землею
+            debrisPositions[i * 3 + 2] = Math.random() * 5;
             debrisColors[i * 3] = 0.6 + Math.random() * 0.4;
             debrisColors[i * 3 + 1] = 0.6 + Math.random() * 0.4;
             debrisColors[i * 3 + 2] = 0.6 + Math.random() * 0.4;
@@ -171,29 +181,58 @@
         scene.add(debrisPoints);
 
         // --- Стан обличчя ---
-        let faceState = { noseX: 0, mouthOpenRatio: 0, active: false };
+        let faceState = {
+            noseX: 0,
+            mouthOpenRatio: 0,
+            browDownRatio: 0, // 0 = норма, 1 = сильно нахмурені
+            active: false
+        };
 
-        // --- AI Трекінг обличчя ---
+        // --- AI Трекінг обличчя (FaceMesh) ---
         function onResults(results) {
             if (loadingElement) loadingElement.style.display = 'none';
 
             if (results.multiFaceLandmarks && results.multiFaceLandmarks.length > 0) {
                 const landmarks = results.multiFaceLandmarks[0];
+                
+                // Ніс (1)
                 const nose = landmarks[1];
+                faceState.noseX = -(nose.x - 0.5) * 75;
+                
+                // Відкриття рота (відстань між верхньою та нижньою губою)
                 const topLip = landmarks[13];
                 const bottomLip = landmarks[14];
-
-                faceState.noseX = -(nose.x - 0.5) * 75;
                 const mouthDist = Math.sqrt(Math.pow(topLip.x - bottomLip.x, 2) + Math.pow(topLip.y - bottomLip.y, 2));
                 faceState.mouthOpenRatio = Math.min(Math.max((mouthDist - 0.015) / 0.06, 0), 1);
+                
+                // Нахмурення брів (відстань між бровами та верхніми повіками)
+                // Беремо середини брів (107 ліва, 55 права) і верхні повіки (159 праве, 145 ліве)
+                const leftBrow = landmarks[107];
+                const rightBrow = landmarks[55];
+                const leftUpperEyelid = landmarks[145];
+                const rightUpperEyelid = landmarks[159];
+                
+                const browMidY = (leftBrow.y + rightBrow.y) / 2;
+                const eyelidMidY = (leftUpperEyelid.y + rightUpperEyelid.y) / 2;
+                const browEyelidDist = eyelidMidY - browMidY; // зазвичай ~0.04-0.06, при нахмуренні зменшується
+                
+                // Калібрування: нейтральна відстань ~0.05, мінімальна ~0.01
+                const neutralDist = 0.05;
+                const minDist = 0.01;
+                faceState.browDownRatio = Math.max(0, Math.min(1, (neutralDist - browEyelidDist) / (neutralDist - minDist)));
+                
                 faceState.active = true;
 
+                // Статус
                 if (faceState.mouthOpenRatio > 0.4) {
-                    statusBadge.innerHTML = "РИФТОГЕНЕЗ (РОЗХОДЖЕННЯ)";
+                    statusBadge.innerHTML = "РИФТОГЕНЕЗ (МАГМА)";
                     statusBadge.style.background = "#ff3300";
-                } else {
-                    statusBadge.innerHTML = "КОЛІЗІЯ (ЗБЛИЖЕННЯ)";
+                } else if (faceState.browDownRatio > 0.3) {
+                    statusBadge.innerHTML = "КОЛІЗІЯ (ГОРИ)";
                     statusBadge.style.background = "#00cc66";
+                } else {
+                    statusBadge.innerHTML = "Нейтральний стан";
+                    statusBadge.style.background = "#555";
                 }
             } else {
                 faceState.active = false;
@@ -214,40 +253,35 @@
         faceMesh.onResults(onResults);
 
         const cameraUtils = new Camera(videoElement, {
-            onFrame: async () => {
-                await faceMesh.send({ image: videoElement });
-            },
-            width: 640,
-            height: 480
+            onFrame: async () => { await faceMesh.send({ image: videoElement }); },
+            width: 640, height: 480
         });
         cameraUtils.start();
 
-        // --- Допоміжні змінні ---
+        // --- Анімація ---
         const clock = new THREE.Clock();
         const col = new THREE.Color();
-        
-        // Для згладженого руху плит
         let currentGap = 0;
-        const maxGap = 5; // максимальне зміщення плити від центру
+        const maxGap = 5;
 
-        // --- Головний цикл рендерингу ---
         function animate() {
             requestAnimationFrame(animate);
             const time = clock.getElapsedTime();
             
-            // Оновлюємо згладжений рух плит залежно від рота
-            const targetGap = faceState.mouthOpenRatio * maxGap;
+            // Визначаємо режим
+            const riftMode = faceState.active && faceState.mouthOpenRatio > 0.4;
+            const collisionMode = faceState.active && !riftMode && faceState.browDownRatio > 0.3;
+            
+            // Рух плит (розходження)
+            const targetGap = riftMode ? faceState.mouthOpenRatio * maxGap : 0;
             currentGap = THREE.MathUtils.lerp(currentGap, targetGap, 0.1);
             
-            // Межі розлому (лінія носа)
             const faultX = faceState.active ? faceState.noseX : 0;
             
-            // Оновлюємо позиції блоків
+            // Оновлення блоків
             let idx = 0;
-            const instanceColor = mesh.instanceColor;
-            // Перевіряємо, чи існує instanceColor (у r128 може бути null)
-            if (!instanceColor) {
-                // Якщо немає, створимо новий атрибут
+            // Переконуємось, що instanceColor існує
+            if (!mesh.instanceColor) {
                 const colorArray = new Float32Array(count * 3);
                 mesh.instanceColor = new THREE.InstancedBufferAttribute(colorArray, 3);
             }
@@ -258,24 +292,17 @@
                     const block = initialPositions[idx];
                     const plate = plateAssignment[idx];
                     
-                    // Зміщення по X залежно від плити
                     let offsetX = 0;
-                    if (plate === 0) { // ліва плита
-                        offsetX = -currentGap / 2;
-                    } else { // права плита
-                        offsetX = currentGap / 2;
-                    }
+                    if (plate === 0) offsetX = -currentGap / 2;
+                    else offsetX = currentGap / 2;
                     
                     let posX = block.x + offsetX;
                     let posY = block.y;
-                    let posZ = Math.sin(block.x * 0.05 + time * 0.5) * 0.2; // фонові коливання
+                    let posZ = Math.sin(block.x * 0.05 + time * 0.5) * 0.2;
                     
-                    // Базові кольори плит
-                    if (plate === 0) {
-                        col.setHex(0x1a2a3a); // океанічна
-                    } else {
-                        col.setHex(0x2d3a1a); // материкова
-                    }
+                    // Кольори плит
+                    if (plate === 0) col.setHex(0x1a2a3a);
+                    else col.setHex(0x2d3a1a);
                     
                     if (faceState.active) {
                         const distToFault = Math.abs(posX - faultX);
@@ -284,21 +311,26 @@
                         if (distToFault < zoneOfInfluence) {
                             const factor = 1 - (distToFault / zoneOfInfluence);
                             
-                            if (faceState.mouthOpenRatio > 0.4) {
-                                // --- РОЗХОДЖЕННЯ ---
+                            if (riftMode) {
+                                // Розходження: провалля + магма
                                 const sink = faceState.mouthOpenRatio * 7 * factor;
                                 posZ -= sink;
                                 if (factor > 0.3) {
                                     col.lerp(new THREE.Color(0xff4400), factor * faceState.mouthOpenRatio);
                                 }
-                            } else {
-                                // --- ЗІТКНЕННЯ ---
-                                const mountainHeight = 9 * factor * (1 - faceState.mouthOpenRatio);
-                                posZ += Math.abs(Math.sin(block.x * 0.5)) * mountainHeight;
+                            } else if (collisionMode) {
+                                // Зіткнення: гори + корінь (опускання вниз)
+                                const intensity = faceState.browDownRatio;
+                                const mountainHeight = 9 * factor * intensity;
+                                const rootDepth = 3 * factor * intensity; // корінь
+                                posZ += mountainHeight - rootDepth; // одночасно вгору і вниз
+                                
                                 if (posZ > 3.5) {
                                     col.lerp(new THREE.Color(0xffffff), (posZ - 3.5) / 4);
                                 } else if (posZ > 1.5) {
                                     col.lerp(new THREE.Color(0x888888), factor);
+                                } else if (posZ < -1.5) {
+                                    col.lerp(new THREE.Color(0x442222), Math.abs(posZ) / 4);
                                 }
                             }
                         }
@@ -320,23 +352,20 @@
             mesh.instanceMatrix.needsUpdate = true;
             mesh.instanceColor.needsUpdate = true;
             
-            // --- Оновлення частинок магми (тільки при відкритому роті) ---
-            if (faceState.active && faceState.mouthOpenRatio > 0.4) {
+            // Частинки магми (тільки рифт)
+            if (riftMode) {
                 magmaPoints.visible = true;
                 const positions = magmaGeometry.attributes.position.array;
                 const colors = magmaGeometry.attributes.color.array;
                 const sizes = magmaGeometry.attributes.size.array;
                 
                 for (let i = 0; i < magmaParticleCount; i++) {
-                    // Рух частинки
                     positions[i * 3] += magmaVelocity[i * 3];
                     positions[i * 3 + 1] += magmaVelocity[i * 3 + 1];
                     positions[i * 3 + 2] += magmaVelocity[i * 3 + 2];
                     magmaLife[i] += 0.01;
                     
-                    // Якщо частинка піднялась надто високо або застаріла — скидаємо
                     if (positions[i * 3 + 2] > 2 || magmaLife[i] > 1.5) {
-                        // Скидання до низу, біля лінії розлому
                         positions[i * 3] = faultX + (Math.random() - 0.5) * (3 + currentGap * 2);
                         positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
                         positions[i * 3 + 2] = -5 - Math.random() * 3;
@@ -350,7 +379,6 @@
                         colors[i * 3 + 2] = 0.0;
                         sizes[i] = 1.5 + Math.random() * 3;
                     } else {
-                        // Згасання кольору до темно-червоного
                         colors[i * 3 + 1] *= 0.98;
                         sizes[i] *= 0.995;
                     }
@@ -362,8 +390,8 @@
                 magmaPoints.visible = false;
             }
             
-            // --- Оновлення уламків (при закритому роті, зіткнення) ---
-            if (faceState.active && faceState.mouthOpenRatio <= 0.4) {
+            // Частинки уламків (тільки колізія)
+            if (collisionMode) {
                 debrisPoints.visible = true;
                 const positions = debrisGeometry.attributes.position.array;
                 const colors = debrisGeometry.attributes.color.array;
@@ -376,7 +404,6 @@
                     debrisLife[i] += 0.02;
                     
                     if (positions[i * 3 + 2] > 8 || debrisLife[i] > 2.0) {
-                        // Скидання в зону зіткнення
                         positions[i * 3] = faultX + (Math.random() - 0.5) * (4 - currentGap);
                         positions[i * 3 + 1] = (Math.random() - 0.5) * 30;
                         positions[i * 3 + 2] = 1 + Math.random() * 2;
@@ -390,7 +417,6 @@
                         colors[i * 3 + 2] = 0.7 + Math.random() * 0.3;
                         sizes[i] = 0.5 + Math.random() * 1.8;
                     } else {
-                        // Поступове зменшення яскравості
                         colors[i * 3] *= 0.995;
                         colors[i * 3 + 1] *= 0.995;
                         colors[i * 3 + 2] *= 0.995;
@@ -404,7 +430,10 @@
                 debrisPoints.visible = false;
             }
             
-            // Рух камери за носом
+            // Підсвічування магми під час рифту
+            magmaPlane.material.opacity = riftMode ? 0.9 : 0.4;
+            
+            // Камера слідує за носом
             if (faceState.active) {
                 camera.position.x = THREE.MathUtils.lerp(camera.position.x, faceState.noseX * 0.2, 0.05);
             }
