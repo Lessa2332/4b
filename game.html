@@ -270,7 +270,7 @@
       font-size: 14px;
       cursor: grab;
       box-shadow: 0 4px 0 #cda600;
-      touch-action: none; /* Захист від скролу на мобілці при перетягуванні */
+      touch-action: none;
     }
 
     .drag-item:active {
@@ -278,7 +278,7 @@
     }
 
     .drag-item.placed {
-      display: none; /* Сховуємо зі полиці, коли поклали */
+      display: none;
     }
 
     /* ФІНАЛЬНИЙ БЕЙДЖ СУПЕРСИЛИ */
@@ -454,12 +454,10 @@
   </audio>
 
   <script>
-    // Ігрові змінні
     let currentXP = 0;
     let tapProgress = 0;
     let placedItemsCount = 0;
     
-    // Аудіоефекти
     const soundCoin = document.getElementById('soundCoin');
     const soundLevelUp = document.getElementById('soundLevelUp');
 
@@ -470,7 +468,6 @@
       }
     }
 
-    // Функція оновлення головного XP Bar
     function updateXP(amount) {
       currentXP += amount;
       if (currentXP > 100) currentXP = 100;
@@ -478,7 +475,6 @@
       document.getElementById('xpCount').innerText = currentXP;
       document.getElementById('xpBar').style.width = currentXP + '%';
       
-      // Показ спливаючих балів +XP
       const popup = document.getElementById('xpPopup');
       popup.innerText = `+${amount} XP`;
       popup.style.display = 'block';
@@ -493,14 +489,13 @@
         playSound(soundCoin);
         updateXP(30);
         
-        // Перехід на Крок 2 через 1 секунду
         setTimeout(() => {
           document.getElementById('screen1').classList.remove('active');
           document.getElementById('screen2').classList.add('active');
         }, 1000);
       } else {
         element.classList.add('wrong');
-        if (navigator.vibrate) navigator.vibrate([60, 40, 60]); // Вібро-відгук помилки
+        if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
         setTimeout(() => element.classList.remove('wrong'), 800);
       }
     }
@@ -509,34 +504,30 @@
     function handleTap() {
       if (tapProgress >= 100) return;
       
-      tapProgress += 8; // Скільки відсотків дає один тап
+      tapProgress += 8;
       if (tapProgress > 100) tapProgress = 100;
       
       document.getElementById('miniBar').style.width = tapProgress + '%';
-      
-      // Легка мікро-вібрація при кожному тапі (ефект клікера)
       if (navigator.vibrate) navigator.vibrate(20);
 
       if (tapProgress >= 100) {
         playSound(soundCoin);
         updateXP(30);
         
-        // Перехід на Крок 3 через 1 секунду
         setTimeout(() => {
           document.getElementById('screen2').classList.remove('active');
           document.getElementById('screen3').classList.add('active');
-          initDragAndDrop(); // Ініціалізуємо перетягування
+          initDragAndDrop();
         }, 1000);
       }
     }
 
-    // --- ЕТАП 3: ТЕТРІС-РЮКЗАК (Сумісний з ПК та мобільними!) ---
+    // --- ЕТАП 3: ТЕТРІС-РЮКЗАК ---
     function initDragAndDrop() {
       const dragItems = document.querySelectorAll('.drag-item');
       const gridCells = document.querySelectorAll('.grid-cell');
       let draggedItem = null;
 
-      // Підтримка для ПК (Mouse Events)
       dragItems.forEach(item => {
         item.addEventListener('dragstart', function() {
           draggedItem = this;
@@ -555,7 +546,6 @@
         });
       });
 
-      // Підтримка для мобільних телефонів (Touch Events за координатами)
       dragItems.forEach(item => {
         item.addEventListener('touchstart', function(e) {
           draggedItem = this;
@@ -564,7 +554,6 @@
         item.addEventListener('touchmove', function(e) {
           if (!draggedItem) return;
           const touch = e.touches[0];
-          // Рухаємо елемент візуально за пальцем
           draggedItem.style.position = 'fixed';
           draggedItem.style.left = (touch.clientX - 50) + 'px';
           draggedItem.style.top = (touch.clientY - 20) + 'px';
@@ -575,62 +564,76 @@
           if (!draggedItem) return;
           
           const touch = e.changedTouches[0];
-          // Знаходимо, над якою коміркою відпустили палець
-          draggedItem.style.display = 'none'; // Тимчасово ховаємо, щоб зчитати елемент під ним
+          draggedItem.style.display = 'none';
           const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
-          draggedItem.style.display = 'block'; // Повертаємо
+          
+          draggedItem.style.position = 'static';
+          draggedItem.style.zIndex = 'auto';
+          draggedItem.style.display = 'block';
           
           const targetCell = elementUnderTouch ? elementUnderTouch.closest('.grid-cell') : null;
 
           if (targetCell && !targetCell.hasAttribute('data-filled')) {
             placeItemInGrid(targetCell, draggedItem);
-          } else {
-            // Якщо не влучили в рюкзак — повертаємо на полицю
-            draggedItem.style.position = 'static';
-            draggedItem.style.zIndex = 'auto';
           }
           draggedItem = null;
         });
       });
     }
 
-    // Спільна функція зарахування предмету в сітку
     function placeItemInGrid(cell, item) {
       cell.setAttribute('data-filled', 'true');
       cell.style.background = 'var(--gold-yellow)';
       cell.style.border = '2px solid white';
-      cell.innerText = item.innerText.split(' ')[0]; // Залишаємо тільки емодзі у рюкзаку
+      cell.innerText = item.innerText.split(' ')[0];
       
-      item.classList.add('placed'); // Сховуємо оригінал
+      item.classList.add('placed');
       placedItemsCount++;
       
-      if (navigator.vibrate) navigator.vibrate(40); // Легкий вібро-відгук успішної дії
+      if (navigator.vibrate) navigator.vibrate(40);
 
-      // Коли спаковано обидва предмети — КВЕСТ ЗАВЕРШЕНО!
       if (placedItemsCount >= 2) {
         updateXP(40);
         setTimeout(finishGame, 800);
       }
     }
 
-    // --- ФІНАЛ: ВИВІД БЕЙДЖА ТА САЛЮТ ---
+    // --- ФІНАЛ: НАДСИЛАННЯ В ТАБЛИЦЮ, БЕЙДЖ ТА САЛЮТ ---
     function finishGame() {
       document.getElementById('screen3').classList.remove('active');
       document.getElementById('screenFinal').classList.add('active');
       
       playSound(soundLevelUp);
       
-      // Зчитуємо дані дитини з пам'яті телефону (введені на Етапі 5: Активація)
       const studentName = localStorage.getItem('pysanka_student_name') || 'Супер-Учень';
       const studentSkill = localStorage.getItem('pysanka_student_skill') || '🦾 Мега-мозок математики';
       const studentBonus = localStorage.getItem('pysanka_student_bonus') || 'Швидкість розв’язування задач x2!';
       
-      // Вставляємо дані у фінальний бейдж
       document.getElementById('badgeName').innerText = studentName;
       document.getElementById('badgeSkill').innerText = studentSkill;
       document.getElementById('badgeBonus').innerText = studentBonus;
 
-      // Запуск вибуху конфеті за допомогою завантаженої бібліотеки
+      // 🌟 ВСТАВЛЕНЕ ВАШЕ ПОСИЛАННЯ НА GOOGLE APPS SCRIPT 🌟
+      const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzqqDgBlAER2cHA-wLm2IVqPmdvTcENYZ9wvKODyc77kgFbvPw7bbY510sPsPEApueZ/exec";
+
+      const playerData = {
+        name: studentName,
+        skill: studentSkill,
+        bonus: studentBonus,
+        key: "Pysanka5ClassKey2026" // Секретний ключ захисту
+      };
+
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(playerData)
+      })
+      .then(() => console.log("Дані захищено та успішно надіслані!"))
+      .catch(err => console.error("Помилка відправки даних:", err));
+
       if (typeof confetti === 'function') {
         confetti({
           particleCount: 150,
