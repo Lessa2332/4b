@@ -28,7 +28,6 @@
     body {
       font-family: var(--font-main);
       background: var(--bg-blue);
-      /* Текстурований глянцевий фон, як на вашій картці */
       background: radial-gradient(circle at 50% 50%, var(--bg-blue) 0%, var(--bg-dark-blue) 100%);
       color: var(--text-white);
       min-height: 100vh;
@@ -40,7 +39,6 @@
       overflow-x: hidden;
     }
 
-    /* Веселі фонові елементи (іконки) */
     .bg-elements {
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -69,7 +67,6 @@
       opacity: 0.9;
     }
     
-    /* ІГРОВИЙ БОКС */
     .scanner-box {
       background: #0055ff;
       border: 6px solid var(--text-white);
@@ -83,7 +80,6 @@
       position: relative;
     }
 
-    /* БЛОК ВВОДУ ІМЕНІ */
     .input-group {
       margin-bottom: 20px;
       transition: var(--transition);
@@ -133,9 +129,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      user-select: none;
+      -webkit-user-select: none;
     }
     
-    /* Ефект блокування сканера, поки не ввели ім'я */
     .scan-area.disabled {
       opacity: 0.3;
       border-color: #777;
@@ -148,6 +145,7 @@
       height: 65%;
       object-fit: contain;
       transition: transform 0.3s ease;
+      pointer-events: none;
     }
 
     .scan-area:not(.disabled):hover .fingerprint-img {
@@ -194,7 +192,6 @@
       50% { opacity: 1; transform: scale(1.03); }
     }
     
-    /* РЕЗУЛЬТАТИ ТА ПОВІДОМЛЕННЯ */
     #message {
       font-size: 16px;
       font-weight: 700;
@@ -211,7 +208,6 @@
       min-height: 35px;
     }
     
-    /* КНОПКИ */
     .btn-group {
       display: flex;
       gap: 10px;
@@ -265,16 +261,21 @@
 
   <div class="scanner-box">
     <div class="input-group" id="inputGroup">
-      <label for="userName">Введи своє ім'я </label>
+      <label for="userName">Введи своє ім'я</label>
       <input type="text" id="userName" class="name-input" placeholder="Наприклад: Максим Іванов" oninput="checkInput()">
     </div>
 
-    <div class="scan-area disabled" id="scanArea" onclick="startScan()" ontouchstart="startScan()">
+    <div class="scan-area disabled" id="scanArea" 
+         onmousedown="startScan(event)" 
+         onmouseup="stopScanEarly(event)" 
+         onmouseleave="stopScanEarly(event)"
+         ontouchstart="startScan(event)" 
+         ontouchend="stopScanEarly(event)">
       <div id="scanLine" class="scan-line"></div>
       <svg class="fingerprint-img" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2C6.48 2 2 6.48 2 12C2 14.22 2.73 16.28 3.97 17.94C4.26 18.33 4.81 18.41 5.2 18.12C5.59 17.83 5.67 17.28 5.38 16.89C4.35 15.51 3.75 13.82 3.75 12C3.75 7.44 7.44 3.75 12 3.75C16.56 3.75 20.25 7.44 20.25 12C20.25 13.01 20.07 14 19.73 14.93C19.58 15.36 19.8 15.83 20.23 15.98C20.66 16.13 21.13 15.91 21.28 15.48C21.75 14.22 22 12.88 22 12C22 6.48 17.52 2 12 2Z" fill="%2339FF14"/>
-        <path d="M12 6C8.69 6 6 8.69 6 12C6 13.46 6.52 14.81 7.39 15.86C7.67 16.2 8.19 16.24 8.53 15.96C8.87 15.68 8.91 15.16 8.63 14.82C7.94 13.99 7.5 12.95 7.5 12C7.5 9.51 9.51 7.5 12 7.5C14.49 7.5 16.5 9.51 16.5 12C16.5 13.41 15.82 14.65 14.79 15.42C14.42 15.7 14.35 16.22 14.63 16.59C14.91 16.96 15.43 17.03 15.8 16.75C17.18 15.72 18 14.07 18 12C18 8.69 15.31 6 12 6Z" fill="%2339FF14"/>
-        <path d="M12 10C10.9 10 10 10.9 10 12C10 13.25 10.66 14.36 11.64 14.81C11.96 14.96 12.35 14.77 12.48 14.43C12.61 14.09 12.43 13.7 12.09 13.57C11.49 13.29 11.25 12.68 11.25 12C11.25 11.59 11.59 11.25 12 11.25C12.41 11.25 12.75 11.59 12.75 12C12.75 13.1 13.65 14 14.75 14C15.16 14 15.5 13.66 15.5 13.25C15.5 12.84 15.16 12.5 14.75 12.5C14.47 12.5 14.25 12.28 14.25 12C14.25 10.9 13.35 10 12 10Z" fill="%2339FF14"/>
+        <path d="M12 2C6.48 2 2 6.48 2 12C2 14.22 2.73 16.28 3.97 17.94C4.26 18.33 4.81 18.41 5.2 18.12C5.59 17.83 5.67 17.28 5.38 16.89C4.35 15.51 3.75 13.82 3.75 12C3.75 7.44 7.44 3.75 12 3.75C16.56 3.75 20.25 7.44 20.25 12C20.25 13.01 20.07 14 19.73 14.93C19.58 15.36 19.8 15.83 20.23 15.98C20.66 16.13 21.13 15.91 21.28 15.48C21.75 14.22 22 12.88 22 12C22 6.48 17.52 2 12 2Z" fill="#39FF14"/>
+        <path d="M12 6C8.69 6 6 8.69 6 12C6 13.46 6.52 14.81 7.39 15.86C7.67 16.2 8.19 16.24 8.53 15.96C8.87 15.68 8.91 15.16 8.63 14.82C7.94 13.99 7.5 12.95 7.5 12C7.5 9.51 9.51 7.5 12 7.5C14.49 7.5 16.5 9.51 16.5 12C16.5 13.41 15.82 14.65 14.79 15.42C14.42 15.7 14.35 16.22 14.63 16.59C14.91 16.96 15.43 17.03 15.8 16.75C17.18 15.72 18 14.07 18 12C18 8.69 15.31 6 12 6Z" fill="#39FF14"/>
+        <path d="M12 10C10.9 10 10 10.9 10 12C10 13.25 10.66 14.36 11.64 14.81C11.96 14.96 12.35 14.77 12.48 14.43C12.61 14.09 12.43 13.7 12.09 13.57C11.49 13.29 11.25 12.68 11.25 12C11.25 11.59 11.59 11.25 12 11.25C12.41 11.25 12.75 11.59 12.75 12C12.75 13.1 13.65 14 14.75 14C15.16 14 15.5 13.66 15.5 13.25C15.5 12.84 15.16 12.5 14.75 12.5C14.47 12.5 14.25 12.28 14.25 12C14.25 10.9 13.35 10 12 10Z" fill="#39FF14"/>
       </svg>
     </div>
     
@@ -289,12 +290,11 @@
     </div>
   </div>
 
-  <audio id="scanSound">
+  <audio id="scanSound" preload="auto">
     <source src="https://assets.mixkit.co/sfx/download/mixkit-scanning-sci-fi-alarm-905.wav" type="audio/wav" />
   </audio>
 
   <script>
-    // ============ СУПЕРСИЛИ П'ЯТИКЛАСНИКІВ ============
     const SKILLS = [
       { name: '🦾 Мега-мозок математики', бонус: 'Швидкість розв’язування задач x2!' },
       { name: '🧭 Майстер географічних мандрів', бонус: 'Ніколи не заблукаєш у кабінетах!' },
@@ -316,12 +316,12 @@
     const sound = document.getElementById('scanSound');
     
     let scanTimer = null;
+    let isScanning = false; // Змінна стану утримання
 
-    // Перевірка введення імені для розблокування сканера
     function checkInput() {
       if (nameInput.value.trim().length >= 3) {
         scanArea.classList.remove('disabled');
-        tapHint.innerHTML = '👆 Приклади палець для верифікації!';
+        tapHint.innerHTML = '👆 Притисни й ТРИМАЙ палець для сканування!';
         tapHint.style.color = 'var(--neon-green)';
       } else {
         scanArea.classList.add('disabled');
@@ -330,11 +330,13 @@
       }
     }
     
-    // Запуск сканування
-    function startScan() {
-      if (scanArea.classList.contains('disabled') || scanArea.classList.contains('scanning')) return;
+    // Запуск утримання пальця
+    function startScan(event) {
+      if (event) event.preventDefault();
+      if (scanArea.classList.contains('disabled') || isScanning) return;
       
-      // Сховуємо старі результати та інпут під час сканування
+      isScanning = true;
+      
       resetBtn.style.display = 'none';
       startGameBtn.style.display = 'none';
       skillDisplay.innerHTML = '';
@@ -343,31 +345,33 @@
       
       scanArea.classList.add('scanning');
       messageEl.innerHTML = '<span style="color: var(--text-white);">🧬 Сканування відбитку... Аналіз ДНК-скілів</span>';
-      tapHint.innerHTML = 'Тримай палець! 🤖';
+      tapHint.innerHTML = 'ТРИМАЙ, НЕ ВІДПУСКАЙ! ⏳';
+      tapHint.style.color = 'var(--gold-yellow)';
       
       if (sound) {
         sound.currentTime = 0;
-        sound.play().catch(e => console.log('Потрібна взаємодія для звуку'));
+        sound.play().catch(e => console.log('Аудіо заблоковано браузером'));
       }
       
       if (scanTimer) clearTimeout(scanTimer);
       
       // Сканування триває 3 секунди
       scanTimer = setTimeout(() => {
+        if (!isScanning) return; // Додатковий захист від збоїв
+        
+        isScanning = false;
         scanArea.classList.remove('scanning');
         document.getElementById('inputGroup').style.opacity = '1';
         
-        // Отримуємо рандомну суперсилу
         const randomSkill = SKILLS[Math.floor(Math.random() * SKILLS.length)];
         const studentName = nameInput.value.trim();
         
-        // Вивід крутого результату
         messageEl.innerHTML = `<span style="color: var(--neon-green);">✅ ВЕРИФІКАЦІЮ ПРОЙДЕНО!</span><br><small style="color:#aaa">${studentName} успішно доданий(а) в 5-й клас</small>`;
         skillDisplay.innerHTML = `<div style="font-size:14px; color:var(--text-white); font-weight:400; margin-bottom:5px;">ТВОЯ СУПЕРСИЛА:</div>${randomSkill.name}<br><span style="font-size:14px; font-weight:bold; color:var(--neon-green)">${randomSkill.бонус}</span>`;
         
-        tapHint.innerHTML = '⚡ Скіл розблоковано! Спробуй гру!';
+        tapHint.innerHTML = '⚡ Скіл розблоковано! Починай квест!';
+        tapHint.style.color = 'var(--neon-green)';
         
-        // Зберігаємо ім'я та силу в локальну пам'ять, щоб використати всередині самої гри
         localStorage.setItem('pysanka_student_name', studentName);
         localStorage.setItem('pysanka_student_skill', randomSkill.name);
         
@@ -378,8 +382,30 @@
       }, 3000);
     }
     
-    // Скидання
+    // Переривання сканування, якщо палець прибрали завчасно
+    function stopScanEarly(event) {
+      if (event) event.preventDefault();
+      if (!isScanning) return; // Якщо сканування не запущене або вже успішно пройшло
+      
+      isScanning = false;
+      if (scanTimer) clearTimeout(scanTimer);
+      
+      scanArea.classList.remove('scanning');
+      if (sound) {
+        sound.pause();
+        sound.currentTime = 0;
+      }
+      
+      messageEl.innerHTML = '<span style="color: #ff3366;">❌ Помилка: Сканування перервано!</span>';
+      tapHint.innerHTML = 'Притисни палець і тримай до кінця! 👆';
+      tapHint.style.color = '#ff3366';
+      
+      document.getElementById('inputGroup').style.opacity = '1';
+      nameInput.disabled = false;
+    }
+
     function resetScan() {
+      isScanning = false;
       scanArea.classList.remove('scanning');
       messageEl.innerHTML = '';
       skillDisplay.innerHTML = '';
