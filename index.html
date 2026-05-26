@@ -4,490 +4,158 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Рівень 5: Активація | Квест-гра</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-blue: #0066ff;
-      --bg-dark-blue: #0044cc;
-      --gold-yellow: #FFE600;
-      --neon-green: #39FF14;
-      --text-white: #ffffff;
-      --font-main: 'Montserrat', sans-serif;
-      --transition: all 0.3s ease;
+      --blue:#1a56ff; --dark:#0a1a6e; --gold:#FFE600;
+      --green:#39FF14; --pink:#ff3366; --white:#ffffff;
+      --font:'Nunito',sans-serif;
     }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-    
-    body {
-      font-family: var(--font-main);
-      background: var(--bg-blue);
-      background: radial-gradient(circle at 50% 50%, var(--bg-blue) 0%, var(--bg-dark-blue) 100%);
-      color: var(--text-white);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 15px;
-      overflow-x: hidden;
-    }
-
-    .bg-elements {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-image: url('data:image/svg+xml;utf8,<svg width="80" height="80" viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="40" r="4" fill="white" opacity="0.15"/><path d="M10 10 L20 20 M70 10 L60 20" stroke="white" stroke-width="2" opacity="0.1"/></svg>');
-      pointer-events: none;
-      z-index: -1;
-    }
-    
-    h1 {
-      font-weight: 900;
-      font-size: 28px;
-      color: var(--gold-yellow);
-      text-align: center;
-      margin-bottom: 5px;
-      text-shadow: 0 4px 0px rgba(0,0,0,0.3);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-    }
-    
-    .subtitle {
-      text-align: center;
-      color: var(--text-white);
-      margin-bottom: 20px;
-      font-size: 15px;
-      font-weight: 700;
-      opacity: 0.9;
-    }
-    
-    .scanner-box {
-      background: #0055ff;
-      border: 6px solid var(--text-white);
-      border-radius: 40px;
-      padding: 25px 20px;
-      max-width: 420px;
-      width: 100%;
-      margin: 0 auto;
-      box-shadow: 0 20px 0px rgba(0, 0, 68, 0.4);
-      text-align: center;
-      position: relative;
-    }
-
-    .input-group {
-      margin-bottom: 15px;
-      transition: var(--transition);
-    }
-
-    .input-group label {
-      display: block;
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--gold-yellow);
-      text-transform: uppercase;
-    }
-
-    .name-input {
-      width: 100%;
-      padding: 15px 20px;
-      font-family: var(--font-main);
-      font-size: 18px;
-      font-weight: 700;
-      border: 4px solid var(--text-white);
-      border-radius: 25px;
-      background: #0044cc;
-      color: var(--text-white);
-      text-align: center;
-      outline: none;
-      box-shadow: inset 0 5px 0px rgba(0,0,0,0.2);
-    }
-
-    .name-input::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-    }
-
-    .vibe-control {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 15px;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 8px 16px;
-      border-radius: 20px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      cursor: pointer;
-      user-select: none;
-      transition: var(--transition);
-    }
-
-    .vibe-control:hover {
-      border-color: var(--gold-yellow);
-    }
-
-    .vibe-label {
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .toggle-switch {
-      width: 40px;
-      height: 22px;
-      background: #ff3366;
-      border-radius: 11px;
-      position: relative;
-      transition: var(--transition);
-    }
-
-    .toggle-handle {
-      width: 16px;
-      height: 16px;
-      background: white;
-      border-radius: 50%;
-      position: absolute;
-      top: 3px;
-      left: 3px;
-      transition: var(--transition);
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .vibe-control.active .toggle-switch {
-      background: var(--neon-green);
-    }
-
-    .vibe-control.active .toggle-handle {
-      left: 21px;
-    }
-
-    .scan-area {
-      width: 170px;
-      height: 170px;
-      margin: 10px auto;
-      border: 6px solid var(--neon-green);
-      border-radius: 50%;
-      position: relative;
-      cursor: pointer;
-      background: radial-gradient(circle, #0033aa 40%, #001166 100%);
-      overflow: hidden;
-      transition: var(--transition);
-      box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      user-select: none;
-      -webkit-user-select: none;
-    }
-    
-    .scan-area.disabled {
-      opacity: 0.3;
-      border-color: #777;
-      cursor: not-allowed;
-      pointer-events: none;
-    }
-    
-    .fingerprint-img {
-      width: 65%;
-      height: 65%;
-      object-fit: contain;
-      transition: transform 0.3s ease;
-      pointer-events: none;
-    }
-
-    .scan-area:not(.disabled):hover .fingerprint-img {
-      transform: scale(1.1);
-    }
-    
-    .scan-line {
-      position: absolute;
-      left: 0;
-      width: 100%;
-      height: 6px;
-      background: var(--neon-green);
-      box-shadow: 0 0 15px var(--neon-green), 0 0 30px var(--neon-green);
-      animation: scan 2s linear infinite;
-      display: none;
-      z-index: 10;
-    }
-    
-    @keyframes scan {
-      0% { top: 0%; }
-      50% { top: 100%; }
-      100% { top: 0%; }
-    }
-    
-    .scan-area.scanning {
-      box-shadow: 0 0 40px var(--neon-green);
-      border-color: var(--text-white);
-    }
-
-    .scan-area.scanning .scan-line {
-      display: block;
-    }
-    
-    .tap-hint {
-      color: var(--text-white);
-      font-size: 13px;
-      font-weight: 700;
-      margin-top: 10px;
-      animation: pulse 1.5s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 0.6; transform: scale(1); }
-      50% { opacity: 1; transform: scale(1.03); }
-    }
-    
-    #message {
-      font-size: 18px;
-      font-weight: 900;
-      margin-top: 20px;
-      margin-bottom: 10px;
-      line-height: 1.4;
-      min-height: 25px;
-    }
-    
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    
-    .btn {
-      padding: 14px 28px;
-      background: #ff3366;
-      border: 4px solid var(--text-white);
-      color: var(--text-white);
-      font-size: 16px;
-      font-weight: 900;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: var(--transition);
-      text-decoration: none;
-      border-radius: 25px;
-      box-shadow: 0 6px 0px #cc0033;
-    }
-    
-    .btn:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0px #cc0033;
-    }
-    
-    .btn-gold {
-      background: var(--gold-yellow);
-      color: #0044cc;
-      box-shadow: 0 6px 0px #cda600;
-    }
-
-    .btn-gold:active {
-      box-shadow: 0 2px 0px #cda600;
-    }
-    
-    @media (max-width: 400px) {
-      h1 { font-size: 24px; }
-      .scan-area { width: 140px; height: 140px; }
-      .btn { padding: 12px 20px; font-size: 14px; }
-    }
+    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+    body{font-family:var(--font);background:radial-gradient(ellipse at 60% 10%,var(--blue) 0%,var(--dark) 70%);color:var(--white);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:15px;overflow-x:hidden;}
+    h1{font-weight:900;font-size:26px;color:var(--gold);text-align:center;margin-bottom:6px;text-transform:uppercase;text-shadow:0 4px 0 rgba(0,0,0,.3);}
+    .sub{text-align:center;font-size:14px;font-weight:700;opacity:.85;margin-bottom:18px;}
+    .box{background:#1a4aff;border:5px solid var(--white);border-radius:36px;padding:26px 20px;max-width:420px;width:100%;box-shadow:0 16px 0 rgba(0,0,50,.4);text-align:center;}
+    .lbl{display:block;font-size:12px;font-weight:800;color:var(--gold);text-transform:uppercase;margin-bottom:7px;text-align:left;}
+    .inp{width:100%;padding:14px 18px;font-family:var(--font);font-size:17px;font-weight:800;border:4px solid var(--white);border-radius:22px;background:#0033bb;color:var(--white);text-align:center;outline:none;margin-bottom:16px;}
+    .inp::placeholder{color:rgba(255,255,255,.4);}
+    .vibe{display:inline-flex;align-items:center;gap:10px;background:rgba(0,0,0,.2);padding:8px 16px;border-radius:20px;border:2px solid rgba(255,255,255,.2);cursor:pointer;margin-bottom:16px;}
+    .vibe-lbl{font-size:12px;font-weight:800;text-transform:uppercase;}
+    .toggle{width:40px;height:22px;background:var(--pink);border-radius:11px;position:relative;transition:.3s;}
+    .toggle-h{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:.3s;box-shadow:0 2px 4px rgba(0,0,0,.3);}
+    .vibe.on .toggle{background:var(--green);}
+    .vibe.on .toggle-h{left:21px;}
+    .scan{width:160px;height:160px;margin:6px auto 10px;border:6px solid var(--green);border-radius:50%;position:relative;cursor:pointer;background:radial-gradient(circle,#0033aa 40%,#001166 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;box-shadow:0 0 22px rgba(57,255,20,.4);}
+    .scan.off{opacity:.35;border-color:#666;cursor:not-allowed;pointer-events:none;}
+    .scan-line{position:absolute;left:0;width:100%;height:6px;background:var(--green);box-shadow:0 0 14px var(--green);display:none;animation:scanAnim 2s linear infinite;z-index:5;}
+    @keyframes scanAnim{0%{top:0%}50%{top:100%}100%{top:0%}}
+    .scan.go .scan-line{display:block;}
+    .scan.go{box-shadow:0 0 40px var(--green);}
+    .fp{width:60%;height:60%;pointer-events:none;}
+    .hint{font-size:13px;font-weight:800;margin-top:8px;animation:pulse 1.5s infinite;}
+    @keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+    #msg{font-size:16px;font-weight:900;margin:14px 0 6px;min-height:22px;line-height:1.4;}
+    .btns{display:flex;gap:10px;justify-content:center;margin-top:12px;}
+    .btn{padding:13px 24px;border:4px solid var(--white);color:var(--white);font-size:15px;font-weight:900;text-transform:uppercase;cursor:pointer;border-radius:22px;text-decoration:none;font-family:var(--font);}
+    .btn-red{background:var(--pink);box-shadow:0 5px 0 #991133;}
+    .btn-red:active{transform:translateY(4px);box-shadow:0 1px 0 #991133;}
+    .btn-gold{background:var(--gold);color:#1a1a00;box-shadow:0 5px 0 #cda500;}
+    .btn-gold:active{transform:translateY(4px);box-shadow:0 1px 0 #cda500;}
   </style>
 </head>
 <body>
+  <h1>🚀 РІВЕНЬ 5: АКТИВОВАНО!</h1>
+  <div class="sub">Вхід у базу даних п'ятикласників</div>
 
-  <div class="bg-elements"></div>
+  <div class="box">
+    <label class="lbl" for="uname">Введи своє ім'я</label>
+    <input class="inp" id="uname" placeholder="Наприклад: Ян або Максим" oninput="chk()">
 
-  <h1>🚀 РІВЕНЬ 5: АКТИВОВАНО! 🚀</h1>
-  <div class="subtitle">Вхід у базу даних п'ятикласників</div>
-
-  <div class="scanner-box">
-    <div class="input-group" id="inputGroup">
-      <label for="userName">Введи своє ім'я</label>
-      <input type="text" id="userName" class="name-input" placeholder="Наприклад: Ян або Максим" oninput="checkInput()">
+    <div class="vibe" id="vib" onclick="toggleV()">
+      <span class="vibe-lbl" id="vlbl">📳 Вібрація: OFF</span>
+      <div class="toggle"><div class="toggle-h"></div></div>
     </div>
 
-    <div class="vibe-control" id="vibeToggle" onclick="toggleVibration()">
-      <span class="vibe-label" id="vibeLabel">📳 Вібрація: OFF</span>
-      <div class="toggle-switch">
-        <div class="toggle-handle"></div>
-      </div>
-    </div>
-
-    <div class="scan-area disabled" id="scanArea" 
-         onmousedown="startScan(event)" 
-         onmouseup="stopScanEarly(event)" 
-         onmouseleave="stopScanEarly(event)"
-         ontouchstart="startScan(event)" 
-         ontouchend="stopScanEarly(event)">
-      <div id="scanLine" class="scan-line"></div>
-      <svg class="fingerprint-img" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2C6.48 2 2 6.48 2 12C2 14.22 2.73 16.28 3.97 17.94C4.26 18.33 4.81 18.41 5.2 18.12C5.59 17.83 5.67 17.28 5.38 16.89C4.35 15.51 3.75 13.82 3.75 12C3.75 7.44 7.44 3.75 12 3.75C16.56 3.75 20.25 7.44 20.25 12C20.25 13.01 20.07 14 19.73 14.93C19.58 15.36 19.8 15.83 20.23 15.98C20.66 16.13 21.13 15.91 21.28 15.48C21.75 14.22 22 12.88 22 12C22 6.48 17.52 2 12 2Z" fill="#39FF14"/>
-        <path d="M12 6C8.69 6 6 8.69 6 12C6 13.46 6.52 14.81 7.39 15.86C7.67 16.2 8.19 16.24 8.53 15.96C8.87 15.68 8.91 15.16 8.63 14.82C7.94 13.99 7.5 12.95 7.5 12C7.5 9.51 9.51 7.5 12 7.5C14.49 7.5 16.5 9.51 16.5 12C16.5 13.41 15.82 14.65 14.79 15.42C14.42 15.7 14.35 16.22 14.63 16.59C14.91 16.96 15.43 17.03 15.8 16.75C17.18 15.72 18 14.07 18 12C18 8.69 15.31 6 12 6Z" fill="#39FF14"/>
-        <path d="M12 10C10.9 10 10 10.9 10 12C10 13.25 10.66 14.36 11.64 14.81C11.96 14.96 12.35 14.77 12.48 14.43C12.61 14.09 12.43 13.7 12.09 13.57C11.49 13.29 11.25 12.68 11.25 12C11.25 11.59 11.59 11.25 12 11.25C12.41 11.25 12.75 11.59 12.75 12C12.75 13.1 13.65 14 14.75 14C15.16 14 15.5 13.66 15.5 13.25C15.5 12.84 15.16 12.5 14.75 12.5C14.47 12.5 14.25 12.28 14.25 12C14.25 10.9 13.35 10 12 10Z" fill="#39FF14"/>
+    <div class="scan off" id="scan"
+         onmousedown="startS(event)" onmouseup="stopS(event)" onmouseleave="stopS(event)"
+         ontouchstart="startS(event)" ontouchend="stopS(event)">
+      <div class="scan-line"></div>
+      <svg class="fp" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C6.48 2 2 6.48 2 12c0 2.22.73 4.28 1.97 5.94.29.39.84.47 1.23.18.39-.29.47-.84.18-1.23A8.24 8.24 0 013.75 12C3.75 7.44 7.44 3.75 12 3.75c4.56 0 8.25 3.69 8.25 8.25 0 1.01-.18 2-.52 2.93-.15.43.07.9.5 1.05.43.15.9-.07 1.05-.5C21.75 14.22 22 12.88 22 12c0-5.52-4.48-10-10-10z" fill="#39FF14"/>
+        <path d="M12 6C8.69 6 6 8.69 6 12c0 1.46.52 2.81 1.39 3.86.28.34.8.38 1.14.1.34-.28.38-.8.1-1.14A4.74 4.74 0 017.5 12C7.5 9.51 9.51 7.5 12 7.5c2.49 0 4.5 2.01 4.5 4.5 0 1.41-.68 2.65-1.71 3.42-.37.28-.44.8-.16 1.17.28.37.8.44 1.17.16C17.18 15.72 18 14.07 18 12c0-3.31-2.69-6-6-6z" fill="#39FF14"/>
+        <circle cx="12" cy="12" r="2" fill="#39FF14"/>
       </svg>
     </div>
-    
-    <div class="tap-hint" id="tapHint">Заповни поле з ім'ям вгорі 👆</div>
-    
-    <div id="message"></div>
-    
-    <div class="btn-group">
-      <button class="btn" onclick="resetScan()" id="resetBtn" style="display: none;">Ще раз</button>
-      <a href="game.html" class="btn btn-gold" id="startGameBtn" style="display: none;">СТАРТ ГРИ 🎮</a>
+    <div class="hint" id="hint" style="color:var(--white)">Заповни поле з ім'ям вгорі 👆</div>
+    <div id="msg"></div>
+    <div class="btns">
+      <button class="btn btn-red" id="rBtn" style="display:none" onclick="reset()">Ще раз</button>
+      <a href="game.html" class="btn btn-gold" id="goBtn" style="display:none">СТАРТ ГРИ 🎮</a>
     </div>
   </div>
 
-  <audio id="scanSound" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/download/mixkit-scanning-sci-fi-alarm-905.wav" type="audio/wav" />
-  </audio>
+  <audio id="snd" preload="auto"><source src="https://assets.mixkit.co/sfx/download/mixkit-scanning-sci-fi-alarm-905.wav" type="audio/wav"></audio>
 
   <script>
-    const SKILLS = [
-      { name: '🦾 Мега-мозок математики', бонус: 'Швидкість розв’язування задач x2!' },
-      { name: '🧭 Майстер географічних мандрів', бонус: 'Ніколи не заблукаєш у кабінетах!' },
-      { name: '⚡ Генератор геніальних ідей', бонус: 'Твої проєкти здивують усю школу!' },
-      { name: '🛡️ Захисник класної дружби', бонус: 'Твоя суперсила — єднати друзів!' },
-      { name: '🚀 Космічний лідер', бонус: 'Упевнено ведеш команду за собою!' },
-      { name: '🎨 Креативний ніндзя', бонус: 'Вмієш малювати шедеври на берегах!' },
-      { name: '📚 Хранитель шкільних таємниць', бонус: 'Знаєш відповіді на всі запитання!' },
-      { name: '🎭 Суперзірка перерв', бонус: 'Вмієш піднімати настрій усьому класу!' }
+    const SKILLS=[
+      {name:'🦾 Мега-мозок математики',бонус:'Швидкість розв\'язування задач x2!'},
+      {name:'🧭 Майстер географічних мандрів',бонус:'Ніколи не заблукаєш у кабінетах!'},
+      {name:'⚡ Генератор геніальних ідей',бонус:'Твої проєкти здивують усю школу!'},
+      {name:'🛡️ Захисник класної дружби',бонус:'Твоя суперсила — єднати друзів!'},
+      {name:'🚀 Космічний лідер',бонус:'Упевнено ведеш команду за собою!'},
+      {name:'🎨 Креативний ніндзя',бонус:'Вмієш малювати шедеври на берегах!'},
+      {name:'📚 Хранитель шкільних таємниць',бонус:'Знаєш відповіді на всі запитання!'},
+      {name:'🎭 Суперзірка перерв',бонус:'Вмієш піднімати настрій усьому класу!'}
     ];
-    
-    const scanArea = document.getElementById('scanArea');
-    const tapHint = document.getElementById('tapHint');
-    const nameInput = document.getElementById('userName');
-    const messageEl = document.getElementById('message');
-    const resetBtn = document.getElementById('resetBtn');
-    const startGameBtn = document.getElementById('startGameBtn');
-    const sound = document.getElementById('scanSound');
-    const vibeToggle = document.getElementById('vibeToggle');
-    const vibeLabel = document.getElementById('vibeLabel');
-    
-    let scanTimer = null;
-    let isScanning = false;
-    let useVibration = false;
+    let useV=false, scanning=false, timer=null;
+    const scan=document.getElementById('scan');
+    const hint=document.getElementById('hint');
+    const msg=document.getElementById('msg');
+    const snd=document.getElementById('snd');
 
-    function toggleVibration() {
-      useVibration = !useVibration;
-      if (useVibration) {
-        vibeToggle.classList.add('active');
-        vibeLabel.innerHTML = '📳 Вібрація: ON';
-        if (navigator.vibrate) navigator.vibrate(40);
-      } else {
-        vibeToggle.classList.remove('active');
-        vibeLabel.innerHTML = '📳 Вібрація: OFF';
-      }
+    function chk(){
+      const ok=document.getElementById('uname').value.trim().length>=2;
+      scan.classList.toggle('off',!ok);
+      hint.textContent=ok?'👆 Притисни й ТРИМАЙ для сканування!':'Заповни поле з іменем вгорі 👆';
+      hint.style.color=ok?'var(--green)':'var(--white)';
     }
-
-    function checkInput() {
-      if (nameInput.value.trim().length >= 2) {
-        scanArea.classList.remove('disabled');
-        tapHint.innerHTML = '👆 Притисни й ТРИМАЙ палець для сканування!';
-        tapHint.style.color = 'var(--neon-green)';
-      } else {
-        scanArea.classList.add('disabled');
-        tapHint.innerHTML = "Заповни поле з ім'ям вгорі 👆";
-        tapHint.style.color = 'var(--text-white)';
-      }
+    function toggleV(){
+      useV=!useV;
+      document.getElementById('vib').classList.toggle('on',useV);
+      document.getElementById('vlbl').textContent='📳 Вібрація: '+(useV?'ON':'OFF');
+      if(useV&&navigator.vibrate)navigator.vibrate(40);
     }
-    
-    function startScan(event) {
-      if (event) event.preventDefault();
-      if (scanArea.classList.contains('disabled') || isScanning) return;
-      
-      isScanning = true;
-      
-      resetBtn.style.display = 'none';
-      startGameBtn.style.display = 'none';
-      document.getElementById('inputGroup').style.opacity = '0.5';
-      nameInput.disabled = true;
-      
-      scanArea.classList.add('scanning');
-      messageEl.innerHTML = '<span style="color: var(--text-white); font-weight:normal; font-size:15px;">🧬 Сканування відбитку...<br>Аналіз ДНК-скілів</span>';
-      tapHint.innerHTML = 'ТРИМАЙ, НЕ ВІДПУСКАЙ! ⏳';
-      tapHint.style.color = 'var(--gold-yellow)';
-      
-      if (useVibration && navigator.vibrate) {
-        navigator.vibrate(60);
-      }
-      
-      if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(e => console.log('Аудіо заблоковано браузером'));
-      }
-      
-      if (scanTimer) clearTimeout(scanTimer);
-      
-      scanTimer = setTimeout(() => {
-        if (!isScanning) return;
-        
-        isScanning = false;
-        scanArea.classList.remove('scanning');
-        document.getElementById('inputGroup').style.opacity = '1';
-        
-        const randomSkill = SKILLS[Math.floor(Math.random() * SKILLS.length)];
-        const studentName = nameInput.value.trim();
-        
-        // ТЕПЕР ТУТ ЛАКОНІЧНИЙ І КРАСИВИЙ ВИВІД БЕЗ ЗАЙВОГО ТЕКСТУ
-        messageEl.innerHTML = `<span style="color: var(--neon-green);">✅ ВЕРИФІКАЦІЮ ПРОЙДЕНО!</span><br><span style="font-size: 15px; font-weight: 700; color: #fff;">${studentName} успішно доданий(а) в 5-й клас</span>`;
-        
-        tapHint.innerHTML = '🚀 Доступ відкрито! Час починати пригоду!';
-        tapHint.style.color = 'var(--neon-green)';
-        
-        // Сила все одно зберігається таємно, щоб показати її на бейджі В КІНЦІ ГРИ!
-        localStorage.setItem('pysanka_student_name', studentName);
-        localStorage.setItem('pysanka_student_skill', randomSkill.name);
-        localStorage.setItem('pysanka_student_bonus', randomSkill.бонус);
-        
-        resetBtn.style.display = 'inline-block';
-        startGameBtn.style.display = 'inline-block';
-        
-        if (useVibration && navigator.vibrate) {
-          navigator.vibrate([150, 80, 150, 80, 300]); 
-        }
-      }, 3000);
+    function startS(e){
+      e.preventDefault();
+      if(scan.classList.contains('off')||scanning)return;
+      scanning=true;
+      scan.classList.add('go');
+      msg.innerHTML='<span style="font-size:14px;font-weight:700">🧬 Сканування... аналіз скілів</span>';
+      hint.textContent='ТРИМАЙ, НЕ ВІДПУСКАЙ! ⏳';
+      hint.style.color='var(--gold)';
+      document.getElementById('uname').disabled=true;
+      if(useV&&navigator.vibrate)navigator.vibrate(60);
+      snd.currentTime=0; snd.play().catch(()=>{});
+      timer=setTimeout(()=>{
+        if(!scanning)return;
+        scanning=false;
+        scan.classList.remove('go');
+        snd.pause(); snd.currentTime=0;
+        const sk=SKILLS[Math.floor(Math.random()*SKILLS.length)];
+        const nm=document.getElementById('uname').value.trim();
+        localStorage.setItem('pysanka_student_name',nm);
+        localStorage.setItem('pysanka_student_skill',sk.name);
+        localStorage.setItem('pysanka_student_bonus',sk.бонус);
+        msg.innerHTML=`<span style="color:var(--green)">✅ ВЕРИФІКОВАНО!</span><br><span style="font-size:13px;font-weight:700">${nm} — в системі п'ятикласників</span>`;
+        hint.textContent='🚀 Доступ відкрито!';
+        hint.style.color='var(--green)';
+        document.getElementById('rBtn').style.display='inline-block';
+        document.getElementById('goBtn').style.display='inline-block';
+        if(useV&&navigator.vibrate)navigator.vibrate([150,80,150,80,300]);
+      },3000);
     }
-    
-    function stopScanEarly(event) {
-      if (event) event.preventDefault();
-      if (!isScanning) return;
-      
-      isScanning = false;
-      if (scanTimer) clearTimeout(scanTimer);
-      
-      scanArea.classList.remove('scanning');
-      if (sound) {
-        sound.pause();
-        sound.currentTime = 0;
-      }
-      
-      if (useVibration && navigator.vibrate) {
-        navigator.vibrate([60, 40, 60]);
-      }
-      
-      messageEl.innerHTML = '<span style="color: #ff3366; font-size:16px;">❌ Сканування перервано!</span>';
-      tapHint.innerHTML = 'Притисни палець і тримай до кінця! 👆';
-      tapHint.style.color = '#ff3366';
-      
-      document.getElementById('inputGroup').style.opacity = '1';
-      nameInput.disabled = false;
+    function stopS(e){
+      e.preventDefault();
+      if(!scanning)return;
+      scanning=false;
+      clearTimeout(timer);
+      scan.classList.remove('go');
+      snd.pause(); snd.currentTime=0;
+      if(useV&&navigator.vibrate)navigator.vibrate([60,40,60]);
+      msg.innerHTML='<span style="color:var(--pink)">❌ Сканування перервано!</span>';
+      hint.textContent='Притисни й тримай до кінця! 👆';
+      hint.style.color='var(--pink)';
+      document.getElementById('uname').disabled=false;
     }
-
-    function resetScan() {
-      isScanning = false;
-      scanArea.classList.remove('scanning');
-      messageEl.innerHTML = '';
-      resetBtn.style.display = 'none';
-      startGameBtn.style.display = 'none';
-      nameInput.disabled = false;
-      nameInput.value = '';
-      checkInput();
-      if (scanTimer) clearTimeout(scanTimer);
+    function reset(){
+      scanning=false; clearTimeout(timer);
+      scan.classList.remove('go');
+      msg.innerHTML='';
+      document.getElementById('rBtn').style.display='none';
+      document.getElementById('goBtn').style.display='none';
+      document.getElementById('uname').disabled=false;
+      document.getElementById('uname').value='';
+      chk();
     }
   </script>
 </body>
