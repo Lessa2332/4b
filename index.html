@@ -81,7 +81,7 @@
     }
 
     .input-group {
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       transition: var(--transition);
     }
 
@@ -113,11 +113,66 @@
       color: rgba(255, 255, 255, 0.5);
     }
 
+    /* Стильний перемикач вібрації */
+    .vibe-control {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      cursor: pointer;
+      user-select: none;
+      transition: var(--transition);
+    }
+
+    .vibe-control:hover {
+      border-color: var(--gold-yellow);
+    }
+
+    .vibe-label {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .toggle-switch {
+      width: 40px;
+      height: 22px;
+      background: #ff3366;
+      border-radius: 11px;
+      position: relative;
+      transition: var(--transition);
+    }
+
+    .toggle-handle {
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      transition: var(--transition);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .vibe-control.active .toggle-switch {
+      background: var(--neon-green);
+    }
+
+    .vibe-control.active .toggle-handle {
+      left: 21px;
+    }
+
     /* СКАНЕР ВІДБИТКУ ПАЛЬЦЯ */
     .scan-area {
-      width: 180px;
-      height: 180px;
-      margin: 15px auto;
+      width: 170px;
+      height: 170px;
+      margin: 10px auto;
       border: 6px solid var(--neon-green);
       border-radius: 50%;
       position: relative;
@@ -247,7 +302,7 @@
     
     @media (max-width: 400px) {
       h1 { font-size: 24px; }
-      .scan-area { width: 150px; height: 150px; }
+      .scan-area { width: 140px; height: 140px; }
       .btn { padding: 12px 20px; font-size: 14px; }
     }
   </style>
@@ -263,6 +318,13 @@
     <div class="input-group" id="inputGroup">
       <label for="userName">Введи своє ім'я</label>
       <input type="text" id="userName" class="name-input" placeholder="Наприклад: Максим Іванов" oninput="checkInput()">
+    </div>
+
+    <div class="vibe-control" id="vibeToggle" onclick="toggleVibration()">
+      <span class="vibe-label" id="vibeLabel">📳 Вібрація: OFF</span>
+      <div class="toggle-switch">
+        <div class="toggle-handle"></div>
+      </div>
     </div>
 
     <div class="scan-area disabled" id="scanArea" 
@@ -314,9 +376,26 @@
     const resetBtn = document.getElementById('resetBtn');
     const startGameBtn = document.getElementById('startGameBtn');
     const sound = document.getElementById('scanSound');
+    const vibeToggle = document.getElementById('vibeToggle');
+    const vibeLabel = document.getElementById('vibeLabel');
     
     let scanTimer = null;
-    let isScanning = false; // Змінна стану утримання
+    let isScanning = false;
+    let useVibration = false; // Початковий стан вібрації
+
+    // Функція увімкнення/вимкнення вібрації
+    function toggleVibration() {
+      useVibration = !useVibration;
+      if (useVibration) {
+        vibeToggle.classList.add('active');
+        vibeLabel.innerHTML = '📳 Вібрація: ON';
+        // Тестовий легкий «тік» при активації режиму, щоб дитина відчула, що він працює
+        if (navigator.vibrate) navigator.vibrate(40);
+      } else {
+        vibeToggle.classList.remove('active');
+        vibeLabel.innerHTML = '📳 Вібрація: OFF';
+      }
+    }
 
     function checkInput() {
       if (nameInput.value.trim().length >= 3) {
@@ -330,7 +409,6 @@
       }
     }
     
-    // Запуск утримання пальця
     function startScan(event) {
       if (event) event.preventDefault();
       if (scanArea.classList.contains('disabled') || isScanning) return;
@@ -348,6 +426,11 @@
       tapHint.innerHTML = 'ТРИМАЙ, НЕ ВІДПУСКАЙ! ⏳';
       tapHint.style.color = 'var(--gold-yellow)';
       
+      // Легкий старт вібрації в момент дотику, якщо увімкнено (ефект «приєднання»)
+      if (useVibration && navigator.vibrate) {
+        navigator.vibrate(60);
+      }
+      
       if (sound) {
         sound.currentTime = 0;
         sound.play().catch(e => console.log('Аудіо заблоковано браузером'));
@@ -355,9 +438,8 @@
       
       if (scanTimer) clearTimeout(scanTimer);
       
-      // Сканування триває 3 секунди
       scanTimer = setTimeout(() => {
-        if (!isScanning) return; // Додатковий захист від збоїв
+        if (!isScanning) return;
         
         isScanning = false;
         scanArea.classList.remove('scanning');
@@ -378,14 +460,16 @@
         resetBtn.style.display = 'inline-block';
         startGameBtn.style.display = 'inline-block';
         
-        if (navigator.vibrate) navigator.vibrate([100, 50, 150]);
+        // Потужна потрійна вібрація успіху в кінці, якщо тумблер увімкнено!
+        if (useVibration && navigator.vibrate) {
+          navigator.vibrate([150, 80, 150, 80, 300]); 
+        }
       }, 3000);
     }
     
-    // Переривання сканування, якщо палець прибрали завчасно
     function stopScanEarly(event) {
       if (event) event.preventDefault();
-      if (!isScanning) return; // Якщо сканування не запущене або вже успішно пройшло
+      if (!isScanning) return;
       
       isScanning = false;
       if (scanTimer) clearTimeout(scanTimer);
@@ -394,6 +478,11 @@
       if (sound) {
         sound.pause();
         sound.currentTime = 0;
+      }
+      
+      // Коротка вібрація помилки (два швидких тривожних імпульси)
+      if (useVibration && navigator.vibrate) {
+        navigator.vibrate([60, 40, 60]);
       }
       
       messageEl.innerHTML = '<span style="color: #ff3366;">❌ Помилка: Сканування перервано!</span>';
