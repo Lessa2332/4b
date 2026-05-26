@@ -246,26 +246,19 @@
     }
     
     #message {
-      font-size: 16px;
-      font-weight: 700;
-      margin-top: 15px;
-      min-height: 25px;
-    }
-    
-    #skillDisplay {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 900;
-      margin: 10px 0;
-      color: var(--gold-yellow);
-      text-shadow: 0 2px 0px rgba(0,0,0,0.5);
-      min-height: 35px;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      line-height: 1.4;
+      min-height: 25px;
     }
     
     .btn-group {
       display: flex;
       gap: 10px;
       justify-content: center;
-      margin-top: 15px;
+      margin-top: 20px;
     }
     
     .btn {
@@ -342,7 +335,6 @@
     <div class="tap-hint" id="tapHint">Заповни поле з ім'ям вгорі 👆</div>
     
     <div id="message"></div>
-    <div id="skillDisplay"></div>
     
     <div class="btn-group">
       <button class="btn" onclick="resetScan()" id="resetBtn" style="display: none;">Ще раз</button>
@@ -370,7 +362,6 @@
     const tapHint = document.getElementById('tapHint');
     const nameInput = document.getElementById('userName');
     const messageEl = document.getElementById('message');
-    const skillDisplay = document.getElementById('skillDisplay');
     const resetBtn = document.getElementById('resetBtn');
     const startGameBtn = document.getElementById('startGameBtn');
     const sound = document.getElementById('scanSound');
@@ -393,7 +384,6 @@
       }
     }
 
-    // ТУТ ЗМІНЕНО УМОВУ: тепер перевіряється довжина >= 2 літер
     function checkInput() {
       if (nameInput.value.trim().length >= 2) {
         scanArea.classList.remove('disabled');
@@ -414,12 +404,11 @@
       
       resetBtn.style.display = 'none';
       startGameBtn.style.display = 'none';
-      skillDisplay.innerHTML = '';
       document.getElementById('inputGroup').style.opacity = '0.5';
       nameInput.disabled = true;
       
       scanArea.classList.add('scanning');
-      messageEl.innerHTML = '<span style="color: var(--text-white);">🧬 Сканування відбитку... Аналіз ДНК-скілів</span>';
+      messageEl.innerHTML = '<span style="color: var(--text-white); font-weight:normal; font-size:15px;">🧬 Сканування відбитку...<br>Аналіз ДНК-скілів</span>';
       tapHint.innerHTML = 'ТРИМАЙ, НЕ ВІДПУСКАЙ! ⏳';
       tapHint.style.color = 'var(--gold-yellow)';
       
@@ -444,14 +433,16 @@
         const randomSkill = SKILLS[Math.floor(Math.random() * SKILLS.length)];
         const studentName = nameInput.value.trim();
         
-        messageEl.innerHTML = `<span style="color: var(--neon-green);">✅ ВЕРИФІКАЦІЮ ПРОЙДЕНО!</span><br><small style="color:#aaa">${studentName} успішно доданий(а) в 5-й клас</small>`;
-        skillDisplay.innerHTML = `<div style="font-size:14px; color:var(--text-white); font-weight:400; margin-bottom:5px;">ТВОЯ СУПЕРСИЛА:</div>${randomSkill.name}<br><span style="font-size:14px; font-weight:bold; color:var(--neon-green)">${randomSkill.бонус}</span>`;
+        // ТЕПЕР ТУТ ЛАКОНІЧНИЙ І КРАСИВИЙ ВИВІД БЕЗ ЗАЙВОГО ТЕКСТУ
+        messageEl.innerHTML = `<span style="color: var(--neon-green);">✅ ВЕРИФІКАЦІЮ ПРОЙДЕНО!</span><br><span style="font-size: 15px; font-weight: 700; color: #fff;">${studentName} успішно доданий(а) в 5-й клас</span>`;
         
-        tapHint.innerHTML = '⚡ Скіл розблоковано! Починай квест!';
+        tapHint.innerHTML = '🚀 Доступ відкрито! Час починати пригоду!';
         tapHint.style.color = 'var(--neon-green)';
         
+        // Сила все одно зберігається таємно, щоб показати її на бейджі В КІНЦІ ГРИ!
         localStorage.setItem('pysanka_student_name', studentName);
         localStorage.setItem('pysanka_student_skill', randomSkill.name);
+        localStorage.setItem('pysanka_student_bonus', randomSkill.бонус);
         
         resetBtn.style.display = 'inline-block';
         startGameBtn.style.display = 'inline-block';
@@ -479,7 +470,7 @@
         navigator.vibrate([60, 40, 60]);
       }
       
-      messageEl.innerHTML = '<span style="color: #ff3366;">❌ Помилка: Сканування перервано!</span>';
+      messageEl.innerHTML = '<span style="color: #ff3366; font-size:16px;">❌ Сканування перервано!</span>';
       tapHint.innerHTML = 'Притисни палець і тримай до кінця! 👆';
       tapHint.style.color = '#ff3366';
       
@@ -491,7 +482,6 @@
       isScanning = false;
       scanArea.classList.remove('scanning');
       messageEl.innerHTML = '';
-      skillDisplay.innerHTML = '';
       resetBtn.style.display = 'none';
       startGameBtn.style.display = 'none';
       nameInput.disabled = false;
