@@ -113,7 +113,6 @@
       color: rgba(255, 255, 255, 0.5);
     }
 
-    /* Стильний перемикач вібрації */
     .vibe-control {
       display: inline-flex;
       align-items: center;
@@ -168,7 +167,6 @@
       left: 21px;
     }
 
-    /* СКАНЕР ВІДБИТКУ ПАЛЬЦЯ */
     .scan-area {
       width: 170px;
       height: 170px;
@@ -317,7 +315,7 @@
   <div class="scanner-box">
     <div class="input-group" id="inputGroup">
       <label for="userName">Введи своє ім'я</label>
-      <input type="text" id="userName" class="name-input" placeholder="Наприклад: Максим Іванов" oninput="checkInput()">
+      <input type="text" id="userName" class="name-input" placeholder="Наприклад: Ян або Максим" oninput="checkInput()">
     </div>
 
     <div class="vibe-control" id="vibeToggle" onclick="toggleVibration()">
@@ -381,15 +379,13 @@
     
     let scanTimer = null;
     let isScanning = false;
-    let useVibration = false; // Початковий стан вібрації
+    let useVibration = false;
 
-    // Функція увімкнення/вимкнення вібрації
     function toggleVibration() {
       useVibration = !useVibration;
       if (useVibration) {
         vibeToggle.classList.add('active');
         vibeLabel.innerHTML = '📳 Вібрація: ON';
-        // Тестовий легкий «тік» при активації режиму, щоб дитина відчула, що він працює
         if (navigator.vibrate) navigator.vibrate(40);
       } else {
         vibeToggle.classList.remove('active');
@@ -397,8 +393,9 @@
       }
     }
 
+    // ТУТ ЗМІНЕНО УМОВУ: тепер перевіряється довжина >= 2 літер
     function checkInput() {
-      if (nameInput.value.trim().length >= 3) {
+      if (nameInput.value.trim().length >= 2) {
         scanArea.classList.remove('disabled');
         tapHint.innerHTML = '👆 Притисни й ТРИМАЙ палець для сканування!';
         tapHint.style.color = 'var(--neon-green)';
@@ -426,7 +423,6 @@
       tapHint.innerHTML = 'ТРИМАЙ, НЕ ВІДПУСКАЙ! ⏳';
       tapHint.style.color = 'var(--gold-yellow)';
       
-      // Легкий старт вібрації в момент дотику, якщо увімкнено (ефект «приєднання»)
       if (useVibration && navigator.vibrate) {
         navigator.vibrate(60);
       }
@@ -460,7 +456,6 @@
         resetBtn.style.display = 'inline-block';
         startGameBtn.style.display = 'inline-block';
         
-        // Потужна потрійна вібрація успіху в кінці, якщо тумблер увімкнено!
         if (useVibration && navigator.vibrate) {
           navigator.vibrate([150, 80, 150, 80, 300]); 
         }
@@ -480,7 +475,6 @@
         sound.currentTime = 0;
       }
       
-      // Коротка вібрація помилки (два швидких тривожних імпульси)
       if (useVibration && navigator.vibrate) {
         navigator.vibrate([60, 40, 60]);
       }
