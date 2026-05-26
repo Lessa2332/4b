@@ -3,645 +3,1099 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Рюкзак у 5-й Клас | Квест-гра</title>
-  
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <title>Рюкзак у 5-й Клас | Квест</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <style>
     :root {
-      --bg-blue: #0066ff;
-      --bg-dark-blue: #0044cc;
-      --gold-yellow: #FFE600;
-      --neon-green: #39FF14;
-      --neon-pink: #ff3366;
-      --text-white: #ffffff;
-      --font-main: 'Montserrat', sans-serif;
-      --transition: all 0.3s ease;
+      --blue: #1a56ff;
+      --dark: #0a1a6e;
+      --gold: #FFE600;
+      --green: #39FF14;
+      --pink: #ff3366;
+      --white: #ffffff;
+      --font: 'Nunito', sans-serif;
     }
-    
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-    
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
     body {
-      font-family: var(--font-main);
-      background: radial-gradient(circle at 50% 50%, var(--bg-blue) 0%, var(--bg-dark-blue) 100%);
-      color: var(--text-white);
+      font-family: var(--font);
+      background: radial-gradient(ellipse at 60% 10%, #1a56ff 0%, #0a1a6e 70%);
+      color: var(--white);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 15px;
+      padding: 12px 12px 30px;
       overflow-x: hidden;
     }
 
-    /* Інтерфейс прогресу (XP BAR) */
-    .header-panel {
+    /* ── HEADER ── */
+    .hdr {
       width: 100%;
-      max-width: 450px;
-      background: rgba(0, 0, 68, 0.4);
-      padding: 15px;
-      border-radius: 20px;
-      border: 3px solid rgba(255, 255, 255, 0.2);
-      margin-bottom: 20px;
-      text-align: center;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    }
-
-    .xp-text {
-      font-weight: 900;
-      font-size: 16px;
-      color: var(--gold-yellow);
-      margin-bottom: 8px;
-      letter-spacing: 1px;
-    }
-
-    .xp-container {
-      width: 100%;
-      height: 20px;
-      background: #002266;
-      border-radius: 10px;
-      border: 2px solid white;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .xp-bar {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, var(--gold-yellow), var(--neon-green));
-      box-shadow: 0 0 10px var(--neon-green);
-      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* Спливаючі бали +XP */
-    .xp-popup {
-      position: fixed;
-      top: 20%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 48px;
-      font-weight: 900;
-      color: var(--neon-green);
-      text-shadow: 0 0 20px var(--neon-green), 0 4px 0 #000;
-      z-index: 100;
-      animation: floatUp 1.2s ease-out forwards;
-      display: none;
-    }
-
-    @keyframes floatUp {
-      0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-      20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
-      100% { opacity: 0; transform: translate(-50%, -100px) scale(1); }
-    }
-
-    /* Ігрові Екрани-Контейнери */
-    .game-box {
-      background: #0055ff;
-      border: 6px solid var(--text-white);
-      border-radius: 35px;
-      padding: 25px 20px;
-      max-width: 450px;
-      width: 100%;
-      margin: auto 0;
-      box-shadow: 0 15px 0px rgba(0, 0, 68, 0.4);
-      text-align: center;
-      position: relative;
-    }
-
-    .screen {
-      display: none;
-    }
-
-    .screen.active {
-      display: block;
-    }
-
-    h2 {
-      font-weight: 900;
-      font-size: 22px;
-      margin-bottom: 10px;
-      text-transform: uppercase;
-      color: var(--gold-yellow);
-      text-shadow: 0 3px 0 rgba(0,0,0,0.3);
-    }
-
-    .desc {
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1.4;
-      margin-bottom: 20px;
-      opacity: 0.95;
-    }
-
-    /* ЕТАП 1: КВІЗ-ВАРІАНТИ */
-    .quiz-equation {
-      background: rgba(0,0,0,0.2);
-      padding: 15px;
-      border-radius: 20px;
-      font-size: 32px;
-      font-weight: 900;
-      margin-bottom: 20px;
-      border: 2px dashed rgba(255,255,255,0.3);
-    }
-
-    .quiz-options {
+      max-width: 460px;
+      background: rgba(0,0,50,.45);
+      backdrop-filter: blur(6px);
+      border: 2px solid rgba(255,255,255,.25);
+      border-radius: 18px;
+      padding: 10px 14px;
       display: flex;
-      flex-direction: column;
-      gap: 12px;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
     }
+    .hdr-labels { flex:1; }
+    .hdr-top { display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:var(--gold); margin-bottom:5px; }
+    .xp-rail { height:14px; background:#0a1060; border-radius:7px; border:2px solid rgba(255,255,255,.3); overflow:hidden; }
+    .xp-fill { height:100%; background:linear-gradient(90deg,var(--gold),var(--green)); border-radius:7px; transition:width .5s cubic-bezier(.4,0,.2,1); width:0%; }
+    .lives { display:flex; gap:3px; font-size:20px; }
 
-    .opt-btn {
-      background: #0044cc;
-      border: 3px solid white;
+    /* ── XP POPUP ── */
+    .xp-pop { position:fixed; top:18%; left:50%; transform:translate(-50%,-50%); font-size:44px; font-weight:900; color:var(--green); text-shadow:0 0 20px var(--green),0 3px 0 #000; z-index:200; display:none; pointer-events:none; }
+    @keyframes floatUp { 0%{opacity:0;transform:translate(-50%,0) scale(.5)} 20%{opacity:1;transform:translate(-50%,-18px) scale(1.2)} 100%{opacity:0;transform:translate(-50%,-90px) scale(1)} }
+
+    /* ── CARD ── */
+    .card {
+      background: #1a4aff;
+      border: 5px solid var(--white);
+      border-radius: 32px;
+      padding: 22px 18px 24px;
+      max-width: 460px;
+      width: 100%;
+      box-shadow: 0 14px 0 rgba(0,0,50,.45);
+      position: relative;
+      overflow: hidden;
+    }
+    .card::before { content:''; position:absolute; top:-40px; right:-40px; width:120px; height:120px; border-radius:50%; background:rgba(255,255,255,.06); pointer-events:none; }
+
+    .screen { display:none; }
+    .screen.active { display:block; }
+
+    h2 { font-weight:900; font-size:20px; text-transform:uppercase; color:var(--gold); text-shadow:0 3px 0 rgba(0,0,0,.3); margin-bottom:6px; }
+    .desc { font-size:13px; font-weight:700; line-height:1.5; margin-bottom:16px; opacity:.9; }
+
+    /* ── STAGE DOTS ── */
+    .stage-dots { display:flex; justify-content:center; gap:6px; margin-bottom:14px; }
+    .dot { width:10px; height:10px; border-radius:50%; background:rgba(255,255,255,.2); border:2px solid rgba(255,255,255,.3); transition:.3s; }
+    .dot.done { background:var(--green); border-color:var(--green); box-shadow:0 0 8px var(--green); }
+    .dot.active { background:var(--gold); border-color:var(--gold); transform:scale(1.3); }
+
+    /* ── BUTTONS ── */
+    .btn { display:block; width:100%; padding:15px; background:var(--green); color:#0a3a00; border:4px solid var(--white); border-radius:22px; font-family:var(--font); font-size:15px; font-weight:900; text-transform:uppercase; cursor:pointer; box-shadow:0 6px 0 #28b20e; text-align:center; transition:transform .08s,box-shadow .08s; margin-top:14px; }
+    .btn:active { transform:translateY(4px); box-shadow:0 2px 0 #28b20e; }
+    .btn-gold { background:var(--gold); color:#1a1a00; box-shadow:0 6px 0 #cda500; }
+    .btn-gold:active { box-shadow:0 2px 0 #cda500; }
+
+    /* ═══════════════════════════════════════════
+       SCREEN 1 — QUIZ (5 питань з таймером)
+       ═══════════════════════════════════════════ */
+    .quiz-q { background:rgba(0,0,0,.22); border-radius:18px; padding:14px 16px; font-size:22px; font-weight:900; margin-bottom:14px; border:2px dashed rgba(255,255,255,.25); min-height:64px; display:flex; align-items:center; justify-content:center; text-align:center; line-height:1.3; }
+    .quiz-timer-rail { height:8px; background:rgba(0,0,0,.3); border-radius:4px; margin-bottom:14px; overflow:hidden; }
+    .quiz-timer-bar { height:100%; border-radius:4px; background:var(--green); transition:width .1s linear; }
+    .quiz-timer-bar.danger { background:var(--pink); }
+    .opts { display:flex; flex-direction:column; gap:10px; }
+    .opt { background:#0033bb; border:3px solid rgba(255,255,255,.6); border-radius:16px; padding:13px 15px; color:var(--white); font-family:var(--font); font-size:15px; font-weight:800; cursor:pointer; text-align:left; box-shadow:0 4px 0 #001a88; transition:transform .05s,box-shadow .05s; }
+    .opt:active { transform:translateY(3px); box-shadow:0 1px 0 #001a88; }
+    .opt.correct { background:var(--green)!important; color:#003300!important; border-color:var(--white)!important; animation:pop .3s; }
+    .opt.wrong { background:var(--pink)!important; animation:shake .3s; }
+    @keyframes pop { 0%{transform:scale(1)} 50%{transform:scale(1.05)} 100%{transform:scale(1)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    .quiz-counter { font-size:12px; font-weight:800; color:var(--gold); text-align:right; margin-bottom:6px; }
+
+    /* ═══════════════════════════════════════════
+       SCREEN 2 — ВЛОВИ ПРЕДМЕТ (Catch game)
+       ═══════════════════════════════════════════ */
+    .catch-arena {
+      position: relative;
+      width: 100%;
+      height: 280px;
+      background: rgba(0,0,0,.25);
       border-radius: 20px;
-      padding: 15px;
-      color: white;
-      font-family: var(--font-main);
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: var(--transition);
-      box-shadow: 0 5px 0 #002288;
-      text-align: left;
+      border: 3px solid rgba(255,255,255,.2);
+      overflow: hidden;
+      margin: 10px 0;
+      touch-action: none;
     }
-
-    .opt-btn:active {
-      transform: translateY(3px);
-      box-shadow: 0 2px 0 #002288;
-    }
-
-    .opt-btn.correct {
-      background: var(--neon-green) !important;
-      color: #0044cc !important;
-      border-color: #fff !important;
-    }
-
-    .opt-btn.wrong {
-      background: var(--neon-pink) !important;
-    }
-
-    /* ЕТАП 2: ТАПАЛКА */
-    .tap-target {
-      width: 130px;
-      height: 130px;
-      background: radial-gradient(circle, #ffe600 0%, #ff9900 100%);
-      border: 5px solid white;
-      border-radius: 50%;
-      margin: 20px auto;
+    .catch-basket {
+      position: absolute;
+      bottom: 8px;
+      width: 70px;
+      height: 40px;
+      background: var(--gold);
+      border: 3px solid var(--white);
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 40px;
+      font-size: 22px;
       cursor: pointer;
-      box-shadow: 0 0 25px var(--gold-yellow), 0 8px 0 #cc6600;
-      transition: transform 0.05s ease;
+      transform: translateX(-50%);
+      transition: left .05s;
+      box-shadow: 0 4px 0 #cda500;
     }
-
-    .tap-target:active {
-      transform: scale(0.92) translateY(4px);
-      box-shadow: 0 0 15px var(--gold-yellow), 0 2px 0 #cc6600;
+    .falling-item {
+      position: absolute;
+      font-size: 28px;
+      top: -40px;
+      transform: translateX(-50%);
+      cursor: pointer;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,.4));
+      transition: top linear;
+      line-height: 1;
     }
+    .catch-stats { display:flex; justify-content:space-between; font-size:13px; font-weight:800; color:var(--gold); margin-bottom:4px; }
+    .catch-bar-rail { height:10px; background:rgba(0,0,0,.3); border-radius:5px; overflow:hidden; }
+    .catch-bar { height:100%; background:var(--green); border-radius:5px; transition:width .2s; box-shadow:0 0 8px var(--green); }
 
-    .progress-mini-container {
-      width: 100%;
-      height: 16px;
-      background: rgba(0,0,0,0.3);
-      border-radius: 8px;
-      border: 2px solid white;
-      overflow: hidden;
-      margin-top: 15px;
-    }
-
-    .progress-mini-bar {
-      width: 0%;
-      height: 100%;
-      background: var(--neon-pink);
-      box-shadow: 0 0 8px var(--neon-pink);
-    }
-
-    /* ЕТАП 3: ТЕТРІС-РЮКЗАК (DRAG & DROP) */
-    .bag-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      max-width: 260px;
-      margin: 20px auto;
-      background: #0033aa;
-      padding: 12px;
-      border-radius: 20px;
-      border: 4px solid white;
-      box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
-    }
-
-    .grid-cell {
-      aspect-ratio: 1;
-      background: rgba(255, 255, 255, 0.1);
-      border: 2px dashed rgba(255, 255, 255, 0.2);
-      border-radius: 10px;
-      transition: var(--transition);
-    }
-
-    .grid-cell.highlight {
-      background: rgba(57, 255, 20, 0.2);
-      border-color: var(--neon-green);
-    }
-
-    .items-shelf {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin-top: 25px;
-      min-height: 80px;
-    }
-
-    .drag-item {
-      padding: 12px 18px;
-      background: var(--gold-yellow);
-      color: #0044cc;
-      border: 3px solid white;
-      border-radius: 15px;
-      font-weight: 900;
-      font-size: 14px;
-      cursor: grab;
-      box-shadow: 0 4px 0 #cda600;
-      touch-action: none;
-    }
-
-    .drag-item:active {
-      cursor: grabbing;
-    }
-
-    .drag-item.placed {
-      display: none;
-    }
-
-    /* ФІНАЛЬНИЙ БЕЙДЖ СУПЕРСИЛИ */
-    .badge-card {
-      background: linear-gradient(135deg, #0044cc 0%, #001166 100%);
-      border: 5px solid var(--gold-yellow);
-      border-radius: 30px;
-      padding: 25px 15px;
-      margin-bottom: 20px;
-      box-shadow: 0 0 30px rgba(255, 230, 0, 0.3);
-    }
-
-    .badge-title {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #aaa;
-      margin-bottom: 5px;
-    }
-
-    .student-name {
-      font-size: 26px;
-      font-weight: 900;
-      color: #fff;
-      margin-bottom: 15px;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
-    }
-
-    .skill-box {
-      background: rgba(255, 255, 255, 0.1);
-      padding: 15px;
-      border-radius: 15px;
-      border-left: 5px solid var(--neon-green);
-      text-align: left;
-      margin-bottom: 15px;
-    }
-
-    .skill-title {
-      font-weight: 900;
-      font-size: 16px;
-      color: var(--gold-yellow);
-      margin-bottom: 4px;
-    }
-
-    .skill-desc {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--neon-green);
-    }
-
-    .promo-box {
-      background: dashed rgba(255, 230, 0, 0.2);
-      border: 2px dashed var(--gold-yellow);
-      padding: 12px;
-      border-radius: 15px;
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--gold-yellow);
-      letter-spacing: 1px;
-    }
-
-    .btn-action {
-      width: 100%;
+    /* ═══════════════════════════════════════════
+       SCREEN 3 — СОРТУВАННЯ (правильно/неправильно)
+       ═══════════════════════════════════════════ */
+    .sort-item {
+      background: var(--gold);
+      color: #1a1a00;
+      border: 3px solid var(--white);
+      border-radius: 18px;
       padding: 16px;
-      background: var(--neon-green);
-      color: #0044cc;
-      border: 4px solid white;
-      border-radius: 25px;
-      font-family: var(--font-main);
-      font-size: 16px;
-      font-weight: 900;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 6px 0 #2cc90f;
+      font-size: 17px;
+      font-weight:900;
+      text-align: center;
+      margin-bottom: 14px;
+      box-shadow: 0 5px 0 #cda500;
+      min-height: 68px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
+    .sort-buttons { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .sort-btn { padding:18px 8px; font-family:var(--font); font-size:14px; font-weight:900; border:4px solid var(--white); border-radius:20px; cursor:pointer; transition:transform .08s,box-shadow .08s; }
+    .sort-btn:active { transform:translateY(3px); }
+    .sort-yes { background:#1a9900; color:var(--white); box-shadow:0 5px 0 #0d5200; }
+    .sort-yes:active { box-shadow:0 2px 0 #0d5200; }
+    .sort-no { background:var(--pink); color:var(--white); box-shadow:0 5px 0 #991133; }
+    .sort-no:active { box-shadow:0 2px 0 #991133; }
+    .sort-counter { font-size:12px; font-weight:800; color:var(--gold); text-align:center; margin-bottom:8px; }
 
-    .btn-action:active {
-      transform: translateY(4px);
-      box-shadow: 0 2px 0 #2cc90f;
+    /* ═══════════════════════════════════════════
+       SCREEN 4 — РЮКЗАК (drag & sort з перевіркою)
+       ═══════════════════════════════════════════ */
+    .pack-layout { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0; }
+    .pack-zone {
+      border: 3px dashed rgba(255,255,255,.35);
+      border-radius:16px;
+      padding:10px;
+      min-height:130px;
+      background:rgba(0,0,0,.2);
     }
+    .pack-zone-label { font-size:11px; font-weight:900; text-transform:uppercase; color:var(--gold); margin-bottom:8px; text-align:center; }
+    .pack-zone.highlight { border-color:var(--green); background:rgba(57,255,20,.1); }
+    .pack-items-row { display:flex; flex-wrap:wrap; gap:6px; justify-content:center; }
+    .pack-chip {
+      background: var(--gold);
+      color: #1a1a00;
+      border: 2px solid var(--white);
+      border-radius: 12px;
+      padding: 8px 10px;
+      font-size: 13px;
+      font-weight:900;
+      cursor:grab;
+      box-shadow:0 3px 0 #cda500;
+      touch-action:none;
+    }
+    .pack-chip.wrong-placed { background:var(--pink); color:#fff; box-shadow:0 3px 0 #991133; }
+    .pack-check { text-align:center; font-size:14px; font-weight:800; margin-top:8px; min-height:22px; }
 
-    .screenshot-hint {
-      font-size: 11px;
-      font-weight: 700;
-      color: #ddd;
-      margin-top: 10px;
-      line-height: 1.3;
+    /* ═══════════════════════════════════════════
+       SCREEN 5 — ШИФР (вгадай літеру)
+       ═══════════════════════════════════════════ */
+    .cipher-display {
+      font-size: 36px;
+      font-weight:900;
+      letter-spacing:8px;
+      text-align:center;
+      background:rgba(0,0,0,.25);
+      border-radius:16px;
+      padding:16px;
+      margin-bottom:16px;
+      border:2px dashed rgba(255,255,255,.3);
+      min-height:72px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
     }
+    .cipher-hint { font-size:13px; font-weight:700; color:var(--gold); text-align:center; margin-bottom:12px; }
+    .cipher-keys { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; }
+    .cipher-key {
+      width:48px; height:48px;
+      background:#0033bb;
+      border:3px solid rgba(255,255,255,.6);
+      border-radius:12px;
+      color:var(--white);
+      font-family:var(--font);
+      font-size:18px;
+      font-weight:900;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      box-shadow:0 4px 0 #001a88;
+      transition:transform .05s,box-shadow .05s;
+    }
+    .cipher-key:active { transform:translateY(3px); box-shadow:0 1px 0 #001a88; }
+    .cipher-key.used { opacity:.35; pointer-events:none; }
+    .cipher-key.correct { background:var(--green); color:#003300; border-color:#fff; }
+    .cipher-key.wrong { background:var(--pink); }
+    .cipher-lives { text-align:center; font-size:22px; margin-bottom:10px; letter-spacing:4px; }
+    .cipher-word-prog { text-align:center; font-size:12px; font-weight:800; color:rgba(255,255,255,.6); margin-bottom:8px; }
+
+    /* ═══════════════════════════════════════════
+       FINAL SCREEN
+       ═══════════════════════════════════════════ */
+    .badge {
+      background: linear-gradient(135deg,#0033bb 0%,#000d66 100%);
+      border: 5px solid var(--gold);
+      border-radius: 26px;
+      padding: 22px 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 28px rgba(255,230,0,.25);
+    }
+    .badge-label { font-size:11px; text-transform:uppercase; letter-spacing:2px; color:#aaa; margin-bottom:4px; }
+    .badge-name { font-size:24px; font-weight:900; color:#fff; margin-bottom:14px; text-shadow:0 2px 4px rgba(0,0,0,.4); }
+    .skill-box { background:rgba(255,255,255,.1); padding:13px; border-radius:13px; border-left:5px solid var(--green); text-align:left; margin-bottom:12px; }
+    .skill-title { font-weight:900; font-size:15px; color:var(--gold); margin-bottom:3px; }
+    .skill-desc { font-size:12px; font-weight:700; color:var(--green); }
+    .promo { border:2px dashed var(--gold); border-radius:13px; padding:11px; font-size:20px; font-weight:900; color:var(--gold); letter-spacing:2px; text-align:center; }
+    .stars-row { font-size:28px; text-align:center; margin:10px 0; }
+    .final-score { font-size:15px; font-weight:800; color:var(--gold); text-align:center; margin-bottom:14px; }
+    .hint { font-size:11px; font-weight:700; color:#ccc; margin-top:10px; text-align:center; line-height:1.4; }
+
+    /* ── TRANSITION ── */
+    .fade-in { animation: fadeIn .4s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ── RESULT FLASH ── */
+    .result-flash {
+      position:fixed; top:0; left:0; width:100%; height:100%;
+      pointer-events:none; z-index:300;
+      opacity:0;
+      transition:opacity .2s;
+    }
+    .result-flash.green { background:rgba(57,255,20,.18); }
+    .result-flash.red { background:rgba(255,51,102,.18); }
+    .result-flash.show { opacity:1; }
   </style>
 </head>
 <body>
 
-  <div class="header-panel">
-    <div class="xp-text">РІВЕНЬ ПРОГРЕСУ: <span id="xpCount">0</span>/100 XP</div>
-    <div class="xp-container">
-      <div class="xp-bar" id="xpBar"></div>
+<div class="result-flash" id="flash"></div>
+<div class="xp-pop" id="xpPop">+25 XP</div>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="hdr-labels">
+    <div class="hdr-top">
+      <span>⚡ XP: <span id="xpCount">0</span>/150</span>
+      <span id="stageLabel">Рівень 1/5</span>
     </div>
+    <div class="xp-rail"><div class="xp-fill" id="xpFill"></div></div>
+  </div>
+  <div class="lives" id="livesEl">❤️❤️❤️</div>
+</div>
+
+<div class="card">
+
+  <!-- STAGE DOTS -->
+  <div class="stage-dots">
+    <div class="dot active" id="dot0"></div>
+    <div class="dot" id="dot1"></div>
+    <div class="dot" id="dot2"></div>
+    <div class="dot" id="dot3"></div>
+    <div class="dot" id="dot4"></div>
   </div>
 
-  <div class="xp-popup" id="xpPopup">+30 XP</div>
-
-  <div class="game-box">
-    
-    <div class="screen active" id="screen1">
-      <h2>🔐 КРОК 1: ЗЛАМАЙ ШИФР</h2>
-      <div class="desc">Олеся Олександрівна закрила шафу з кібер-підручниками на емодзі-замок! Розгадай рівняння, щоб отримати ключ:</div>
-      
-      <div class="quiz-equation">🧠 + 📚 = ?</div>
-      
-      <div class="quiz-options">
-        <button class="opt-btn" onclick="handleQuiz(false, this)">💤 А) Сон на першому уроці</button>
-        <button class="opt-btn" onclick="handleQuiz(false, this)">🤯 Б) Нудна домашня робота</button>
-        <button class="opt-btn" onclick="handleQuiz(true, this)">🚀 В) Успішний 5-й Клас!</button>
-      </div>
-    </div>
-
-    <div class="screen" id="screen2">
-      <h2>⚡ КРОК 2: АНТИСТРЕС-ЗАРЯДКА</h2>
-      <div class="desc">Знайдено <b>Неонову Лінійку</b>! Але вона заряджена стресом від контрольних. Швидко ТАПАЙ по екрану, щоб очистити її!</div>
-      
-      <div class="tap-target" onclick="handleTap()">📏</div>
-      
-      <div style="font-size: 13px; font-weight: 700;">ЕНЕРГІЯ ОЧИЩЕННЯ:</div>
-      <div class="progress-mini-container">
-        <div class="progress-mini-bar" id="miniBar"></div>
-      </div>
-    </div>
-
-    <div class="screen" id="screen3">
-      <h2>🎒 КРОК 3: ТЕТРІС-СПАКОВКА</h2>
-      <div class="desc">Всі речі готові! Перетягни пальцем <b>Підручник</b> та <b>Лінійку</b> в рюкзак, щоб закрити замок!</div>
-      
-      <div class="bag-grid" id="bagGrid">
-        <div class="grid-cell" id="cell1"></div>
-        <div class="grid-cell" id="cell2"></div>
-        <div class="grid-cell" id="cell3"></div>
-      </div>
-
-      <div class="items-shelf">
-        <div class="drag-item" id="item1" draggable="true">📚 Підручник</div>
-        <div class="drag-item" id="item2" draggable="true">📏 Лінійка</div>
-      </div>
-    </div>
-
-    <div class="screen" id="screenFinal">
-      <h2>🏆 КВЕСТ ПРОЙДЕНО!</h2>
-      <div class="desc" style="color:var(--neon-green)">Ти повністю готовий(а) до нових пригод!</div>
-      
-      <div class="badge-card">
-        <div class="badge-title">Офіційний П'ятикласник</div>
-        <div class="student-name" id="badgeName">Учень</div>
-        
-        <div class="skill-box">
-          <div class="skill-title" id="badgeSkill">Суперсила</div>
-          <div class="skill-desc" id="badgeBonus">Бонус</div>
-        </div>
-        
-        <div class="badge-title" style="color: var(--gold-yellow); margin-bottom: 5px;">Секретний промокод:</div>
-        <div class="promo-box">SUPER5CLASS</div>
-      </div>
-
-      <button class="btn-action" onclick="alert('Скріншот готовий! Збережи його до 1 вересня! 📸')">Зробити Скріншот 📸</button>
-      <div class="screenshot-hint">Зроби скріншот цього екрана, надішли вчителю або покажи 1 вересня, щоб отримати свій перший реальний бонус!</div>
-    </div>
-
+  <!-- ══ SCREEN 1: QUIZ ══ -->
+  <div class="screen active" id="s1">
+    <h2>🔐 КРОК 1: КОДЕКС ЛІЦЕЇСТА</h2>
+    <div class="desc">5 питань про правила Чорноморського ліцею №6 та безпеку! Відповідай швидше — більше XP!</div>
+    <div class="quiz-counter" id="qCounter">Питання 1/5</div>
+    <div class="quiz-timer-rail"><div class="quiz-timer-bar" id="qTimerBar"></div></div>
+    <div class="quiz-q" id="qText"></div>
+    <div class="opts" id="qOpts"></div>
   </div>
 
-  <audio id="soundCoin" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/download/mixkit-payout-award-1934.wav" type="audio/wav">
-  </audio>
-  <audio id="soundLevelUp" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/download/mixkit-video-game-level-next-231.wav" type="audio/wav">
-  </audio>
+  <!-- ══ SCREEN 2: CATCH GAME ══ -->
+  <div class="screen" id="s2">
+    <h2>🎯 КРОК 2: ЗАХИСНИЙ ЩИТ</h2>
+    <div class="desc">Лови корисне для ліцею — уникай <b>🚬 вейпів, 🤬 образ, 🥊 бійок</b>!</div>
+    <div class="catch-stats">
+      <span>Зловлено: <span id="catchCount">0</span>/10</span>
+      <span>Пропущено: <span id="missCount">0</span></span>
+    </div>
+    <div class="catch-bar-rail"><div class="catch-bar" id="catchBar" style="width:0%"></div></div>
+    <div class="catch-arena" id="arena">
+      <div class="catch-basket" id="basket">🎒</div>
+    </div>
+    <div style="font-size:12px;font-weight:800;color:var(--gold);text-align:center;margin-top:6px;">Тягни кошик або тапай по предметам! 🚬🤬🥊 — ухиляйся!</div>
+  </div>
 
-  <script>
-    let currentXP = 0;
-    let tapProgress = 0;
-    let placedItemsCount = 0;
-    
-    const soundCoin = document.getElementById('soundCoin');
-    const soundLevelUp = document.getElementById('soundLevelUp');
+  <!-- ══ SCREEN 3: SORT ══ -->
+  <div class="screen" id="s3">
+    <h2>✅ КРОК 3: ПРАВИЛА ЛІЦЕЮ</h2>
+    <div class="desc">Правило ліцею №6 чи порушення? Відповідай швидко!</div>
+    <div class="sort-counter" id="sortCounter">1/8</div>
+    <div class="sort-item" id="sortItem"></div>
+    <div class="sort-buttons">
+      <button class="sort-btn sort-yes" onclick="handleSort(true)">✅ ТАК</button>
+      <button class="sort-btn sort-no" onclick="handleSort(false)">❌ НІ</button>
+    </div>
+    <div class="pack-check" id="sortFeedback"></div>
+  </div>
 
-    function playSound(audioElement) {
-      if (audioElement) {
-        audioElement.currentTime = 0;
-        audioElement.play().catch(e => console.log('Аудіо очікує дії користувача'));
+  <!-- ══ SCREEN 4: РЮКЗАК ══ -->
+  <div class="screen" id="s4">
+    <h2>🎒 КРОК 4: РЮКЗАК ЛІЦЕЇСТА</h2>
+    <div class="desc">Що дозволено приносити в ліцей? Перетягни у <b>РЮКЗАК</b> або залиш <b>ВДОМА</b>!</div>
+    <div class="pack-layout">
+      <div class="pack-zone" id="zoneSchool" data-zone="school">
+        <div class="pack-zone-label">🎒 Рюкзак</div>
+        <div class="pack-items-row" id="schoolItems"></div>
+      </div>
+      <div class="pack-zone" id="zoneHome" data-zone="home">
+        <div class="pack-zone-label">🏠 Вдома</div>
+        <div class="pack-items-row" id="homeItems"></div>
+      </div>
+    </div>
+    <div class="pack-items-row" id="packShelf" style="justify-content:center;gap:8px;margin:8px 0;"></div>
+    <div class="pack-check" id="packCheck"></div>
+    <button class="btn btn-gold" id="packCheckBtn" onclick="checkPack()" style="display:none">Перевірити! 🔍</button>
+  </div>
+
+  <!-- ══ SCREEN 5: CIPHER ══ -->
+  <div class="screen" id="s5">
+    <h2>🧠 КРОК 5: СЛОВО ЛІЦЕЮ</h2>
+    <div class="desc">Вгадай секретне слово Чорноморського ліцею №6 — і отримаєш свій бейдж!</div>
+    <div class="cipher-lives" id="cipherLives">❤️❤️❤️</div>
+    <div class="cipher-word-prog" id="cipherProg"></div>
+    <div class="cipher-display" id="cipherDisplay"></div>
+    <div class="cipher-hint" id="cipherHint"></div>
+    <div class="cipher-keys" id="cipherKeys"></div>
+  </div>
+
+  <!-- ══ FINAL ══ -->
+  <div class="screen" id="sFinal">
+    <h2>🏆 КВЕСТ ПРОЙДЕНО!</h2>
+    <div class="stars-row" id="starsRow">⭐⭐⭐</div>
+    <div class="final-score" id="finalScore"></div>
+    <div class="badge">
+      <div class="badge-label">Офіційний П'ятикласник</div>
+      <div class="badge-name" id="bName">Учень</div>
+      <div class="skill-box">
+        <div class="skill-title" id="bSkill"></div>
+        <div class="skill-desc" id="bBonus"></div>
+      </div>
+      <div class="badge-label" style="color:var(--gold);margin-bottom:5px;">Секретний промокод:</div>
+      <div class="promo">SUPER5CLASS</div>
+    </div>
+    <button class="btn btn-gold" id="screenshotBtn" onclick="saveScreenshot()">Зберегти бейдж 📸</button>
+    <a href="https://t.me/lessa32" target="_blank" class="btn" style="background:#0088cc;box-shadow:0 6px 0 #005f8e;margin-top:10px;display:block;text-decoration:none;">✉️ Напиши пані Олесі</a>
+    <div class="hint">Збережи бейдж та покажи вчителю 1 вересня!<br>Або напиши мені — якщо сподобалося 😊</div>
+  </div>
+
+</div><!-- /card -->
+
+<script>
+// ═══════════════ STATE ═══════════════
+let xp = 0;
+let lives = 3;
+let totalXP = 0;
+const MAX_XP = 150;
+
+// ═══════════════ XP / LIVES ═══════════════
+function addXP(n) {
+  xp = Math.min(xp + n, MAX_XP);
+  totalXP += n;
+  document.getElementById('xpCount').textContent = xp;
+  document.getElementById('xpFill').style.width = (xp/MAX_XP*100)+'%';
+  const pop = document.getElementById('xpPop');
+  pop.textContent = '+'+n+' XP';
+  pop.style.display = 'block';
+  pop.style.animation = 'none';
+  void pop.offsetWidth;
+  pop.style.animation = 'floatUp 1.2s ease-out forwards';
+  setTimeout(()=>{ pop.style.display='none'; }, 1200);
+}
+
+function loseLife() {
+  lives = Math.max(0, lives - 1);
+  updateLives();
+  flash('red');
+  if (navigator.vibrate) navigator.vibrate([60,40,60]);
+}
+
+function updateLives() {
+  const hearts = ['❤️','❤️','❤️'].map((_,i)=> i < lives ? '❤️' : '🖤').join('');
+  document.getElementById('livesEl').textContent = hearts;
+}
+
+function flash(color) {
+  const el = document.getElementById('flash');
+  el.className = 'result-flash '+color+' show';
+  setTimeout(()=> el.classList.remove('show'), 300);
+}
+
+function goTo(screenId, stageIdx) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(screenId).classList.add('active','fade-in');
+  document.querySelectorAll('.dot').forEach((d,i)=>{
+    d.className = 'dot' + (i < stageIdx ? ' done' : i === stageIdx ? ' active' : '');
+  });
+  document.getElementById('stageLabel').textContent = 'Рівень '+(stageIdx+1)+'/5';
+}
+
+// ══════════════════════════════════════════
+// SCREEN 1 — QUIZ
+// ══════════════════════════════════════════
+const QUIZ = [
+  {
+    q: '⏰ За скільки хвилин до уроків треба прийти в ліцей, щоб спокійно підготуватись?',
+    opts: ['За 1 хвилину — встигну!', 'За 15–20 хвилин', 'Можна запізнитись — нічого страшного'],
+    correct: 1
+  },
+  {
+    q: '📝 З чого починати домашнє завдання за правильним алгоритмом?',
+    opts: ['Одразу пишу у чистовик — швидше', 'Відкриваю щоденник і дивлюсь що задано', 'Спочатку ігри, потім ДЗ'],
+    correct: 1
+  },
+  {
+    q: '🚨 Пролунала тривога в ліцеї. Що робити?',
+    opts: ['Бігти до виходу самостійно', 'Слухати вчителя, шикуватись парами, спокійно йти до укриття', 'Залишитись у класі — там безпечніше'],
+    correct: 1
+  },
+  {
+    q: '🤬 Тебе ображають у чаті класу. Правильна дія?',
+    opts: ['Відповідати образами у відповідь', 'Заблокувати, зберегти скріншот, розказати дорослим', 'Мовчати і терпіти'],
+    correct: 1
+  },
+  {
+    q: '✋ Ти хочеш відповісти на питання вчителя. Що робиш?',
+    opts: ['Кричу відповідь з місця', 'Підіймаю руку і чекаю', 'Питаю сусіда по парті'],
+    correct: 1
+  }
+];
+
+let qIdx = 0;
+let qTimer = null;
+let qTimeLeft = 0;
+const Q_TIME = 12; // секунди
+
+function initQuiz() { qIdx = 0; showQuestion(); }
+
+function showQuestion() {
+  if (qIdx >= QUIZ.length) { addXP(20); goTo('s2',1); initCatch(); return; }
+  const q = QUIZ[qIdx];
+  document.getElementById('qCounter').textContent = `Питання ${qIdx+1}/${QUIZ.length}`;
+  document.getElementById('qText').textContent = q.q;
+  const optsEl = document.getElementById('qOpts');
+  optsEl.innerHTML = '';
+  q.opts.forEach((o,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.textContent = ['А)','Б)','В)'][i]+' '+o;
+    btn.onclick = ()=> handleQuizAnswer(i, btn);
+    optsEl.appendChild(btn);
+  });
+  startQTimer();
+}
+
+function startQTimer() {
+  clearInterval(qTimer);
+  qTimeLeft = Q_TIME;
+  updateQTimer();
+  qTimer = setInterval(()=>{
+    qTimeLeft -= 0.1;
+    if (qTimeLeft <= 0) { clearInterval(qTimer); timeUp(); }
+    else updateQTimer();
+  }, 100);
+}
+
+function updateQTimer() {
+  const pct = (qTimeLeft / Q_TIME) * 100;
+  const bar = document.getElementById('qTimerBar');
+  bar.style.width = pct+'%';
+  bar.className = 'quiz-timer-bar' + (pct < 30 ? ' danger' : '');
+}
+
+function timeUp() {
+  loseLife();
+  document.getElementById('qOpts').querySelectorAll('.opt').forEach((b,i)=>{
+    if (i === QUIZ[qIdx].correct) b.classList.add('correct');
+  });
+  setTimeout(()=>{ qIdx++; showQuestion(); }, 1000);
+}
+
+function handleQuizAnswer(idx, btn) {
+  clearInterval(qTimer);
+  document.getElementById('qOpts').querySelectorAll('.opt').forEach(b=>b.style.pointerEvents='none');
+  const correct = QUIZ[qIdx].correct;
+  if (idx === correct) {
+    btn.classList.add('correct');
+    const bonus = Math.ceil(qTimeLeft / Q_TIME * 15) + 10;
+    addXP(bonus);
+    flash('green');
+    if (navigator.vibrate) navigator.vibrate(30);
+  } else {
+    btn.classList.add('wrong');
+    document.getElementById('qOpts').querySelectorAll('.opt')[correct].classList.add('correct');
+    loseLife();
+  }
+  setTimeout(()=>{ qIdx++; showQuestion(); }, 900);
+}
+
+// ══════════════════════════════════════════
+// SCREEN 2 — CATCH GAME
+// ══════════════════════════════════════════
+// Ліцей №6: ловимо корисне, уникаємо забороненого
+const GOOD = ['📘 Підручник','✏️ Пенал','📒 Щоденник','🍏 Сніданок','📐 Лінійка','🗂️ Папка','🔒 Пароль','🤝 Підтримка'];
+const BAD  = ['🚬 Вейп','🍬 Жуйка','🤬 Образа','💬 Плітки','🥊 Бійка','🧥 Верхній одяг'];
+
+let catchCount = 0;
+let missCount = 0;
+let catchItems = [];
+let catchInterval = null;
+let arenaW = 0, arenaH = 0;
+let basketX = 50; // percent
+let catchAnimFrame = null;
+let catchRunning = false;
+const CATCH_TARGET = 10;
+
+function initCatch() {
+  catchCount = 0; missCount = 0; catchItems = [];
+  document.getElementById('catchCount').textContent = '0';
+  document.getElementById('missCount').textContent = '0';
+  document.getElementById('catchBar').style.width = '0%';
+
+  const arena = document.getElementById('arena');
+  arenaW = arena.clientWidth;
+  arenaH = arena.clientHeight;
+  basketX = 50;
+  updateBasket();
+
+  // Touch/mouse for basket
+  arena.addEventListener('touchmove', onArenaTouch, {passive:true});
+  arena.addEventListener('mousemove', onArenaMouse);
+
+  catchRunning = true;
+  catchInterval = setInterval(spawnItem, 1100);
+  requestAnimationFrame(catchLoop);
+}
+
+function onArenaTouch(e) {
+  const rect = document.getElementById('arena').getBoundingClientRect();
+  basketX = Math.min(95, Math.max(5, (e.touches[0].clientX - rect.left)/arenaW*100));
+  updateBasket();
+}
+function onArenaMouse(e) {
+  const rect = document.getElementById('arena').getBoundingClientRect();
+  basketX = Math.min(95, Math.max(5, (e.clientX - rect.left)/arenaW*100));
+  updateBasket();
+}
+function updateBasket() {
+  document.getElementById('basket').style.left = basketX+'%';
+}
+
+function spawnItem() {
+  if (!catchRunning) return;
+  const arena = document.getElementById('arena');
+  const isGood = Math.random() > 0.3;
+  const emoji = isGood ? GOOD[Math.floor(Math.random()*GOOD.length)] : BAD[Math.floor(Math.random()*BAD.length)];
+  const x = 8 + Math.random()*84;
+  const speed = 2.8 + Math.random()*1.6;
+
+  const el = document.createElement('div');
+  el.className = 'falling-item';
+  el.textContent = emoji;
+  el.style.left = x+'%';
+  el.style.top = '-40px';
+  el.dataset.good = isGood ? '1' : '0';
+  el.dataset.y = -40;
+  el.dataset.speed = speed;
+  el.dataset.x = x;
+  arena.appendChild(el);
+  catchItems.push(el);
+
+  // Tap item directly
+  el.addEventListener('touchstart', ()=> tapItem(el), {passive:true});
+  el.addEventListener('click', ()=> tapItem(el));
+}
+
+function tapItem(el) {
+  if (!el.parentNode) return;
+  const good = el.dataset.good === '1';
+  if (good) { catchGood(); } else { catchBad(); }
+  el.remove();
+  catchItems = catchItems.filter(i=>i!==el);
+}
+
+function catchGood() {
+  catchCount++;
+  document.getElementById('catchCount').textContent = catchCount;
+  document.getElementById('catchBar').style.width = (catchCount/CATCH_TARGET*100)+'%';
+  addXP(4);
+  flash('green');
+  if (navigator.vibrate) navigator.vibrate(20);
+  if (catchCount >= CATCH_TARGET) finishCatch();
+}
+function catchBad() {
+  loseLife();
+  if (navigator.vibrate) navigator.vibrate([50,30,50]);
+}
+
+function catchLoop() {
+  if (!catchRunning) return;
+  const arena = document.getElementById('arena');
+  const basket = document.getElementById('basket');
+  const bRect = basket.getBoundingClientRect();
+  const aRect = arena.getBoundingClientRect();
+  const bLeft = bRect.left - aRect.left;
+  const bRight = bRect.right - aRect.left;
+  const bTop = bRect.top - aRect.top;
+
+  catchItems = catchItems.filter(el => {
+    if (!el.parentNode) return false;
+    let y = parseFloat(el.dataset.y);
+    let speed = parseFloat(el.dataset.speed);
+    y += speed;
+    el.dataset.y = y;
+    el.style.top = y+'px';
+
+    const x = parseFloat(el.dataset.x)/100 * arenaW;
+    // Collision with basket
+    if (y + 35 >= bTop && y <= bTop + 40 && x >= bLeft - 10 && x <= bRight + 10) {
+      const good = el.dataset.good === '1';
+      if (good) catchGood(); else catchBad();
+      el.remove();
+      return false;
+    }
+    // Off screen
+    if (y > arenaH + 10) {
+      if (el.dataset.good === '1') {
+        missCount++;
+        document.getElementById('missCount').textContent = missCount;
+        if (missCount >= 4) { loseLife(); missCount = 0; document.getElementById('missCount').textContent = '0'; }
       }
+      el.remove();
+      return false;
     }
+    return true;
+  });
+  catchAnimFrame = requestAnimationFrame(catchLoop);
+}
 
-    function updateXP(amount) {
-      currentXP += amount;
-      if (currentXP > 100) currentXP = 100;
-      
-      document.getElementById('xpCount').innerText = currentXP;
-      document.getElementById('xpBar').style.width = currentXP + '%';
-      
-      const popup = document.getElementById('xpPopup');
-      popup.innerText = `+${amount} XP`;
-      popup.style.display = 'block';
-      setTimeout(() => { popup.style.opacity = '0'; }, 800);
-      setTimeout(() => { popup.style.display = 'none'; popup.style.opacity = '1'; }, 1200);
+function finishCatch() {
+  catchRunning = false;
+  clearInterval(catchInterval);
+  cancelAnimationFrame(catchAnimFrame);
+  catchItems.forEach(e=>{ if(e.parentNode) e.remove(); });
+  const arena = document.getElementById('arena');
+  arena.removeEventListener('touchmove', onArenaTouch);
+  arena.removeEventListener('mousemove', onArenaMouse);
+  addXP(15);
+  setTimeout(()=>{ goTo('s3',2); initSort(); }, 600);
+}
+
+// ══════════════════════════════════════════
+// SCREEN 3 — SORT
+// ══════════════════════════════════════════
+// Ліцей №6 — правила, ДЗ, перерви, безпека
+const SORT_ITEMS = [
+  { text:'📒 Відкрити щоденник і знайти що задано',          need:true,  explain:'Крок №1 правильного алгоритму ДЗ!' },
+  { text:'✍️ Складне завдання одразу в чистовик',            need:false, explain:'Спочатку — чернетка, де можна виправити!' },
+  { text:'🔁 Переглянути класну роботу перед ДЗ',            need:true,  explain:'Орієнтуйся на вправи з учителем!' },
+  { text:'🏃 Бігти по сходах під час перерви',               need:false, explain:'Заборонено з міркувань безпеки!' },
+  { text:'🤫 Зберігати тишу в укритті під час тривоги',      need:true,  explain:'Слухай вчителя — це безпека всіх!' },
+  { text:'🪟 Самостійно підійти до вікна під час тривоги',   need:false, explain:'Суворо заборонено в укритті!' },
+  { text:'⏸️ Перепочити 10 хвилин між предметами',           need:true,  explain:'Так мозок краще засвоює матеріал!' },
+  { text:'📱 Гортати телефон під час уроку',                 need:false, explain:'Телефон на уроках заборонений!' },
+  { text:'🙋 Підняти руку, щоб відповісти на уроці',        need:true,  explain:'Правило поведінки на уроці ліцею!' },
+  { text:'🚶 Самовільно вийти з ліцею в урочний час',        need:false, explain:'Тільки з дозволу вчителя або медсестри!' },
+];
+
+let sortIdx = 0;
+let sortLocked = false;
+
+function initSort() {
+  sortIdx = 0;
+  showSortItem();
+}
+
+function showSortItem() {
+  if (sortIdx >= SORT_ITEMS.length) { addXP(15); goTo('s4',3); initPack(); return; }
+  document.getElementById('sortCounter').textContent = `${sortIdx+1}/${SORT_ITEMS.length}`;
+  document.getElementById('sortItem').textContent = SORT_ITEMS[sortIdx].text;
+  document.getElementById('sortFeedback').textContent = '';
+  sortLocked = false;
+}
+
+function handleSort(answer) {
+  if (sortLocked) return;
+  sortLocked = true;
+  const item = SORT_ITEMS[sortIdx];
+  const correct = item.need === answer;
+  const fb = document.getElementById('sortFeedback');
+  if (correct) {
+    fb.innerHTML = '✅ Правильно! <span style="font-size:11px;opacity:.85">' + (item.explain||'') + '</span>';
+    fb.style.color = 'var(--green)';
+    addXP(5);
+    flash('green');
+    if (navigator.vibrate) navigator.vibrate(25);
+  } else {
+    fb.innerHTML = '❌ ' + (item.explain || 'Не зовсім…');
+    fb.style.color = 'var(--pink)';
+    loseLife();
+  }
+  setTimeout(()=>{ sortIdx++; showSortItem(); }, 1100);
+}
+
+// ══════════════════════════════════════════
+// SCREEN 4 — PACK (drag & drop)
+// ══════════════════════════════════════════
+// Ліцей №6 — що беремо до школи, що залишаємо вдома
+const PACK_ITEMS = [
+  { text:'📚 Підручники',          zone:'school' },
+  { text:'✏️ Пенал',               zone:'school' },
+  { text:'📱 Планшет',             zone:'school' },
+  { text:'📒 Щоденник',            zone:'school' },
+  { text:'🎮 Ігрова приставка',    zone:'home'   },
+  { text:'🧸 М\'яка іграшка',      zone:'home'   },
+  { text:'🚬 Вейп/сигарети',       zone:'home'   },
+  { text:'📐 Лінійка',             zone:'school' },
+];
+
+let packPlaced = {};
+let dragChip = null;
+let dragGhost = null;
+let dragOffX = 0, dragOffY = 0;
+
+function initPack() {
+  packPlaced = {};
+  document.getElementById('schoolItems').innerHTML = '';
+  document.getElementById('homeItems').innerHTML = '';
+  document.getElementById('packCheck').textContent = '';
+  document.getElementById('packCheckBtn').style.display = 'none';
+
+  const shelf = document.getElementById('packShelf');
+  shelf.innerHTML = '';
+
+  PACK_ITEMS.forEach((item,i) => {
+    const chip = document.createElement('div');
+    chip.className = 'pack-chip';
+    chip.textContent = item.text;
+    chip.dataset.idx = i;
+    chip.dataset.correct = item.zone;
+
+    // Touch drag
+    chip.addEventListener('touchstart', startDragTouch, {passive:true});
+    // Mouse drag
+    chip.addEventListener('mousedown', startDragMouse);
+    shelf.appendChild(chip);
+  });
+
+  setupDropZones();
+}
+
+function setupDropZones() {
+  ['zoneSchool','zoneHome'].forEach(id=>{
+    const zone = document.getElementById(id);
+    zone.addEventListener('touchend', dropTouch);
+    zone.addEventListener('mouseup', dropMouse);
+    zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('highlight'); });
+    zone.addEventListener('dragleave', ()=> zone.classList.remove('highlight'));
+  });
+}
+
+function startDragTouch(e) {
+  dragChip = e.currentTarget;
+  const t = e.touches[0];
+  createGhost(dragChip, t.clientX, t.clientY);
+  document.addEventListener('touchmove', moveDragTouch, {passive:true});
+  document.addEventListener('touchend', endDragTouch, {once:true});
+}
+function moveDragTouch(e) {
+  const t = e.touches[0];
+  moveGhost(t.clientX, t.clientY);
+  highlightZone(t.clientX, t.clientY);
+}
+function endDragTouch(e) {
+  const t = e.changedTouches[0];
+  document.removeEventListener('touchmove', moveDragTouch);
+  dropAtPoint(t.clientX, t.clientY);
+  removeGhost();
+}
+
+function startDragMouse(e) {
+  dragChip = e.currentTarget;
+  createGhost(dragChip, e.clientX, e.clientY);
+  document.addEventListener('mousemove', moveDragMouse);
+  document.addEventListener('mouseup', endDragMouse, {once:true});
+}
+function moveDragMouse(e) { moveGhost(e.clientX, e.clientY); highlightZone(e.clientX, e.clientY); }
+function endDragMouse(e) {
+  document.removeEventListener('mousemove', moveDragMouse);
+  dropAtPoint(e.clientX, e.clientY);
+  removeGhost();
+}
+
+function createGhost(chip, x, y) {
+  dragGhost = chip.cloneNode(true);
+  dragGhost.style.cssText = `position:fixed;left:${x-40}px;top:${y-20}px;z-index:500;opacity:.85;pointer-events:none;`;
+  document.body.appendChild(dragGhost);
+  chip.style.opacity = '0.35';
+}
+function moveGhost(x,y) { if(dragGhost){ dragGhost.style.left=(x-40)+'px'; dragGhost.style.top=(y-20)+'px'; } }
+function removeGhost() { if(dragGhost){ dragGhost.remove(); dragGhost=null; } if(dragChip) dragChip.style.opacity='1'; }
+
+function highlightZone(x,y) {
+  ['zoneSchool','zoneHome'].forEach(id=>{
+    const r = document.getElementById(id).getBoundingClientRect();
+    const over = x>=r.left && x<=r.right && y>=r.top && y<=r.bottom;
+    document.getElementById(id).classList.toggle('highlight', over);
+  });
+}
+
+function dropAtPoint(x,y) {
+  ['zoneSchool','zoneHome'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.classList.remove('highlight');
+    const r = el.getBoundingClientRect();
+    if (x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) {
+      placeChip(id.replace('zone','').toLowerCase());
     }
+  });
+}
+function dropTouch(e) {} // handled in endDragTouch
+function dropMouse(e) {}  // handled in endDragMouse
 
-    // --- ЕТАП 1: ЛОГІКА КВІЗУ ---
-    function handleQuiz(isCorrect, element) {
-      if (isCorrect) {
-        element.classList.add('correct');
-        playSound(soundCoin);
-        updateXP(30);
-        
-        setTimeout(() => {
-          document.getElementById('screen1').classList.remove('active');
-          document.getElementById('screen2').classList.add('active');
-        }, 1000);
-      } else {
-        element.classList.add('wrong');
-        if (navigator.vibrate) navigator.vibrate([60, 40, 60]);
-        setTimeout(() => element.classList.remove('wrong'), 800);
-      }
+function placeChip(zone) {
+  if (!dragChip) return;
+  const idx = dragChip.dataset.idx;
+  if (packPlaced[idx] !== undefined) return;
+
+  packPlaced[idx] = zone;
+  dragChip.style.opacity = '1';
+
+  const target = zone === 'school' ? document.getElementById('schoolItems') : document.getElementById('homeItems');
+  const clone = document.createElement('div');
+  clone.className = 'pack-chip';
+  clone.textContent = dragChip.textContent;
+  clone.dataset.idx = idx;
+  target.appendChild(clone);
+
+  dragChip.style.display = 'none';
+  dragChip = null;
+
+  // Show check button when all placed
+  if (Object.keys(packPlaced).length >= PACK_ITEMS.length) {
+    document.getElementById('packCheckBtn').style.display = 'block';
+  }
+}
+
+function checkPack() {
+  let correct = 0;
+  PACK_ITEMS.forEach((item,i) => {
+    const placed = packPlaced[i];
+    if (placed === item.zone) correct++;
+  });
+
+  const fb = document.getElementById('packCheck');
+  if (correct === PACK_ITEMS.length) {
+    fb.textContent = '🎉 Ідеально! Рюкзак зібрано!';
+    fb.style.color = 'var(--green)';
+    addXP(25);
+    flash('green');
+    setTimeout(()=>{ goTo('s5',4); initCipher(); }, 1000);
+  } else {
+    fb.textContent = `😬 ${correct}/${PACK_ITEMS.length} правильно — спробуй ще!`;
+    fb.style.color = 'var(--pink)';
+    loseLife();
+    // Reset wrong ones
+    setTimeout(resetPack, 1200);
+  }
+}
+
+function resetPack() {
+  packPlaced = {};
+  document.getElementById('schoolItems').innerHTML = '';
+  document.getElementById('homeItems').innerHTML = '';
+  document.getElementById('packCheck').textContent = '';
+  document.getElementById('packCheckBtn').style.display = 'none';
+  document.querySelectorAll('#packShelf .pack-chip').forEach(c=>{ c.style.display=''; c.style.opacity='1'; });
+}
+
+// ══════════════════════════════════════════
+// SCREEN 5 — CIPHER (Hangman-style)
+// ══════════════════════════════════════════
+const CIPHER_WORDS = [
+  { word:'ПОРЯДОК', hint:'Головне правило Чорноморського ліцею №6 🏫' },
+  { word:'БЕЗПЕКА', hint:'Те, що захищає тебе в мережі та в ліцеї 🔒' },
+  { word:'ПОШАНА',  hint:'Ліцеїсти поступаються дорогою дорослим і молодшим 🤝' },
+];
+
+let cWord = '';
+let cHint = '';
+let cGuessed = [];
+let cWrong = 0;
+const C_MAX_WRONG = 3;
+
+function initCipher() {
+  const w = CIPHER_WORDS[Math.floor(Math.random()*CIPHER_WORDS.length)];
+  cWord = w.word;
+  cHint = w.hint;
+  cGuessed = [];
+  cWrong = 0;
+  renderCipher();
+  buildKeys();
+}
+
+function renderCipher() {
+  // Display
+  const disp = cWord.split('').map(l=> cGuessed.includes(l) ? l : '_').join(' ');
+  document.getElementById('cipherDisplay').textContent = disp;
+  // Progress
+  const done = cWord.split('').filter(l=> cGuessed.includes(l)).length;
+  document.getElementById('cipherProg').textContent = `Відкрито: ${done}/${cWord.length}`;
+  // Lives
+  const h = Array(C_MAX_WRONG).fill(0).map((_,i)=> i < (C_MAX_WRONG - cWrong) ? '❤️':'🖤').join('');
+  document.getElementById('cipherLives').textContent = h;
+  // Hint
+  document.getElementById('cipherHint').textContent = '💡 Підказка: '+cHint;
+}
+
+function buildKeys() {
+  const LETTERS = 'АБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ';
+  const container = document.getElementById('cipherKeys');
+  container.innerHTML = '';
+  LETTERS.split('').forEach(l=>{
+    const btn = document.createElement('button');
+    btn.className = 'cipher-key';
+    btn.textContent = l;
+    btn.onclick = ()=> guessLetter(l, btn);
+    container.appendChild(btn);
+  });
+}
+
+function guessLetter(letter, btn) {
+  if (cGuessed.includes(letter)) return;
+  cGuessed.push(letter);
+  btn.classList.add('used');
+
+  if (cWord.includes(letter)) {
+    btn.classList.add('correct');
+    addXP(5);
+    flash('green');
+    // Check win
+    if (cWord.split('').every(l=> cGuessed.includes(l))) {
+      addXP(20);
+      setTimeout(finishGame, 700);
+      return;
     }
-
-    // --- ЕТАП 2: ЛОГІКА ТАПАЛКИ ---
-    function handleTap() {
-      if (tapProgress >= 100) return;
-      
-      tapProgress += 8;
-      if (tapProgress > 100) tapProgress = 100;
-      
-      document.getElementById('miniBar').style.width = tapProgress + '%';
-      if (navigator.vibrate) navigator.vibrate(20);
-
-      if (tapProgress >= 100) {
-        playSound(soundCoin);
-        updateXP(30);
-        
-        setTimeout(() => {
-          document.getElementById('screen2').classList.remove('active');
-          document.getElementById('screen3').classList.add('active');
-          initDragAndDrop();
-        }, 1000);
-      }
+  } else {
+    btn.classList.add('wrong');
+    cWrong++;
+    loseLife();
+    if (cWrong >= C_MAX_WRONG) {
+      // Reveal word & finish anyway
+      cGuessed.push(...cWord.split(''));
+      renderCipher();
+      setTimeout(finishGame, 1000);
+      return;
     }
+  }
+  renderCipher();
+}
 
-    // --- ЕТАП 3: ТЕТРІС-РЮКЗАК ---
-    function initDragAndDrop() {
-      const dragItems = document.querySelectorAll('.drag-item');
-      const gridCells = document.querySelectorAll('.grid-cell');
-      let draggedItem = null;
+// ══════════════════════════════════════════
+// FINAL
+// ══════════════════════════════════════════
+function finishGame() {
+  const name = localStorage.getItem('pysanka_student_name') || 'Супер-Учень';
+  const skill = localStorage.getItem('pysanka_student_skill') || '🦾 Мега-мозок';
+  const bonus = localStorage.getItem('pysanka_student_bonus') || 'Рівень майстра x2!';
 
-      dragItems.forEach(item => {
-        item.addEventListener('dragstart', function() {
-          draggedItem = this;
-        });
-      });
+  document.getElementById('bName').textContent = name;
+  document.getElementById('bSkill').textContent = skill;
+  document.getElementById('bBonus').textContent = bonus;
 
-      gridCells.forEach(cell => {
-        cell.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('highlight'); });
-        cell.addEventListener('dragleave', function() { this.classList.remove('highlight'); });
-        cell.addEventListener('drop', function() {
-          this.classList.remove('highlight');
-          if (draggedItem && !this.hasAttribute('data-filled')) {
-            placeItemInGrid(this, draggedItem);
-            draggedItem = null;
-          }
-        });
-      });
+  // Stars based on lives
+  const stars = ['⭐','⭐⭐','⭐⭐⭐'][Math.min(2, Math.max(0, lives))];
+  document.getElementById('starsRow').textContent = stars;
+  // finalScore set below after goTo
 
-      dragItems.forEach(item => {
-        item.addEventListener('touchstart', function(e) {
-          draggedItem = this;
-        }, {passive: true});
+  // Personalized finish message
+  const finalMsg = cWord === 'ПОРЯДОК'
+    ? `«Шифр зламано! ${name} знає правила Чорноморського ліцею №6 на 12 балів! Дані занесено в базу ліцею!»`
+    : cWord === 'БЕЗПЕКА'
+    ? `«${name} — майстер кібербезпеки та правил ліцею! Молодець!»`
+    : `«${name} пройшов(ла) ліцейський квест! Зустрінемось 1 вересня!»`;
+  document.getElementById('finalScore').textContent = `Набрано: ${xp} XP · ${stars} · ${finalMsg}`;
 
-        item.addEventListener('touchmove', function(e) {
-          if (!draggedItem) return;
-          const touch = e.touches[0];
-          draggedItem.style.position = 'fixed';
-          draggedItem.style.left = (touch.clientX - 50) + 'px';
-          draggedItem.style.top = (touch.clientY - 20) + 'px';
-          draggedItem.style.zIndex = '1000';
-        }, {passive: true});
+  goTo('sFinal',5);
 
-        item.addEventListener('touchend', function(e) {
-          if (!draggedItem) return;
-          
-          const touch = e.changedTouches[0];
-          draggedItem.style.display = 'none';
-          const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
-          
-          draggedItem.style.position = 'static';
-          draggedItem.style.zIndex = 'auto';
-          draggedItem.style.display = 'block';
-          
-          const targetCell = elementUnderTouch ? elementUnderTouch.closest('.grid-cell') : null;
+  if (typeof confetti === 'function') {
+    confetti({ particleCount:160, spread:85, origin:{y:0.55} });
+    setTimeout(()=> confetti({ particleCount:80, spread:120, origin:{y:0.3}, angle:60 }), 600);
+  }
 
-          if (targetCell && !targetCell.hasAttribute('data-filled')) {
-            placeItemInGrid(targetCell, draggedItem);
-          }
-          draggedItem = null;
-        });
-      });
-    }
+  // Send to Google Sheet
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzqqDgBlAER2cHA-wLm2IVqPmdvTcENYZ9wvKODyc77kgFbvPw7bbY510sPsPEApueZ/exec";
+  fetch(WEB_APP_URL, {
+    method:'POST', mode:'no-cors',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ name, skill, bonus, xp, lives, key:'Pysanka5ClassKey2026' })
+  }).catch(()=>{});
+}
 
-    function placeItemInGrid(cell, item) {
-      cell.setAttribute('data-filled', 'true');
-      cell.style.background = 'var(--gold-yellow)';
-      cell.style.border = '2px solid white';
-      cell.innerText = item.innerText.split(' ')[0];
-      
-      item.classList.add('placed');
-      placedItemsCount++;
-      
-      if (navigator.vibrate) navigator.vibrate(40);
+function saveScreenshot() {
+  const btn = document.getElementById('screenshotBtn');
+  const tgBtn = btn.nextElementSibling;
+  btn.textContent = '⏳ Зберігаємо...';
+  btn.style.pointerEvents = 'none';
 
-      if (placedItemsCount >= 2) {
-        updateXP(40);
-        setTimeout(finishGame, 800);
-      }
-    }
+  // Hide buttons during capture
+  btn.style.display = 'none';
+  tgBtn.style.display = 'none';
 
-    // --- ФІНАЛ: НАДСИЛАННЯ В ТАБЛИЦЮ, БЕЙДЖ ТА САЛЮТ ---
-    function finishGame() {
-      document.getElementById('screen3').classList.remove('active');
-      document.getElementById('screenFinal').classList.add('active');
-      
-      playSound(soundLevelUp);
-      
-      const studentName = localStorage.getItem('pysanka_student_name') || 'Супер-Учень';
-      const studentSkill = localStorage.getItem('pysanka_student_skill') || '🦾 Мега-мозок математики';
-      const studentBonus = localStorage.getItem('pysanka_student_bonus') || 'Швидкість розв’язування задач x2!';
-      
-      document.getElementById('badgeName').innerText = studentName;
-      document.getElementById('badgeSkill').innerText = studentSkill;
-      document.getElementById('badgeBonus').innerText = studentBonus;
+  const badge = document.querySelector('.badge');
+  html2canvas(badge, {
+    backgroundColor: null,
+    scale: 2,
+    useCORS: true,
+    allowTaint: true,
+  }).then(canvas => {
+    btn.style.display = '';
+    tgBtn.style.display = '';
+    btn.textContent = '✅ Збережено! 📸';
+    btn.style.pointerEvents = '';
 
-      // 🌟 ВСТАВЛЕНЕ ВАШЕ ПОСИЛАННЯ НА GOOGLE APPS SCRIPT 🌟
-      const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzqqDgBlAER2cHA-wLm2IVqPmdvTcENYZ9wvKODyc77kgFbvPw7bbY510sPsPEApueZ/exec";
+    // Download
+    const link = document.createElement('a');
+    const name = localStorage.getItem('pysanka_student_name') || 'uchenʼ';
+    link.download = `badge_5klas_${name}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }).catch(()=> {
+    btn.style.display = '';
+    tgBtn.style.display = '';
+    btn.textContent = 'Зберегти бейдж 📸';
+    btn.style.pointerEvents = '';
+    alert('Зроби скріншот вручну — затисни кнопку живлення + гучність! 📸');
+  });
+}
 
-      const playerData = {
-        name: studentName,
-        skill: studentSkill,
-        bonus: studentBonus,
-        key: "Pysanka5ClassKey2026" // Секретний ключ захисту
-      };
-
-      fetch(WEB_APP_URL, {
-        method: "POST",
-        mode: "no-cors",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(playerData)
-      })
-      .then(() => console.log("Дані захищено та успішно надіслані!"))
-      .catch(err => console.error("Помилка відправки даних:", err));
-
-      if (typeof confetti === 'function') {
-        confetti({
-          particleCount: 150,
-          spread: 80,
-          origin: { y: 0.6 }
-        });
-      }
-    }
-  </script>
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load', ()=>{
+  initQuiz();
+});
+</script>
 </body>
 </html>
