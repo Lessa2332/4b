@@ -1,1 +1,644 @@
-1
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Рюкзак у 5-й Клас | Квест-гра</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <style>
+    :root {
+      --bg-blue: #0066ff;
+      --bg-dark-blue: #0044cc;
+      --gold-yellow: #FFE600;
+      --neon-green: #39FF14;
+      --neon-pink: #ff3366;
+      --text-white: #ffffff;
+      --font-main: 'Montserrat', sans-serif;
+      --transition: all 0.3s ease;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    
+    body {
+      font-family: var(--font-main);
+      background: radial-gradient(circle at 50% 50%, var(--bg-blue) 0%, var(--bg-dark-blue) 100%);
+      color: var(--text-white);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      overflow-x: hidden;
+    }
+
+    /* Інтерфейс прогресу (XP BAR) */
+    .header-panel {
+      width: 100%;
+      max-width: 450px;
+      background: rgba(0, 0, 68, 0.4);
+      padding: 15px;
+      border-radius: 20px;
+      border: 3px solid rgba(255, 255, 255, 0.2);
+      margin-bottom: 20px;
+      text-align: center;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .xp-text {
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--gold-yellow);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .xp-container {
+      width: 100%;
+      height: 20px;
+      background: #002266;
+      border-radius: 10px;
+      border: 2px solid white;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .xp-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--gold-yellow), var(--neon-green));
+      box-shadow: 0 0 10px var(--neon-green);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Спливаючі бали +XP */
+    .xp-popup {
+      position: fixed;
+      top: 20%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--neon-green);
+      text-shadow: 0 0 20px var(--neon-green), 0 4px 0 #000;
+      z-index: 100;
+      animation: floatUp 1.2s ease-out forwards;
+      display: none;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+      20% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -100px) scale(1); }
+    }
+
+    /* Ігрові Екрани-Контейнери */
+    .game-box {
+      background: #0055ff;
+      border: 6px solid var(--text-white);
+      border-radius: 35px;
+      padding: 25px 20px;
+      max-width: 450px;
+      width: 100%;
+      margin: auto 0;
+      box-shadow: 0 15px 0px rgba(0, 0, 68, 0.4);
+      text-align: center;
+      position: relative;
+    }
+
+    .screen {
+      display: none;
+    }
+
+    .screen.active {
+      display: block;
+    }
+
+    h2 {
+      font-weight: 900;
+      font-size: 22px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      color: var(--gold-yellow);
+      text-shadow: 0 3px 0 rgba(0,0,0,0.3);
+    }
+
+    .desc {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      opacity: 0.95;
+    }
+
+    /* ЕТАП 1: КВІЗ-ВАРІАНТИ */
+    .quiz-equation {
+      background: rgba(0,0,0,0.2);
+      padding: 15px;
+      border-radius: 20px;
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 20px;
+      border: 2px dashed rgba(255,255,255,0.3);
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .opt-btn {
+      background: #0044cc;
+      border: 3px solid white;
+      border-radius: 20px;
+      padding: 15px;
+      color: white;
+      font-family: var(--font-main);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      box-shadow: 0 5px 0 #002288;
+      text-align: left;
+    }
+
+    .opt-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #002288;
+    }
+
+    .opt-btn.correct {
+      background: var(--neon-green) !important;
+      color: #0044cc !important;
+      border-color: #fff !important;
+    }
+
+    .opt-btn.wrong {
+      background: var(--neon-pink) !important;
+    }
+
+    /* ЕТАП 2: ТАПАЛКА */
+    .tap-target {
+      width: 130px;
+      height: 130px;
+      background: radial-gradient(circle, #ffe600 0%, #ff9900 100%);
+      border: 5px solid white;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      cursor: pointer;
+      box-shadow: 0 0 25px var(--gold-yellow), 0 8px 0 #cc6600;
+      transition: transform 0.05s ease;
+    }
+
+    .tap-target:active {
+      transform: scale(0.92) translateY(4px);
+      box-shadow: 0 0 15px var(--gold-yellow), 0 2px 0 #cc6600;
+    }
+
+    .progress-mini-container {
+      width: 100%;
+      height: 16px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 8px;
+      border: 2px solid white;
+      overflow: hidden;
+      margin-top: 15px;
+    }
+
+    .progress-mini-bar {
+      width: 0%;
+      height: 100%;
+      background: var(--neon-pink);
+      box-shadow: 0 0 8px var(--neon-pink);
+    }
+
+    /* ЕТАП 3: ТЕТРІС-РЮКЗАК (DRAG & DROP) */
+    .bag-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      max-width: 260px;
+      margin: 20px auto;
+      background: #0033aa;
+      padding: 12px;
+      border-radius: 20px;
+      border: 4px solid white;
+      box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
+    }
+
+    .grid-cell {
+      aspect-ratio: 1;
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px dashed rgba(255, 255, 255, 0.2);
+      border-radius: 10px;
+      transition: var(--transition);
+    }
+
+    .grid-cell.highlight {
+      background: rgba(57, 255, 20, 0.2);
+      border-color: var(--neon-green);
+    }
+
+    .items-shelf {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 25px;
+      min-height: 80px;
+    }
+
+    .drag-item {
+      padding: 12px 18px;
+      background: var(--gold-yellow);
+      color: #0044cc;
+      border: 3px solid white;
+      border-radius: 15px;
+      font-weight: 900;
+      font-size: 14px;
+      cursor: grab;
+      box-shadow: 0 4px 0 #cda600;
+      touch-action: none; /* Захист від скролу на мобілці при перетягуванні */
+    }
+
+    .drag-item:active {
+      cursor: grabbing;
+    }
+
+    .drag-item.placed {
+      display: none; /* Сховуємо зі полиці, коли поклали */
+    }
+
+    /* ФІНАЛЬНИЙ БЕЙДЖ СУПЕРСИЛИ */
+    .badge-card {
+      background: linear-gradient(135deg, #0044cc 0%, #001166 100%);
+      border: 5px solid var(--gold-yellow);
+      border-radius: 30px;
+      padding: 25px 15px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 30px rgba(255, 230, 0, 0.3);
+    }
+
+    .badge-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #aaa;
+      margin-bottom: 5px;
+    }
+
+    .student-name {
+      font-size: 26px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 15px;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.4);
+    }
+
+    .skill-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      border-radius: 15px;
+      border-left: 5px solid var(--neon-green);
+      text-align: left;
+      margin-bottom: 15px;
+    }
+
+    .skill-title {
+      font-weight: 900;
+      font-size: 16px;
+      color: var(--gold-yellow);
+      margin-bottom: 4px;
+    }
+
+    .skill-desc {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--neon-green);
+    }
+
+    .promo-box {
+      background: dashed rgba(255, 230, 0, 0.2);
+      border: 2px dashed var(--gold-yellow);
+      padding: 12px;
+      border-radius: 15px;
+      font-size: 18px;
+      font-weight: 900;
+      color: var(--gold-yellow);
+      letter-spacing: 1px;
+    }
+
+    .btn-action {
+      width: 100%;
+      padding: 16px;
+      background: var(--neon-green);
+      color: #0044cc;
+      border: 4px solid white;
+      border-radius: 25px;
+      font-family: var(--font-main);
+      font-size: 16px;
+      font-weight: 900;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 6px 0 #2cc90f;
+    }
+
+    .btn-action:active {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #2cc90f;
+    }
+
+    .screenshot-hint {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ddd;
+      margin-top: 10px;
+      line-height: 1.3;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-panel">
+    <div class="xp-text">РІВЕНЬ ПРОГРЕСУ: <span id="xpCount">0</span>/100 XP</div>
+    <div class="xp-container">
+      <div class="xp-bar" id="xpBar"></div>
+    </div>
+  </div>
+
+  <div class="xp-popup" id="xpPopup">+30 XP</div>
+
+  <div class="game-box">
+    
+    <div class="screen active" id="screen1">
+      <h2>🔐 КРОК 1: ЗЛАМАЙ ШИФР</h2>
+      <div class="desc">Олеся Олександрівна закрила шафу з кібер-підручниками на емодзі-замок! Розгадай рівняння, щоб отримати ключ:</div>
+      
+      <div class="quiz-equation">🧠 + 📚 = ?</div>
+      
+      <div class="quiz-options">
+        <button class="opt-btn" onclick="handleQuiz(false, this)">💤 А) Сон на першому уроці</button>
+        <button class="opt-btn" onclick="handleQuiz(false, this)">🤯 Б) Нудна домашня робота</button>
+        <button class="opt-btn" onclick="handleQuiz(true, this)">🚀 В) Успішний 5-й Клас!</button>
+      </div>
+    </div>
+
+    <div class="screen" id="screen2">
+      <h2>⚡ КРОК 2: АНТИСТРЕС-ЗАРЯДКА</h2>
+      <div class="desc">Знайдено <b>Неонову Лінійку</b>! Але вона заряджена стресом від контрольних. Швидко ТАПАЙ по екрану, щоб очистити її!</div>
+      
+      <div class="tap-target" onclick="handleTap()">📏</div>
+      
+      <div style="font-size: 13px; font-weight: 700;">ЕНЕРГІЯ ОЧИЩЕННЯ:</div>
+      <div class="progress-mini-container">
+        <div class="progress-mini-bar" id="miniBar"></div>
+      </div>
+    </div>
+
+    <div class="screen" id="screen3">
+      <h2>🎒 КРОК 3: ТЕТРІС-СПАКОВКА</h2>
+      <div class="desc">Всі речі готові! Перетягни пальцем <b>Підручник</b> та <b>Лінійку</b> в рюкзак, щоб закрити замок!</div>
+      
+      <div class="bag-grid" id="bagGrid">
+        <div class="grid-cell" id="cell1"></div>
+        <div class="grid-cell" id="cell2"></div>
+        <div class="grid-cell" id="cell3"></div>
+      </div>
+
+      <div class="items-shelf">
+        <div class="drag-item" id="item1" draggable="true">📚 Підручник</div>
+        <div class="drag-item" id="item2" draggable="true">📏 Лінійка</div>
+      </div>
+    </div>
+
+    <div class="screen" id="screenFinal">
+      <h2>🏆 КВЕСТ ПРОЙДЕНО!</h2>
+      <div class="desc" style="color:var(--neon-green)">Ти повністю готовий(а) до нових пригод!</div>
+      
+      <div class="badge-card">
+        <div class="badge-title">Офіційний П'ятикласник</div>
+        <div class="student-name" id="badgeName">Учень</div>
+        
+        <div class="skill-box">
+          <div class="skill-title" id="badgeSkill">Суперсила</div>
+          <div class="skill-desc" id="badgeBonus">Бонус</div>
+        </div>
+        
+        <div class="badge-title" style="color: var(--gold-yellow); margin-bottom: 5px;">Секретний промокод:</div>
+        <div class="promo-box">SUPER5CLASS</div>
+      </div>
+
+      <button class="btn-action" onclick="alert('Скріншот готовий! Збережи його до 1 вересня! 📸')">Зробити Скріншот 📸</button>
+      <div class="screenshot-hint">Зроби скріншот цього екрана, надішли вчителю або покажи 1 вересня, щоб отримати свій перший реальний бонус!</div>
+    </div>
+
+  </div>
+
+  <audio id="soundCoin" preload="auto">
+    <source src="https://assets.mixkit.co/sfx/download/mixkit-payout-award-1934.wav" type="audio/wav">
+  </audio>
+  <audio id="soundLevelUp" preload="auto">
+    <source src="https://assets.mixkit.co/sfx/download/mixkit-video-game-level-next-231.wav" type="audio/wav">
+  </audio>
+
+  <script>
+    // Ігрові змінні
+    let currentXP = 0;
+    let tapProgress = 0;
+    let placedItemsCount = 0;
+    
+    // Аудіоефекти
+    const soundCoin = document.getElementById('soundCoin');
+    const soundLevelUp = document.getElementById('soundLevelUp');
+
+    function playSound(audioElement) {
+      if (audioElement) {
+        audioElement.currentTime = 0;
+        audioElement.play().catch(e => console.log('Аудіо очікує дії користувача'));
+      }
+    }
+
+    // Функція оновлення головного XP Bar
+    function updateXP(amount) {
+      currentXP += amount;
+      if (currentXP > 100) currentXP = 100;
+      
+      document.getElementById('xpCount').innerText = currentXP;
+      document.getElementById('xpBar').style.width = currentXP + '%';
+      
+      // Показ спливаючих балів +XP
+      const popup = document.getElementById('xpPopup');
+      popup.innerText = `+${amount} XP`;
+      popup.style.display = 'block';
+      setTimeout(() => { popup.style.opacity = '0'; }, 800);
+      setTimeout(() => { popup.style.display = 'none'; popup.style.opacity = '1'; }, 1200);
+    }
+
+    // --- ЕТАП 1: ЛОГІКА КВІЗУ ---
+    function handleQuiz(isCorrect, element) {
+      if (isCorrect) {
+        element.classList.add('correct');
+        playSound(soundCoin);
+        updateXP(30);
+        
+        // Перехід на Крок 2 через 1 секунду
+        setTimeout(() => {
+          document.getElementById('screen1').classList.remove('active');
+          document.getElementById('screen2').classList.add('active');
+        }, 1000);
+      } else {
+        element.classList.add('wrong');
+        if (navigator.vibrate) navigator.vibrate([60, 40, 60]); // Вібро-відгук помилки
+        setTimeout(() => element.classList.remove('wrong'), 800);
+      }
+    }
+
+    // --- ЕТАП 2: ЛОГІКА ТАПАЛКИ ---
+    function handleTap() {
+      if (tapProgress >= 100) return;
+      
+      tapProgress += 8; // Скільки відсотків дає один тап
+      if (tapProgress > 100) tapProgress = 100;
+      
+      document.getElementById('miniBar').style.width = tapProgress + '%';
+      
+      // Легка мікро-вібрація при кожному тапі (ефект клікера)
+      if (navigator.vibrate) navigator.vibrate(20);
+
+      if (tapProgress >= 100) {
+        playSound(soundCoin);
+        updateXP(30);
+        
+        // Перехід на Крок 3 через 1 секунду
+        setTimeout(() => {
+          document.getElementById('screen2').classList.remove('active');
+          document.getElementById('screen3').classList.add('active');
+          initDragAndDrop(); // Ініціалізуємо перетягування
+        }, 1000);
+      }
+    }
+
+    // --- ЕТАП 3: ТЕТРІС-РЮКЗАК (Сумісний з ПК та мобільними!) ---
+    function initDragAndDrop() {
+      const dragItems = document.querySelectorAll('.drag-item');
+      const gridCells = document.querySelectorAll('.grid-cell');
+      let draggedItem = null;
+
+      // Підтримка для ПК (Mouse Events)
+      dragItems.forEach(item => {
+        item.addEventListener('dragstart', function() {
+          draggedItem = this;
+        });
+      });
+
+      gridCells.forEach(cell => {
+        cell.addEventListener('dragover', function(e) { e.preventDefault(); this.classList.add('highlight'); });
+        cell.addEventListener('dragleave', function() { this.classList.remove('highlight'); });
+        cell.addEventListener('drop', function() {
+          this.classList.remove('highlight');
+          if (draggedItem && !this.hasAttribute('data-filled')) {
+            placeItemInGrid(this, draggedItem);
+            draggedItem = null;
+          }
+        });
+      });
+
+      // Підтримка для мобільних телефонів (Touch Events за координатами)
+      dragItems.forEach(item => {
+        item.addEventListener('touchstart', function(e) {
+          draggedItem = this;
+        }, {passive: true});
+
+        item.addEventListener('touchmove', function(e) {
+          if (!draggedItem) return;
+          const touch = e.touches[0];
+          // Рухаємо елемент візуально за пальцем
+          draggedItem.style.position = 'fixed';
+          draggedItem.style.left = (touch.clientX - 50) + 'px';
+          draggedItem.style.top = (touch.clientY - 20) + 'px';
+          draggedItem.style.zIndex = '1000';
+        }, {passive: true});
+
+        item.addEventListener('touchend', function(e) {
+          if (!draggedItem) return;
+          
+          const touch = e.changedTouches[0];
+          // Знаходимо, над якою коміркою відпустили палець
+          draggedItem.style.display = 'none'; // Тимчасово ховаємо, щоб зчитати елемент під ним
+          const elementUnderTouch = document.elementFromPoint(touch.clientX, touch.clientY);
+          draggedItem.style.display = 'block'; // Повертаємо
+          
+          const targetCell = elementUnderTouch ? elementUnderTouch.closest('.grid-cell') : null;
+
+          if (targetCell && !targetCell.hasAttribute('data-filled')) {
+            placeItemInGrid(targetCell, draggedItem);
+          } else {
+            // Якщо не влучили в рюкзак — повертаємо на полицю
+            draggedItem.style.position = 'static';
+            draggedItem.style.zIndex = 'auto';
+          }
+          draggedItem = null;
+        });
+      });
+    }
+
+    // Спільна функція зарахування предмету в сітку
+    function placeItemInGrid(cell, item) {
+      cell.setAttribute('data-filled', 'true');
+      cell.style.background = 'var(--gold-yellow)';
+      cell.style.border = '2px solid white';
+      cell.innerText = item.innerText.split(' ')[0]; // Залишаємо тільки емодзі у рюкзаку
+      
+      item.classList.add('placed'); // Сховуємо оригінал
+      placedItemsCount++;
+      
+      if (navigator.vibrate) navigator.vibrate(40); // Легкий вібро-відгук успішної дії
+
+      // Коли спаковано обидва предмети — КВЕСТ ЗАВЕРШЕНО!
+      if (placedItemsCount >= 2) {
+        updateXP(40);
+        setTimeout(finishGame, 800);
+      }
+    }
+
+    // --- ФІНАЛ: ВИВІД БЕЙДЖА ТА САЛЮТ ---
+    function finishGame() {
+      document.getElementById('screen3').classList.remove('active');
+      document.getElementById('screenFinal').classList.add('active');
+      
+      playSound(soundLevelUp);
+      
+      // Зчитуємо дані дитини з пам'яті телефону (введені на Етапі 5: Активація)
+      const studentName = localStorage.getItem('pysanka_student_name') || 'Супер-Учень';
+      const studentSkill = localStorage.getItem('pysanka_student_skill') || '🦾 Мега-мозок математики';
+      const studentBonus = localStorage.getItem('pysanka_student_bonus') || 'Швидкість розв’язування задач x2!';
+      
+      // Вставляємо дані у фінальний бейдж
+      document.getElementById('badgeName').innerText = studentName;
+      document.getElementById('badgeSkill').innerText = studentSkill;
+      document.getElementById('badgeBonus').innerText = studentBonus;
+
+      // Запуск вибуху конфеті за допомогою завантаженої бібліотеки
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+  </script>
+</body>
+</html>
