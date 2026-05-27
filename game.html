@@ -22,11 +22,11 @@
       font-family: var(--font);
       background: radial-gradient(ellipse at 60% 10%, #1a56ff 0%, #0a1a6e 70%);
       color: var(--white);
-      min-height: 100dvh; /* Динамічна висота екрану замість vh для iOS/Safari */
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 12px 12px 40px; /* padding-bottom можна трохи збільшити, щоб не перекривалося свайпом на iPhone */
+      padding: 12px 12px 40px;
       overflow-x: hidden;
     }
     
@@ -339,8 +339,8 @@
     <h2>🎯 КРОК 2: ЗАХИСНИЙ ЩИТ</h2>
     <div class="desc">Лови корисне для ліцею — уникай <b> 🤬 образ, 🥊 бійок</b>!</div>
     <div class="catch-stats">
-      <span>Зловлено: <span id="catchCount">0</span>/10</span>
-      <span>Пропущено: <span id="missCount">0</span></span>
+      <span>Зловлено: <span id="catchCountDisplay">0</span>/10</span>
+      <span>Пропущено: <span id="missCountDisplay">0</span></span>
     </div>
     <div class="catch-bar-rail"><div class="catch-bar" id="catchBar" style="width:0%"></div></div>
     <div class="catch-arena" id="arena">
@@ -356,8 +356,8 @@
     <div class="sort-counter" id="sortCounter">1/8</div>
     <div class="sort-item" id="sortItem"></div>
     <div class="sort-buttons">
-      <button class="sort-btn sort-yes" onclick="handleSort(true)">✅ ТАК</button>
-      <button class="sort-btn sort-no" onclick="handleSort(false)">❌ НІ</button>
+      <button class="sort-btn sort-yes" onclick="window.handleSort(true)">✅ ТАК</button>
+      <button class="sort-btn sort-no" onclick="window.handleSort(false)">❌ НІ</button>
     </div>
     <div class="pack-check" id="sortFeedback"></div>
   </div>
@@ -378,7 +378,7 @@
     </div>
     <div class="pack-items-row" id="packShelf" style="justify-content:center;gap:8px;margin:8px 0;"></div>
     <div class="pack-check" id="packCheck"></div>
-    <button class="btn btn-gold" id="packCheckBtn" onclick="checkPack()" style="display:none">Перевірити! 🔍</button>
+    <button class="btn btn-gold" id="packCheckBtn" onclick="window.checkPack()" style="display:none">Перевірити! 🔍</button>
   </div>
 
   <!-- ══ SCREEN 5: CIPHER ══ -->
@@ -407,7 +407,7 @@
       <div class="badge-label" style="color:var(--gold);margin-bottom:5px;">Секретний промокод:</div>
       <div class="promo">SUPER5CLASS</div>
     </div>
-    <button class="btn btn-gold" id="screenshotBtn" onclick="saveScreenshot()">Зберегти бейдж 📸</button>
+    <button class="btn btn-gold" id="screenshotBtn" onclick="window.saveScreenshot()">Зберегти бейдж 📸</button>
     <a href="https://t.me/lessa32" target="_blank" class="btn" style="background:#0088cc;box-shadow:0 6px 0 #005f8e;margin-top:10px;display:block;text-decoration:none;">✉️ Напиши пані Олесі</a>
     <div class="hint">Збережи бейдж та покажи вчителю 1 вересня!<br>Або напиши мені — якщо сподобалося 😊</div>
   </div>
@@ -415,6 +415,8 @@
 </div><!-- /card -->
 
 <script>
+'use strict';
+
 // ═══════════════ STATE ═══════════════
 let xp = 0;
 let lives = 3;
@@ -425,42 +427,50 @@ const MAX_XP = 150;
 function addXP(n) {
   xp = Math.min(xp + n, MAX_XP);
   totalXP += n;
-  document.getElementById('xpCount').textContent = xp;
-  document.getElementById('xpFill').style.width = (xp/MAX_XP*100)+'%';
+  const xpCountEl = document.getElementById('xpCount');
+  if (xpCountEl) xpCountEl.textContent = xp;
+  const xpFillEl = document.getElementById('xpFill');
+  if (xpFillEl) xpFillEl.style.width = (xp/MAX_XP*100)+'%';
   const pop = document.getElementById('xpPop');
-  pop.textContent = '+'+n+' XP';
-  pop.style.display = 'block';
-  pop.style.animation = 'none';
-  void pop.offsetWidth;
-  pop.style.animation = 'floatUp 1.2s ease-out forwards';
-  setTimeout(()=>{ pop.style.display='none'; }, 1200);
+  if (pop) {
+    pop.textContent = '+'+n+' XP';
+    pop.style.display = 'block';
+    pop.style.animation = 'none';
+    void pop.offsetWidth;
+    pop.style.animation = 'floatUp 1.2s ease-out forwards';
+    setTimeout(()=>{ pop.style.display='none'; }, 1200);
+  }
 }
 
 function loseLife() {
   lives = Math.max(0, lives - 1);
   updateLives();
-  flash('red');
+  window.flash('red');
   if (navigator.vibrate) navigator.vibrate([60,40,60]);
 }
 
 function updateLives() {
   const hearts = ['❤️','❤️','❤️'].map((_,i)=> i < lives ? '❤️' : '🖤').join('');
-  document.getElementById('livesEl').textContent = hearts;
+  const livesEl = document.getElementById('livesEl');
+  if (livesEl) livesEl.textContent = hearts;
 }
 
-function flash(color) {
+window.flash = function(color) {
   const el = document.getElementById('flash');
+  if (!el) return;
   el.className = 'result-flash '+color+' show';
   setTimeout(()=> el.classList.remove('show'), 300);
-}
+};
 
 function goTo(screenId, stageIdx) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(screenId).classList.add('active','fade-in');
+  const target = document.getElementById(screenId);
+  if (target) target.classList.add('active','fade-in');
   document.querySelectorAll('.dot').forEach((d,i)=>{
     d.className = 'dot' + (i < stageIdx ? ' done' : i === stageIdx ? ' active' : '');
   });
-  document.getElementById('stageLabel').textContent = 'Рівень '+(stageIdx+1)+'/5';
+  const stageLabel = document.getElementById('stageLabel');
+  if (stageLabel) stageLabel.textContent = 'Рівень '+(stageIdx+1)+'/5';
 }
 
 // ══════════════════════════════════════════
@@ -504,17 +514,21 @@ function initQuiz() { qIdx = 0; showQuestion(); }
 function showQuestion() {
   if (qIdx >= QUIZ.length) { addXP(20); goTo('s2',1); initCatch(); return; }
   const q = QUIZ[qIdx];
-  document.getElementById('qCounter').textContent = `Питання ${qIdx+1}/${QUIZ.length}`;
-  document.getElementById('qText').textContent = q.q;
+  const counterEl = document.getElementById('qCounter');
+  if (counterEl) counterEl.textContent = `Питання ${qIdx+1}/${QUIZ.length}`;
+  const qTextEl = document.getElementById('qText');
+  if (qTextEl) qTextEl.textContent = q.q;
   const optsEl = document.getElementById('qOpts');
-  optsEl.innerHTML = '';
-  q.opts.forEach((o,i)=>{
-    const btn = document.createElement('button');
-    btn.className = 'opt';
-    btn.textContent = ['А)','Б)','В)'][i]+' '+o;
-    btn.onclick = ()=> handleQuizAnswer(i, btn);
-    optsEl.appendChild(btn);
-  });
+  if (optsEl) {
+    optsEl.innerHTML = '';
+    q.opts.forEach((o,i)=>{
+      const btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = ['А)','Б)','В)'][i]+' '+o;
+      btn.onclick = ()=> handleQuizAnswer(i, btn);
+      optsEl.appendChild(btn);
+    });
+  }
   startQTimer();
 }
 
@@ -532,31 +546,40 @@ function startQTimer() {
 function updateQTimer() {
   const pct = (qTimeLeft / Q_TIME) * 100;
   const bar = document.getElementById('qTimerBar');
-  bar.style.width = pct+'%';
-  bar.className = 'quiz-timer-bar' + (pct < 30 ? ' danger' : '');
+  if (bar) {
+    bar.style.width = pct+'%';
+    bar.className = 'quiz-timer-bar' + (pct < 30 ? ' danger' : '');
+  }
 }
 
 function timeUp() {
   loseLife();
-  document.getElementById('qOpts').querySelectorAll('.opt').forEach((b,i)=>{
-    if (i === QUIZ[qIdx].correct) b.classList.add('correct');
-  });
+  const optsEl = document.getElementById('qOpts');
+  if (optsEl) {
+    optsEl.querySelectorAll('.opt').forEach((b,i)=>{
+      if (i === QUIZ[qIdx].correct) b.classList.add('correct');
+    });
+  }
   setTimeout(()=>{ qIdx++; showQuestion(); }, 1000);
 }
 
 function handleQuizAnswer(idx, btn) {
   clearInterval(qTimer);
-  document.getElementById('qOpts').querySelectorAll('.opt').forEach(b=>b.style.pointerEvents='none');
+  const optsEl = document.getElementById('qOpts');
+  if (optsEl) optsEl.querySelectorAll('.opt').forEach(b=>b.style.pointerEvents='none');
   const correct = QUIZ[qIdx].correct;
   if (idx === correct) {
     btn.classList.add('correct');
     const bonus = Math.ceil(qTimeLeft / Q_TIME * 15) + 10;
     addXP(bonus);
-    flash('green');
+    window.flash('green');
     if (navigator.vibrate) navigator.vibrate(30);
   } else {
     btn.classList.add('wrong');
-    document.getElementById('qOpts').querySelectorAll('.opt')[correct].classList.add('correct');
+    if (optsEl) {
+      const correctBtn = optsEl.querySelectorAll('.opt')[correct];
+      if (correctBtn) correctBtn.classList.add('correct');
+    }
     loseLife();
   }
   setTimeout(()=>{ qIdx++; showQuestion(); }, 900);
@@ -567,7 +590,8 @@ function handleQuizAnswer(idx, btn) {
 // ══════════════════════════════════════════
 const GOOD = ['📘 Підручник','✏️ Пенал','📒 Щоденник','🍏 Сніданок','📐 Лінійка','🗂️ Папка','🔒 Пароль','🤝 Підтримка'];
 const BAD  = ['📱 Гра на уроці','🍬 Сміття повз урну','🤬 Образа','💬 Плітки','🏃 Біг коридором'];
-  
+
+let catchCount = 0;       // <-- ОГОЛОШЕНО (виправлено помилку)
 let missCount = 0;
 let catchItems = [];
 let catchInterval = null;
@@ -579,11 +603,15 @@ const CATCH_TARGET = 10;
 
 function initCatch() {
   catchCount = 0; missCount = 0; catchItems = [];
-  document.getElementById('catchCount').textContent = '0';
-  document.getElementById('missCount').textContent = '0';
-  document.getElementById('catchBar').style.width = '0%';
+  const catchCountDisplay = document.getElementById('catchCountDisplay');
+  const missCountDisplay = document.getElementById('missCountDisplay');
+  if (catchCountDisplay) catchCountDisplay.textContent = '0';
+  if (missCountDisplay) missCountDisplay.textContent = '0';
+  const catchBar = document.getElementById('catchBar');
+  if (catchBar) catchBar.style.width = '0%';
 
   const arena = document.getElementById('arena');
+  if (!arena) return;
   arenaW = arena.clientWidth;
   arenaH = arena.clientHeight;
   basketX = 50;
@@ -593,27 +621,38 @@ function initCatch() {
   arena.addEventListener('mousemove', onArenaMouse);
 
   catchRunning = true;
+  if (catchInterval) clearInterval(catchInterval);
   catchInterval = setInterval(spawnItem, 1800);
-  requestAnimationFrame(catchLoop);
+  if (catchAnimFrame) cancelAnimationFrame(catchAnimFrame);
+  catchAnimFrame = requestAnimationFrame(catchLoop);
 }
 
 function onArenaTouch(e) {
-  const rect = document.getElementById('arena').getBoundingClientRect();
-  basketX = Math.min(95, Math.max(5, (e.touches[0].clientX - rect.left)/arenaW*100));
-  updateBasket();
+  const arena = document.getElementById('arena');
+  if (!arena) return;
+  const rect = arena.getBoundingClientRect();
+  const touch = e.touches[0];
+  if (touch) {
+    basketX = Math.min(95, Math.max(5, (touch.clientX - rect.left)/arenaW*100));
+    updateBasket();
+  }
 }
 function onArenaMouse(e) {
-  const rect = document.getElementById('arena').getBoundingClientRect();
+  const arena = document.getElementById('arena');
+  if (!arena) return;
+  const rect = arena.getBoundingClientRect();
   basketX = Math.min(95, Math.max(5, (e.clientX - rect.left)/arenaW*100));
   updateBasket();
 }
 function updateBasket() {
-  document.getElementById('basket').style.left = basketX+'%';
+  const basket = document.getElementById('basket');
+  if (basket) basket.style.left = basketX+'%';
 }
 
 function spawnItem() {
   if (!catchRunning) return;
   const arena = document.getElementById('arena');
+  if (!arena) return;
   const isGood = Math.random() > 0.3;
   const emoji = isGood ? GOOD[Math.floor(Math.random()*GOOD.length)] : BAD[Math.floor(Math.random()*BAD.length)];
   const x = 8 + Math.random()*84;
@@ -645,10 +684,12 @@ function tapItem(el) {
 
 function catchGood() {
   catchCount++;
-  document.getElementById('catchCount').textContent = catchCount;
-  document.getElementById('catchBar').style.width = (catchCount/CATCH_TARGET*100)+'%';
+  const catchCountDisplay = document.getElementById('catchCountDisplay');
+  if (catchCountDisplay) catchCountDisplay.textContent = catchCount;
+  const catchBar = document.getElementById('catchBar');
+  if (catchBar) catchBar.style.width = (catchCount/CATCH_TARGET*100)+'%';
   addXP(4);
-  flash('green');
+  window.flash('green');
   if (navigator.vibrate) navigator.vibrate(20);
   if (catchCount >= CATCH_TARGET) finishCatch();
 }
@@ -661,6 +702,10 @@ function catchLoop() {
   if (!catchRunning) return;
   const arena = document.getElementById('arena');
   const basket = document.getElementById('basket');
+  if (!arena || !basket) {
+    if (catchAnimFrame) cancelAnimationFrame(catchAnimFrame);
+    return;
+  }
   const bRect = basket.getBoundingClientRect();
   const aRect = arena.getBoundingClientRect();
   const bLeft = bRect.left - aRect.left;
@@ -687,8 +732,9 @@ function catchLoop() {
     if (y > arenaH + 10) {
       if (el.dataset.good === '1') {
         missCount++;
-        document.getElementById('missCount').textContent = missCount;
-        if (missCount >= 4) { loseLife(); missCount = 0; document.getElementById('missCount').textContent = '0'; }
+        const missCountDisplay = document.getElementById('missCountDisplay');
+        if (missCountDisplay) missCountDisplay.textContent = missCount;
+        if (missCount >= 4) { loseLife(); missCount = 0; if (missCountDisplay) missCountDisplay.textContent = '0'; }
       }
       el.remove();
       return false;
@@ -704,8 +750,10 @@ function finishCatch() {
   cancelAnimationFrame(catchAnimFrame);
   catchItems.forEach(e=>{ if(e.parentNode) e.remove(); });
   const arena = document.getElementById('arena');
-  arena.removeEventListener('touchmove', onArenaTouch);
-  arena.removeEventListener('mousemove', onArenaMouse);
+  if (arena) {
+    arena.removeEventListener('touchmove', onArenaTouch);
+    arena.removeEventListener('mousemove', onArenaMouse);
+  }
   addXP(15);
   setTimeout(()=>{ goTo('s3',2); initSort(); }, 600);
 }
@@ -736,31 +784,36 @@ function initSort() {
 
 function showSortItem() {
   if (sortIdx >= SORT_ITEMS.length) { addXP(15); goTo('s4',3); initPack(); return; }
-  document.getElementById('sortCounter').textContent = `${sortIdx+1}/${SORT_ITEMS.length}`;
-  document.getElementById('sortItem').textContent = SORT_ITEMS[sortIdx].text;
-  document.getElementById('sortFeedback').textContent = '';
+  const counterEl = document.getElementById('sortCounter');
+  if (counterEl) counterEl.textContent = `${sortIdx+1}/${SORT_ITEMS.length}`;
+  const itemEl = document.getElementById('sortItem');
+  if (itemEl) itemEl.textContent = SORT_ITEMS[sortIdx].text;
+  const fbEl = document.getElementById('sortFeedback');
+  if (fbEl) fbEl.textContent = '';
   sortLocked = false;
 }
 
-function handleSort(answer) {
+window.handleSort = function(answer) {
   if (sortLocked) return;
   sortLocked = true;
   const item = SORT_ITEMS[sortIdx];
   const correct = item.need === answer;
   const fb = document.getElementById('sortFeedback');
-  if (correct) {
-    fb.innerHTML = '✅ Правильно! <span style="font-size:11px;opacity:.85">' + (item.explain||'') + '</span>';
-    fb.style.color = 'var(--green)';
-    addXP(5);
-    flash('green');
-    if (navigator.vibrate) navigator.vibrate(25);
-  } else {
-    fb.innerHTML = '❌ ' + (item.explain || 'Не зовсім…');
-    fb.style.color = 'var(--pink)';
-    loseLife();
+  if (fb) {
+    if (correct) {
+      fb.innerHTML = '✅ Правильно! <span style="font-size:11px;opacity:.85">' + (item.explain||'') + '</span>';
+      fb.style.color = 'var(--green)';
+      addXP(5);
+      window.flash('green');
+      if (navigator.vibrate) navigator.vibrate(25);
+    } else {
+      fb.innerHTML = '❌ ' + (item.explain || 'Не зовсім…');
+      fb.style.color = 'var(--pink)';
+      loseLife();
+    }
   }
   setTimeout(()=>{ sortIdx++; showSortItem(); }, 1100);
-}
+};
 
 // ══════════════════════════════════════════
 // SCREEN 4 — PACK (drag & drop)
@@ -771,7 +824,7 @@ const PACK_ITEMS = [
   { text:'📱 Планшет',             zone:'school' },
   { text:'📒 Щоденник',            zone:'school' },
   { text:'🎮 Ігрова приставка',    zone:'home'   },
-  { text:'🧸 М'яка іграшка',      zone:'home'   },
+  { text:'🧸 М\'яка іграшка',      zone:'home'   },
   { text:'🧸 Велика іграшка',      zone:'home'   },
   { text:'📐 Лінійка',             zone:'school' }
 ];
@@ -779,29 +832,33 @@ const PACK_ITEMS = [
 let packPlaced = {};
 let dragChip = null;
 let dragGhost = null;
-let dragOffX = 0, dragOffY = 0;
 
 function initPack() {
   packPlaced = {};
-  document.getElementById('schoolItems').innerHTML = '';
-  document.getElementById('homeItems').innerHTML = '';
-  document.getElementById('packCheck').textContent = '';
-  document.getElementById('packCheckBtn').style.display = 'none';
+  const schoolItems = document.getElementById('schoolItems');
+  const homeItems = document.getElementById('homeItems');
+  const packCheck = document.getElementById('packCheck');
+  const packCheckBtn = document.getElementById('packCheckBtn');
+  if (schoolItems) schoolItems.innerHTML = '';
+  if (homeItems) homeItems.innerHTML = '';
+  if (packCheck) packCheck.textContent = '';
+  if (packCheckBtn) packCheckBtn.style.display = 'none';
 
   const shelf = document.getElementById('packShelf');
-  shelf.innerHTML = '';
+  if (shelf) {
+    shelf.innerHTML = '';
+    PACK_ITEMS.forEach((item,i) => {
+      const chip = document.createElement('div');
+      chip.className = 'pack-chip';
+      chip.textContent = item.text;
+      chip.dataset.idx = i;
+      chip.dataset.correct = item.zone;
 
-  PACK_ITEMS.forEach((item,i) => {
-    const chip = document.createElement('div');
-    chip.className = 'pack-chip';
-    chip.textContent = item.text;
-    chip.dataset.idx = i;
-    chip.dataset.correct = item.zone;
-
-    chip.addEventListener('touchstart', startDragTouch, {passive:true});
-    chip.addEventListener('mousedown', startDragMouse);
-    shelf.appendChild(chip);
-  });
+      chip.addEventListener('touchstart', startDragTouch, {passive:true});
+      chip.addEventListener('mousedown', startDragMouse);
+      shelf.appendChild(chip);
+    });
+  }
 
   setupDropZones();
 }
@@ -809,6 +866,7 @@ function initPack() {
 function setupDropZones() {
   ['zoneSchool','zoneHome'].forEach(id=>{
     const zone = document.getElementById(id);
+    if (!zone) return;
     zone.addEventListener('touchend', dropTouch);
     zone.addEventListener('mouseup', dropMouse);
     zone.addEventListener('dragover', e=>{ e.preventDefault(); zone.classList.add('highlight'); });
@@ -859,15 +917,18 @@ function removeGhost() { if(dragGhost){ dragGhost.remove(); dragGhost=null; } if
 
 function highlightZone(x,y) {
   ['zoneSchool','zoneHome'].forEach(id=>{
-    const r = document.getElementById(id).getBoundingClientRect();
+    const el = document.getElementById(id);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
     const over = x>=r.left && x<=r.right && y>=r.top && y<=r.bottom;
-    document.getElementById(id).classList.toggle('highlight', over);
+    el.classList.toggle('highlight', over);
   });
 }
 
 function dropAtPoint(x,y) {
   ['zoneSchool','zoneHome'].forEach(id=>{
     const el = document.getElementById(id);
+    if (!el) return;
     el.classList.remove('highlight');
     const r = el.getBoundingClientRect();
     if (x>=r.left && x<=r.right && y>=r.top && y<=r.bottom) {
@@ -887,21 +948,24 @@ function placeChip(zone) {
   dragChip.style.opacity = '1';
 
   const target = zone === 'school' ? document.getElementById('schoolItems') : document.getElementById('homeItems');
-  const clone = document.createElement('div');
-  clone.className = 'pack-chip';
-  clone.textContent = dragChip.textContent;
-  clone.dataset.idx = idx;
-  target.appendChild(clone);
+  if (target) {
+    const clone = document.createElement('div');
+    clone.className = 'pack-chip';
+    clone.textContent = dragChip.textContent;
+    clone.dataset.idx = idx;
+    target.appendChild(clone);
+  }
 
   dragChip.style.display = 'none';
   dragChip = null;
 
   if (Object.keys(packPlaced).length >= PACK_ITEMS.length) {
-    document.getElementById('packCheckBtn').style.display = 'block';
+    const packCheckBtn = document.getElementById('packCheckBtn');
+    if (packCheckBtn) packCheckBtn.style.display = 'block';
   }
 }
 
-function checkPack() {
+window.checkPack = function() {
   let correct = 0;
   PACK_ITEMS.forEach((item,i) => {
     const placed = packPlaced[i];
@@ -909,27 +973,36 @@ function checkPack() {
   });
 
   const fb = document.getElementById('packCheck');
-  if (correct === PACK_ITEMS.length) {
-    fb.textContent = '🎉 Ідеально! Рюкзак зібрано!';
-    fb.style.color = 'var(--green)';
-    addXP(25);
-    flash('green');
-    setTimeout(()=>{ goTo('s5',4); initCipher(); }, 1000);
-  } else {
-    fb.textContent = `😬 ${correct}/${PACK_ITEMS.length} правильно — спробуй ще!`;
-    fb.style.color = 'var(--pink)';
-    loseLife();
-    setTimeout(resetPack, 1200);
+  if (fb) {
+    if (correct === PACK_ITEMS.length) {
+      fb.textContent = '🎉 Ідеально! Рюкзак зібрано!';
+      fb.style.color = 'var(--green)';
+      addXP(25);
+      window.flash('green');
+      setTimeout(()=>{ goTo('s5',4); initCipher(); }, 1000);
+    } else {
+      fb.textContent = `😬 ${correct}/${PACK_ITEMS.length} правильно — спробуй ще!`;
+      fb.style.color = 'var(--pink)';
+      loseLife();
+      setTimeout(resetPack, 1200);
+    }
   }
-}
+};
 
 function resetPack() {
   packPlaced = {};
-  document.getElementById('schoolItems').innerHTML = '';
-  document.getElementById('homeItems').innerHTML = '';
-  document.getElementById('packCheck').textContent = '';
-  document.getElementById('packCheckBtn').style.display = 'none';
-  document.querySelectorAll('#packShelf .pack-chip').forEach(c=>{ c.style.display=''; c.style.opacity='1'; });
+  const schoolItems = document.getElementById('schoolItems');
+  const homeItems = document.getElementById('homeItems');
+  const packCheck = document.getElementById('packCheck');
+  const packCheckBtn = document.getElementById('packCheckBtn');
+  if (schoolItems) schoolItems.innerHTML = '';
+  if (homeItems) homeItems.innerHTML = '';
+  if (packCheck) packCheck.textContent = '';
+  if (packCheckBtn) packCheckBtn.style.display = 'none';
+  const shelf = document.getElementById('packShelf');
+  if (shelf) {
+    shelf.querySelectorAll('.pack-chip').forEach(c=>{ c.style.display=''; c.style.opacity='1'; });
+  }
 }
 
 // ══════════════════════════════════════════
@@ -959,17 +1032,22 @@ function initCipher() {
 
 function renderCipher() {
   const disp = cWord.split('').map(l=> cGuessed.includes(l) ? l : '_').join(' ');
-  document.getElementById('cipherDisplay').textContent = disp;
+  const displayEl = document.getElementById('cipherDisplay');
+  if (displayEl) displayEl.textContent = disp;
   const done = cWord.split('').filter(l=> cGuessed.includes(l)).length;
-  document.getElementById('cipherProg').textContent = `Відкрито: ${done}/${cWord.length}`;
+  const progEl = document.getElementById('cipherProg');
+  if (progEl) progEl.textContent = `Відкрито: ${done}/${cWord.length}`;
   const h = Array(C_MAX_WRONG).fill(0).map((_,i)=> i < (C_MAX_WRONG - cWrong) ? '❤️':'🖤').join('');
-  document.getElementById('cipherLives').textContent = h;
-  document.getElementById('cipherHint').textContent = '💡 Підказка: '+cHint;
+  const livesEl = document.getElementById('cipherLives');
+  if (livesEl) livesEl.textContent = h;
+  const hintEl = document.getElementById('cipherHint');
+  if (hintEl) hintEl.textContent = '💡 Підказка: '+cHint;
 }
 
 function buildKeys() {
   const LETTERS = 'АБВГДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ';
   const container = document.getElementById('cipherKeys');
+  if (!container) return;
   container.innerHTML = '';
   LETTERS.split('').forEach(l=>{
     const btn = document.createElement('button');
@@ -988,7 +1066,7 @@ function guessLetter(letter, btn) {
   if (cWord.includes(letter)) {
     btn.classList.add('correct');
     addXP(5);
-    flash('green');
+    window.flash('green');
     if (cWord.split('').every(l=> cGuessed.includes(l))) {
       addXP(20);
       setTimeout(finishGame, 700);
@@ -1016,19 +1094,24 @@ function finishGame() {
   const skill = localStorage.getItem('pysanka_student_skill') || '🦾 Мега-мозок';
   const bonus = localStorage.getItem('pysanka_student_bonus') || 'Рівень майстра x2!';
 
-  document.getElementById('bName').textContent = name;
-  document.getElementById('bSkill').textContent = skill;
-  document.getElementById('bBonus').textContent = bonus;
+  const bNameEl = document.getElementById('bName');
+  const bSkillEl = document.getElementById('bSkill');
+  const bBonusEl = document.getElementById('bBonus');
+  if (bNameEl) bNameEl.textContent = name;
+  if (bSkillEl) bSkillEl.textContent = skill;
+  if (bBonusEl) bBonusEl.textContent = bonus;
 
   const stars = ['⭐','⭐⭐','⭐⭐⭐'][Math.min(2, Math.max(0, lives))];
-  document.getElementById('starsRow').textContent = stars;
+  const starsRow = document.getElementById('starsRow');
+  if (starsRow) starsRow.textContent = stars;
 
   const finalMsg = cWord === 'ПОРЯДОК'
     ? `«Шифр зламано! ${name} знає правила Чорноморського ліцею №6 на 12 балів! Дані занесено в базу ліцею!»`
     : cWord === 'БЕЗПЕКА'
     ? `«${name} — майстер кібербезпеки та правил ліцею! Молодець!»`
     : `«${name} пройшов(ла) ліцейський квест! Зустрінемось 1 вересня!»`;
-  document.getElementById('finalScore').textContent = `Набрано: ${xp} XP · ${stars} · ${finalMsg}`;
+  const finalScoreEl = document.getElementById('finalScore');
+  if (finalScoreEl) finalScoreEl.textContent = `Набрано: ${xp} XP · ${stars} · ${finalMsg}`;
 
   goTo('sFinal',5);
 
@@ -1045,26 +1128,41 @@ function finishGame() {
   }).catch(()=>{});
 }
 
-function saveScreenshot() {
+window.saveScreenshot = function() {
   const btn = document.getElementById('screenshotBtn');
-  const tgBtn = btn.nextElementSibling;
-  btn.textContent = '⏳ Зберігаємо...';
-  btn.style.pointerEvents = 'none';
+  const tgBtn = btn ? btn.nextElementSibling : null;
+  if (btn) {
+    btn.textContent = '⏳ Зберігаємо...';
+    btn.style.pointerEvents = 'none';
+  }
 
-  btn.style.display = 'none';
-  tgBtn.style.display = 'none';
+  if (btn) btn.style.display = 'none';
+  if (tgBtn && tgBtn.tagName === 'A') tgBtn.style.display = 'none';
 
   const badge = document.querySelector('.badge');
+  if (!badge) {
+    if (btn) {
+      btn.style.display = '';
+      if (tgBtn) tgBtn.style.display = '';
+      btn.textContent = 'Зберегти бейдж 📸';
+      btn.style.pointerEvents = '';
+    }
+    alert('Не вдалося знайти бейдж для збереження.');
+    return;
+  }
+
   html2canvas(badge, {
     backgroundColor: null,
     scale: 2,
     useCORS: true,
     allowTaint: true,
   }).then(canvas => {
-    btn.style.display = '';
-    tgBtn.style.display = '';
-    btn.textContent = '✅ Збережено! 📸';
-    btn.style.pointerEvents = '';
+    if (btn) btn.style.display = '';
+    if (tgBtn && tgBtn.tagName === 'A') tgBtn.style.display = '';
+    if (btn) {
+      btn.textContent = '✅ Збережено! 📸';
+      btn.style.pointerEvents = '';
+    }
 
     const link = document.createElement('a');
     const name = localStorage.getItem('pysanka_student_name') || 'uchenʼ';
@@ -1072,13 +1170,15 @@ function saveScreenshot() {
     link.href = canvas.toDataURL('image/png');
     link.click();
   }).catch(()=> {
-    btn.style.display = '';
-    tgBtn.style.display = '';
-    btn.textContent = 'Зберегти бейдж 📸';
-    btn.style.pointerEvents = '';
+    if (btn) btn.style.display = '';
+    if (tgBtn && tgBtn.tagName === 'A') tgBtn.style.display = '';
+    if (btn) {
+      btn.textContent = 'Зберегти бейдж 📸';
+      btn.style.pointerEvents = '';
+    }
     alert('Зроби скріншот вручну — затисни кнопку живлення + гучність! 📸');
   });
-}
+};
 
 // ══════════════════════════════════════════
 // INIT
