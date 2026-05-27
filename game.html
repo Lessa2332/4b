@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Рюкзак у 5-й Клас | Квест</title>
+  <title>Доступ у 5-й Клас </title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
@@ -22,11 +22,11 @@
       font-family: var(--font);
       background: radial-gradient(ellipse at 60% 10%, #1a56ff 0%, #0a1a6e 70%);
       color: var(--white);
-      min-height: 100dvh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 12px 12px 40px;
+      padding: 12px 12px 30px;
       overflow-x: hidden;
     }
 
@@ -87,7 +87,7 @@
     .btn-gold:active { box-shadow:0 2px 0 #cda500; }
 
     /* ═══════════════════════════════════════════
-       SCREEN 1 — QUIZ
+       SCREEN 1 — QUIZ (5 питань з таймером)
        ═══════════════════════════════════════════ */
     .quiz-q { background:rgba(0,0,0,.22); border-radius:18px; padding:14px 16px; font-size:22px; font-weight:900; margin-bottom:14px; border:2px dashed rgba(255,255,255,.25); min-height:64px; display:flex; align-items:center; justify-content:center; text-align:center; line-height:1.3; }
     .quiz-timer-rail { height:8px; background:rgba(0,0,0,.3); border-radius:4px; margin-bottom:14px; overflow:hidden; }
@@ -103,7 +103,7 @@
     .quiz-counter { font-size:12px; font-weight:800; color:var(--gold); text-align:right; margin-bottom:6px; }
 
     /* ═══════════════════════════════════════════
-       SCREEN 2 — ВЛОВИ ПРЕДМЕТ
+       SCREEN 2 — ВЛОВИ ПРЕДМЕТ (Catch game)
        ═══════════════════════════════════════════ */
     .catch-arena {
       position: relative;
@@ -148,7 +148,7 @@
     .catch-bar { height:100%; background:var(--green); border-radius:5px; transition:width .2s; box-shadow:0 0 8px var(--green); }
 
     /* ═══════════════════════════════════════════
-       SCREEN 3 — СОРТУВАННЯ
+       SCREEN 3 — СОРТУВАННЯ (правильно/неправильно)
        ═══════════════════════════════════════════ */
     .sort-item {
       background: var(--gold);
@@ -176,7 +176,7 @@
     .sort-counter { font-size:12px; font-weight:800; color:var(--gold); text-align:center; margin-bottom:8px; }
 
     /* ═══════════════════════════════════════════
-       SCREEN 4 — РЮКЗАК
+       SCREEN 4 — РЮКЗАК (drag & sort з перевіркою)
        ═══════════════════════════════════════════ */
     .pack-layout { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:10px 0; }
     .pack-zone {
@@ -205,7 +205,7 @@
     .pack-check { text-align:center; font-size:14px; font-weight:800; margin-top:8px; min-height:22px; }
 
     /* ═══════════════════════════════════════════
-       SCREEN 5 — ШИФР
+       SCREEN 5 — ШИФР (вгадай літеру)
        ═══════════════════════════════════════════ */
     .cipher-display {
       font-size: 36px;
@@ -325,7 +325,7 @@
   <!-- ══ SCREEN 2: CATCH GAME ══ -->
   <div class="screen" id="s2">
     <h2>🎯 КРОК 2: ЗАХИСНИЙ ЩИТ</h2>
-    <div class="desc">Лови корисне для ліцею — уникай <b>📱 ігор на уроці, 🤬 образ, 🍬 сміття</b>!</div>
+<div class="desc">Лови корисне для ліцею — уникай <b>📱 ігор на уроці, 🤬 образ, 🍬 сміття</b>!</div>
     <div class="catch-stats">
       <span>Зловлено: <span id="catchCount">0</span>/10</span>
       <span>Пропущено: <span id="missCount">0</span></span>
@@ -334,7 +334,7 @@
     <div class="catch-arena" id="arena">
       <div class="catch-basket" id="basket">🎒</div>
     </div>
-    <div style="font-size:12px;font-weight:800;color:var(--gold);text-align:center;margin-top:6px;">Тягни кошик або тапай по предметам! 📱🤬🍬 — ухиляйся!</div>
+    <div style="font-size:12px;font-weight:800;color:var(--gold);text-align:center;margin-top:6px;">Тягни кошик або тапай по предметам! 🚬🤬🥊 — ухиляйся!</div>
   </div>
 
   <!-- ══ SCREEN 3: SORT ══ -->
@@ -401,20 +401,6 @@
   </div>
 
 </div><!-- /card -->
-
-<div style="text-align: center; margin-top: 15px;">
-  <a href="#" onclick="document.getElementById('privacyModal').style.display='flex'; return false;" style="color: rgba(255,255,255,0.6); font-size: 11px; text-decoration: underline;">Політика конфіденційності SmartLessa</a>
-</div>
-
-<div id="privacyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,30,0.9); z-index:999; align-items:center; justify-content:center; padding: 20px;">
-  <div style="background: #1a4aff; border: 3px solid #fff; border-radius: 20px; padding: 20px; max-width: 400px; color: #fff;">
-    <h3 style="color: #FFE600; margin-bottom: 10px;">🛡️ Безпека даних</h3>
-    <p style="font-size: 13px; margin-bottom: 10px;">1. <b>Безпека:</b> Цей квест створено для адаптації п'ятикласників. Ми не використовуємо сторонні трекери або рекламу.</p>
-    <p style="font-size: 13px; margin-bottom: 10px;">2. <b>Дані:</b> Ім'я дитини та ігрові бали (XP) передаються виключно у закриту базу ліцею для підготовки сюрпризу на 1 вересня.</p>
-    <p style="font-size: 13px; margin-bottom: 15px;">3. <b>Пам'ять:</b> Прогрес гри зберігається локально на вашому пристрої (LocalStorage) лише для генерації іменного бейджа.</p>
-    <button onclick="document.getElementById('privacyModal').style.display='none'" class="btn btn-gold" style="margin-top: 0;">Зрозуміло</button>
-  </div>
-</div>
 
 <script>
 // ═══════════════ STATE ═══════════════
@@ -499,7 +485,7 @@ const QUIZ = [
 let qIdx = 0;
 let qTimer = null;
 let qTimeLeft = 0;
-const Q_TIME = 30; // Збільшено до 30 секунд для комфортного читання
+const Q_TIME = 30; // секунди
 
 function initQuiz() { qIdx = 0; showQuestion(); }
 
@@ -567,15 +553,17 @@ function handleQuizAnswer(idx, btn) {
 // ══════════════════════════════════════════
 // SCREEN 2 — CATCH GAME
 // ══════════════════════════════════════════
+// Ліцей №6: ловимо корисне, уникаємо забороненого
 const GOOD = ['📘 Підручник','✏️ Пенал','📒 Щоденник','🍏 Сніданок','📐 Лінійка','🗂️ Папка','🔒 Пароль','🤝 Підтримка'];
-const BAD  = ['📱 Гра на уроці','🍬 Сміття повз урну','🤬 Образа','💬 Плітки','🏃 Біг коридором','🧥 Куртка в класі'];
+// Прибрали вейп та бійку, додали більш релевантні для цього віку речі
+const BAD  = ['📱 Гра на уроці','🍬 Сміття повз урну','🤬 Образа','💬 Плітки','🏃 Біг коридором'];
 
 let catchCount = 0;
 let missCount = 0;
 let catchItems = [];
 let catchInterval = null;
 let arenaW = 0, arenaH = 0;
-let basketX = 50;
+let basketX = 50; // percent
 let catchAnimFrame = null;
 let catchRunning = false;
 const CATCH_TARGET = 10;
@@ -592,11 +580,12 @@ function initCatch() {
   basketX = 50;
   updateBasket();
 
+  // Touch/mouse for basket
   arena.addEventListener('touchmove', onArenaTouch, {passive:true});
   arena.addEventListener('mousemove', onArenaMouse);
 
   catchRunning = true;
-  catchInterval = setInterval(spawnItem, 1800); // Збільшено інтервал (рідше падають)
+  catchInterval = setInterval(spawnItem, 1800); // Було 1100.
   requestAnimationFrame(catchLoop);
 }
 
@@ -620,7 +609,7 @@ function spawnItem() {
   const isGood = Math.random() > 0.3;
   const emoji = isGood ? GOOD[Math.floor(Math.random()*GOOD.length)] : BAD[Math.floor(Math.random()*BAD.length)];
   const x = 8 + Math.random()*84;
-  const speed = 1.5 + Math.random()*1.0; // Зменшено швидкість падіння
+  const speed = 1.5 + Math.random() * 1.0; // Було 2.8 + 1.6. Тепер падають повільніше
 
   const el = document.createElement('div');
   el.className = 'falling-item';
@@ -634,6 +623,7 @@ function spawnItem() {
   arena.appendChild(el);
   catchItems.push(el);
 
+  // Tap item directly
   el.addEventListener('touchstart', ()=> tapItem(el), {passive:true});
   el.addEventListener('click', ()=> tapItem(el));
 }
@@ -716,6 +706,7 @@ function finishCatch() {
 // ══════════════════════════════════════════
 // SCREEN 3 — SORT
 // ══════════════════════════════════════════
+// Ліцей №6 — правила, ДЗ, перерви, безпека
 const SORT_ITEMS = [
   { text:'📒 Відкрити щоденник і знайти що задано',          need:true,  explain:'Крок №1 правильного алгоритму ДЗ!' },
   { text:'✍️ Складне завдання одразу в чистовик',            need:false, explain:'Спочатку — чернетка, де можна виправити!' },
@@ -768,14 +759,15 @@ function handleSort(answer) {
 // ══════════════════════════════════════════
 // SCREEN 4 — PACK (drag & drop)
 // ══════════════════════════════════════════
+// Ліцей №6 — що беремо до школи, що залишаємо вдома
 const PACK_ITEMS = [
   { text:'📚 Підручники',          zone:'school' },
   { text:'✏️ Пенал',               zone:'school' },
   { text:'📱 Планшет',             zone:'school' },
   { text:'📒 Щоденник',            zone:'school' },
   { text:'🎮 Ігрова приставка',    zone:'home'   },
-  { text:'🧸 Велика іграшка',      zone:'home'   },
-  { text:'🧸 М'яка іграшка',      zone:'home'   },
+  { text:'🧸 М\'яка іграшка',      zone:'home'   },
+  { text:'🧸 Велика іграшка',      zone:'home' }
   { text:'📐 Лінійка',             zone:'school' },
 ];
 
@@ -801,7 +793,9 @@ function initPack() {
     chip.dataset.idx = i;
     chip.dataset.correct = item.zone;
 
+    // Touch drag
     chip.addEventListener('touchstart', startDragTouch, {passive:true});
+    // Mouse drag
     chip.addEventListener('mousedown', startDragMouse);
     shelf.appendChild(chip);
   });
@@ -878,8 +872,8 @@ function dropAtPoint(x,y) {
     }
   });
 }
-function dropTouch(e) {}
-function dropMouse(e) {}
+function dropTouch(e) {} // handled in endDragTouch
+function dropMouse(e) {}  // handled in endDragMouse
 
 function placeChip(zone) {
   if (!dragChip) return;
@@ -899,6 +893,7 @@ function placeChip(zone) {
   dragChip.style.display = 'none';
   dragChip = null;
 
+  // Show check button when all placed
   if (Object.keys(packPlaced).length >= PACK_ITEMS.length) {
     document.getElementById('packCheckBtn').style.display = 'block';
   }
@@ -922,6 +917,7 @@ function checkPack() {
     fb.textContent = `😬 ${correct}/${PACK_ITEMS.length} правильно — спробуй ще!`;
     fb.style.color = 'var(--pink)';
     loseLife();
+    // Reset wrong ones
     setTimeout(resetPack, 1200);
   }
 }
@@ -936,7 +932,7 @@ function resetPack() {
 }
 
 // ══════════════════════════════════════════
-// SCREEN 5 — CIPHER
+// SCREEN 5 — CIPHER (Hangman-style)
 // ══════════════════════════════════════════
 const CIPHER_WORDS = [
   { word:'ПОРЯДОК', hint:'Головне правило Чорноморського ліцею №6 🏫' },
@@ -961,12 +957,16 @@ function initCipher() {
 }
 
 function renderCipher() {
+  // Display
   const disp = cWord.split('').map(l=> cGuessed.includes(l) ? l : '_').join(' ');
   document.getElementById('cipherDisplay').textContent = disp;
+  // Progress
   const done = cWord.split('').filter(l=> cGuessed.includes(l)).length;
   document.getElementById('cipherProg').textContent = `Відкрито: ${done}/${cWord.length}`;
+  // Lives
   const h = Array(C_MAX_WRONG).fill(0).map((_,i)=> i < (C_MAX_WRONG - cWrong) ? '❤️':'🖤').join('');
   document.getElementById('cipherLives').textContent = h;
+  // Hint
   document.getElementById('cipherHint').textContent = '💡 Підказка: '+cHint;
 }
 
@@ -992,6 +992,7 @@ function guessLetter(letter, btn) {
     btn.classList.add('correct');
     addXP(5);
     flash('green');
+    // Check win
     if (cWord.split('').every(l=> cGuessed.includes(l))) {
       addXP(20);
       setTimeout(finishGame, 700);
@@ -1002,6 +1003,7 @@ function guessLetter(letter, btn) {
     cWrong++;
     loseLife();
     if (cWrong >= C_MAX_WRONG) {
+      // Reveal word & finish anyway
       cGuessed.push(...cWord.split(''));
       renderCipher();
       setTimeout(finishGame, 1000);
@@ -1023,9 +1025,12 @@ function finishGame() {
   document.getElementById('bSkill').textContent = skill;
   document.getElementById('bBonus').textContent = bonus;
 
+  // Stars based on lives
   const stars = ['⭐','⭐⭐','⭐⭐⭐'][Math.min(2, Math.max(0, lives))];
   document.getElementById('starsRow').textContent = stars;
+  // finalScore set below after goTo
 
+  // Personalized finish message
   const finalMsg = cWord === 'ПОРЯДОК'
     ? `«Шифр зламано! ${name} знає правила Чорноморського ліцею №6 на 12 балів! Дані занесено в базу ліцею!»`
     : cWord === 'БЕЗПЕКА'
@@ -1040,6 +1045,7 @@ function finishGame() {
     setTimeout(()=> confetti({ particleCount:80, spread:120, origin:{y:0.3}, angle:60 }), 600);
   }
 
+  // Send to Google Sheet
   const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzqqDgBlAER2cHA-wLm2IVqPmdvTcENYZ9wvKODyc77kgFbvPw7bbY510sPsPEApueZ/exec";
   fetch(WEB_APP_URL, {
     method:'POST', mode:'no-cors',
@@ -1054,6 +1060,7 @@ function saveScreenshot() {
   btn.textContent = '⏳ Зберігаємо...';
   btn.style.pointerEvents = 'none';
 
+  // Hide buttons during capture
   btn.style.display = 'none';
   tgBtn.style.display = 'none';
 
@@ -1069,6 +1076,7 @@ function saveScreenshot() {
     btn.textContent = '✅ Збережено! 📸';
     btn.style.pointerEvents = '';
 
+    // Download
     const link = document.createElement('a');
     const name = localStorage.getItem('pysanka_student_name') || 'uchenʼ';
     link.download = `badge_5klas_${name}.png`;
