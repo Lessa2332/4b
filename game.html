@@ -1106,10 +1106,10 @@ function finishGame() {
   if (starsRow) starsRow.textContent = stars;
 
   const finalMsg = cWord === 'ПОРЯДОК'
-    ? `«Шифр зламано! ${name} знає правила Чорноморського ліцею №6 на 12 балів! Дані занесено в базу ліцею!»`
+    ? `«Шифр зламано! ${name} знає правила Чорноморського ліцею №6! Дані занесено в базу ліцею!»`
     : cWord === 'БЕЗПЕКА'
-    ? `«${name} — майстер кібербезпеки та правил ліцею! Молодець!»`
-    : `«${name} пройшов(ла) ліцейський квест! Зустрінемось 1 вересня!»`;
+    ? `«${name} , молодець!»`
+    : `«${name} пройшов(ла) квест! Зустрінемось 1 вересня!»`;
   const finalScoreEl = document.getElementById('finalScore');
   if (finalScoreEl) finalScoreEl.textContent = `Набрано: ${xp} XP · ${stars} · ${finalMsg}`;
 
